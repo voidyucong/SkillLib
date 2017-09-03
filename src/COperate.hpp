@@ -76,7 +76,7 @@ private:
 };
 
 /**
- * 闪烁
+ * 闪现
  */
 class CBlink : public COperate {
 public:

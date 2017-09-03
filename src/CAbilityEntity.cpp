@@ -8,8 +8,6 @@
 
 #include "CAbilityEntity.hpp"
 #include <assert.h>
-#include "CAbility.hpp"
-#include "CAbilityContainer.hpp"
 
 CAbilityEntity::CAbilityEntity()
 : abilityContainer_(new CAbilityContainer())
