@@ -1,22 +1,35 @@
 //
-//  CTargetType.hpp
+//  CTargetSearcher.hpp
 //  SkillLib
 //
-//  Created by yucong on 17/8/27.
+//  Created by yucong on 2017/9/6.
 //  Copyright © 2017年 yucong. All rights reserved.
 //
 
-#ifndef CTargetType_hpp
-#define CTargetType_hpp
+#ifndef CTargetSearcher_hpp
+#define CTargetSearcher_hpp
 
+#include <iostream>
 #include "SkillTypes.h"
 #include "CObject.hpp"
 
-class CTargetType : public CObject {
+class CAbilityEntity;
+
+class CTargetSearcher : public CObject {
+    struct {
+    public:
+        TARGET_CENTER center_;
+        float radius_;      // 半径
+        TARGET_TEAMS teams_;
+        TARGET_TYPES types_;
+        TARGET_FLAGS flags_;
+    };
 public:
-    CTargetType(): center_(TARGET_CENTER_POINT), teams_(TARGET_TEAM_BOTH), types_(TARGET_TYPE_ALL), flags_(TARGET_FLAG_NONE) {}
-    CTargetType(TARGET_CENTER center): center_(center), teams_(TARGET_TEAM_BOTH), types_(TARGET_TYPE_ALL), flags_(TARGET_FLAG_NONE) {}
-    ~CTargetType() {}
+    CTargetSearcher();
+    ~CTargetSearcher();
+    
+    bool IsHaveTargets(CAbilityEntity* caster);
+    std::vector<CAbilityEntity*> GetTargets(CAbilityEntity* caster);
     
     void SetCenter(TARGET_CENTER center) { center_ = center; }
     TARGET_CENTER GetCenter() { return center_; }
@@ -32,12 +45,6 @@ public:
     
     void SetFlags(TARGET_FLAGS flags) { flags_ = flags; }
     TARGET_FLAGS GetFlags() { return flags_; }
-private:
-    TARGET_CENTER center_;
-    float radius_;      // 半径
-    TARGET_TEAMS teams_;
-    TARGET_TYPES types_;
-    TARGET_FLAGS flags_;
 };
 
-#endif /* CTargetType_hpp */
+#endif /* CTargetSearcher_hpp */

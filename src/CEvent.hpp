@@ -10,14 +10,17 @@
 #define CEvent_hpp
 
 #include <vector>
+#include "CObject.hpp"
 #include "SkillTypes.h"
 
 class COperate;
+class CAbility;
+class CAbilityEntity;
 
-class CEvent {
+class CEvent : public CObject {
     
 public:
-    virtual int Execute();
+    virtual int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CEvent();
     CEvent(EVENT_TYPE type);

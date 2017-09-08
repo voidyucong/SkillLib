@@ -8,6 +8,7 @@
 
 #include "CAbilityEntity.hpp"
 #include <assert.h>
+#include "CModifier.h"
 
 CAbilityEntity::CAbilityEntity()
 : abilityContainer_(new CAbilityContainer())
@@ -18,11 +19,28 @@ CAbilityEntity::CAbilityEntity()
 CAbilityEntity::~CAbilityEntity() {
     delete abilityContainer_;
     abilityContainer_ = 0;
+    
+    for (auto iter = buffs_.begin(); iter != buffs_.end(); iter++) {
+        for (auto modifier : iter->second->sameModifiers) {
+            delete modifier;
+            modifier = NULL;
+        }
+        delete iter->second;
+    }
+    for (auto iter = debuffs_.begin(); iter != debuffs_.end(); iter++) {
+        for (auto modifier : iter->second->sameModifiers) {
+            delete modifier;
+            modifier = NULL;
+        }
+        delete iter->second;
+    }
 }
 
 void CAbilityEntity::ExecuteAbility(unsigned index) {
     assert(index < abilityContainer_->GetAbilityLayout());
-    abilityContainer_->GetAbility(index)->Cast();
+    auto ability = abilityContainer_->GetAbility(index);
+    assert(ability);
+    ability->Cast(this);
 }
 
 void CAbilityEntity::SetEntityAbility(CAbility* ability, unsigned index) {
@@ -40,7 +58,11 @@ void CAbilityEntity::SetBaseAttribute(ENTITY_ATTRIBUTES attribute, float value) 
 
 void CAbilityEntity::ModifyAttribute(ENTITY_ATTRIBUTES attribute, float value) {
     assert(value);
-    modifyAttributes_[attribute] = value;
+    if (modifyAttributes_.find(attribute) != modifyAttributes_.end()) {
+        modifyAttributes_[attribute] += value;
+    } else {
+        modifyAttributes_[attribute] = value;
+    }
 }
 
 float CAbilityEntity::GetBaseAttribute(ENTITY_ATTRIBUTES attribute) {
@@ -59,4 +81,71 @@ float CAbilityEntity::GetModifyAttribute(ENTITY_ATTRIBUTES attribute) {
 
 float CAbilityEntity::GetCurrentAttribute(ENTITY_ATTRIBUTES attribute) {
     return this->GetBaseAttribute(attribute) + this->GetModifyAttribute(attribute);
+}
+
+void CAbilityEntity::AddModifer(CModifier* modifier) {
+    if (modifier) {
+        std::map<const char*, ModifierNode*>* buff = NULL;
+        if (modifier->IsBuff()) {
+            buff = &buffs_;
+        }
+        else if (modifier->IsDebuff()) {
+            buff = &debuffs_;
+        }
+        if (buff) {
+            if (buff->find(modifier->GetName()) != buff->end()) {
+                if (modifier->IsMulti()) {
+                    ModifierNode* node = (*buff)[modifier->GetName()];
+                    node->sameModifiers.push_back(modifier);
+                }
+            }
+            else {
+                ModifierNode* node = new ModifierNode();
+                node->sameModifiers.push_back(modifier);
+                (*buff)[modifier->GetName()] = node;
+            }
+        }
+    }
+}
+
+void CAbilityEntity::RemoveModifier(CModifier* modifier) {
+    std::map<const char*, ModifierNode*>* buff = NULL;
+    if (modifier->IsBuff()) {
+        buff = &buffs_;
+    }
+    else if (modifier->IsDebuff()) {
+        buff = &debuffs_;
+    }
+    if (buff->find(modifier->GetName()) != buff->end()) {
+        auto node = (*buff)[modifier->GetName()];
+        for (auto iter = node->sameModifiers.begin(); iter != node->sameModifiers.end(); iter++) {
+            if (*iter == modifier) {
+                node->sameModifiers.erase(iter);
+                if (node->sameModifiers.size() == 0) {
+                    (*buff)[modifier->GetName()] = NULL;
+                }
+                break;
+            }
+        }
+    }
+//    modifier->Destroy();
+//    modifier = NULL;
+}
+
+void CAbilityEntity::ClearModifier(const char* name) {
+    if (buffs_.find(name) != buffs_.end()) {
+        auto node = buffs_[name];
+        for (auto modifier : node->sameModifiers) {
+            modifier->Destroy();
+        }
+        buffs_.erase(name);
+    }
+    else if (debuffs_.find(name) != debuffs_.end()) {
+        auto node = debuffs_[name];
+        for (auto modifier : node->sameModifiers) {
+            modifier->Destroy();
+            modifier = NULL;
+        }
+        debuffs_.erase(name);
+    }
 }

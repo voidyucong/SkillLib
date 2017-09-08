@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <map>
 #include "SkillTypes.h"
+#include "CObject.hpp"
 #include "CAbility.hpp"
 #include "CAbilityContainer.hpp"
 #include "COperate.hpp"
@@ -19,7 +20,11 @@
 //class CAbilityContainer;
 //class CAbility;
 
-class CAbilityEntity {
+struct ModifierNode {
+    std::vector<CModifier*> sameModifiers;
+};
+
+class CAbilityEntity : public CObject {
 public:
     CAbilityEntity();
     ~CAbilityEntity();
@@ -41,6 +46,10 @@ public:
     void SetCurrentLevel(int level) { level_ = level; }
     int GetCurrentLevel() { return level_; }
     
+    // buff
+    void AddModifer(CModifier* modifer);
+    void RemoveModifier(CModifier* modifier);
+    void ClearModifier(const char* name);
     
     
     // 获取最大值
@@ -88,11 +97,11 @@ private:
     
     std::map<ENTITY_ATTRIBUTES, float> baseAttributes_;     // 所有基础属性
 
-    
-    
     // 变化的数据
     //----------------------------------------------------------------
     std::map<ENTITY_ATTRIBUTES, float> modifyAttributes_;   // 变动属性
+    std::map<const char*, ModifierNode*> buffs_;
+    std::map<const char*, ModifierNode*> debuffs_;
     
     // 边界设置
     //----------------------------------------------------------------

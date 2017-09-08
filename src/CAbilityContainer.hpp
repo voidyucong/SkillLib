@@ -11,10 +11,11 @@
 
 #include <stdio.h>
 #include <vector>
+#include "CObject.hpp"
 
 class CAbility;
 
-class CAbilityContainer {
+class CAbilityContainer : public CObject {
 public:
     CAbilityContainer();
     ~CAbilityContainer();

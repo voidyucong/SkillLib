@@ -8,7 +8,11 @@
 
 #include "COperate.hpp"
 #include <iostream>
-
+#include <assert.h>
+#include "CAbility.hpp"
+#include "CAbilityEntity.hpp"
+#include "CModifier.h"
+#include "CScheduleManager.h"
 
 // COperate
 COperate::COperate() {
@@ -19,7 +23,7 @@ COperate::~COperate() {
     
 }
 
-int COperate::Execute() {
+int COperate::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -36,7 +40,7 @@ COperateAddAbility::~COperateAddAbility() {
     
 }
 
-int COperateAddAbility::Execute() {
+int COperateAddAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -53,7 +57,7 @@ CActOnTargets::~CActOnTargets() {
     
 }
 
-int CActOnTargets::Execute() {
+int CActOnTargets::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -70,7 +74,10 @@ CApplyModifier::~CApplyModifier() {
     
 }
 
-int CApplyModifier::Execute() {
+int CApplyModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
+    auto modifier = ability->GetModifier(modifierName_);
+    assert(modifier);
+    entity->AddModifer(modifier);
     return 1;
 }
 
@@ -87,7 +94,7 @@ CAttachEffect::~CAttachEffect() {
     
 }
 
-int CAttachEffect::Execute() {
+int CAttachEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -102,7 +109,7 @@ CBlink::~CBlink() {
     
 }
 
-int CBlink::Execute() {
+int CBlink::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -120,12 +127,17 @@ CCreateThinker::CCreateThinker(float interval)
 }
 
 CCreateThinker::~CCreateThinker() {
-    
+    CScheduleManager::getInstance()->RemoveSchedule(this);
 }
 
-int CCreateThinker::Execute() {
+int CCreateThinker::Execute(CAbilityEntity* entity, CAbility* ability) {
     std::cout << "CCreateThinker Execute" << std::endl;
+    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CCreateThinker::update), interval_);
     return 1;
+}
+
+void CCreateThinker::update(float dt) {
+    std::cout << "CCreateThinker update" << std::endl;
 }
 
 #pragma mark -
@@ -144,7 +156,7 @@ CDamage::~CDamage() {
     
 }
 
-int CDamage::Execute() {
+int CDamage::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -162,7 +174,7 @@ CDelayedAction::~CDelayedAction() {
     
 }
 
-int CDelayedAction::Execute() {
+int CDelayedAction::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -180,7 +192,7 @@ CFireEffect::~CFireEffect() {
     
 }
 
-int CFireEffect::Execute() {
+int CFireEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
     std::cout << "CFireEffect Execute" << std::endl;
     return 1;
 }
@@ -198,7 +210,7 @@ CFireSound::~CFireSound() {
     
 }
 
-int CFireSound::Execute() {
+int CFireSound::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -215,7 +227,7 @@ CHeal::~CHeal() {
     
 }
 
-int CHeal::Execute() {
+int CHeal::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -232,7 +244,7 @@ CKnockback::~CKnockback() {
     
 }
 
-int CKnockback::Execute() {
+int CKnockback::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -249,7 +261,7 @@ CLevelUpAbility::~CLevelUpAbility() {
     
 }
 
-int CLevelUpAbility::Execute() {
+int CLevelUpAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -266,7 +278,7 @@ CLifesteal::~CLifesteal() {
     
 }
 
-int CLifesteal::Execute() {
+int CLifesteal::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -277,7 +289,7 @@ CLinearProjectile::CLinearProjectile()
 : effectName_(0)
 , moveSpeed_(0.f)
 , startPosition_(0)
-, targetType_(0)
+, targetSearcher_(0)
 , isProvidesVision_(false)
 , visionRadius_ (0.f)
 {
@@ -288,7 +300,7 @@ CLinearProjectile::~CLinearProjectile() {
     
 }
 
-int CLinearProjectile::Execute() {
+int CLinearProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -299,7 +311,7 @@ CTrackingProjectile::CTrackingProjectile()
 : effectName_(0)
 , moveSpeed_(0.f)
 , startPosition_(0)
-, targetType_(0)
+, targetSearcher_(0)
 , isProvidesVision_(false)
 , visionRadius_ (0.f)
 {
@@ -310,7 +322,7 @@ CTrackingProjectile::~CTrackingProjectile() {
     
 }
 
-int CTrackingProjectile::Execute() {
+int CTrackingProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -329,7 +341,7 @@ CRandom::~CRandom() {
     
 }
 
-int CRandom::Execute() {
+int CRandom::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -346,7 +358,7 @@ CRemoveAbility::~CRemoveAbility() {
     
 }
 
-int CRemoveAbility::Execute() {
+int CRemoveAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -363,7 +375,7 @@ CRemoveModifier::~CRemoveModifier() {
     
 }
 
-int CRemoveModifier::Execute() {
+int CRemoveModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -381,7 +393,7 @@ CRunScript::~CRunScript() {
     
 }
 
-int CRunScript::Execute() {
+int CRunScript::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -402,7 +414,7 @@ CSpawnUnit::~CSpawnUnit() {
     
 }
 
-int CSpawnUnit::Execute() {
+int CSpawnUnit::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -419,7 +431,7 @@ CStun::~CStun() {
     
 }
 
-int CStun::Execute() {
+int CStun::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
@@ -436,6 +448,6 @@ CSpendMana::~CSpendMana() {
     
 }
 
-int CSpendMana::Execute() {
+int CSpendMana::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }

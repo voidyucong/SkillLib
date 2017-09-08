@@ -22,12 +22,23 @@ CModifier::CModifier()
 , textureName_(NULL)
 , effectName_(NULL)
 , modelName_(NULL)
+, name_(NULL)
 {
     
 }
 
 CModifier::~CModifier() {
-    
+    for (auto iter = events_.begin(); iter != events_.end(); iter++) {
+        delete iter->second;
+    }
+    for (auto operate : operators_) {
+        delete operate;
+        operate = NULL;
+    }
+}
+
+void CModifier::Destroy() {
+    delete this;
 }
 
 void CModifier::SetModifierEvent(MODIFIER_EVENT_TYPE type, CModifierEvent* event) {
@@ -42,8 +53,8 @@ int CModifier::ExecuteEvent(MODIFIER_EVENT_TYPE type) {
     return 0;
 }
 
-void CModifier::ExecuteOperate() {
+void CModifier::ExecuteOperate(CAbilityEntity* entity, CAbility* ability) {
     for (COperate* operate : this->operators_) {
-        operate->Execute();
+        operate->Execute(entity, ability);
     }
 }

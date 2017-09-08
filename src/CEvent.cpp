@@ -26,10 +26,10 @@ CEvent::~CEvent() {
     }
 }
 
-int CEvent::Execute() {
+int CEvent::Execute(CAbilityEntity* entity, CAbility* ability) {
     int ok = 1;
     for (COperate* op : operators_) {
-        ok &= op->Execute();
+        ok &= op->Execute(entity, ability);
     }
     return ok;
 }

@@ -52,6 +52,36 @@ enum EVENT_TYPE {
     EVENT_TYPE_ON_PROJECTILE_FINISH,	// 当弹道粒子特效结束
 };
 
+enum MODIFIER_EVENT_TYPE{
+    MODIFIER_EVENT_ON_CREATED,              // 创建时
+    MODIFIER_EVENT_ON_DESTROY,              // 销毁时
+    MODIFIER_EVENT_ON_ATTACK,               // 攻击时
+    MODIFIER_EVENT_ON_ATTACKED,             // 被攻击时
+    MODIFIER_EVENT_ON_ATTACK_LADNED,        // 攻击到时
+    MODIFIER_EVENT_ON_ATTACK_FAILED,        // 攻击单位丢失时
+    MODIFIER_EVENT_ON_ATTACK_ALLIED,        // 攻击同盟时
+    MODIFIER_EVENT_ON_DEAL_DAMAGE,          // 施加伤害时
+    MODIFIER_EVENT_ON_TAKE_DAMAGE,          // 收到伤害时
+    MODIFIER_EVENT_ON_DEATH,                // 死亡时
+    MODIFIER_EVENT_ON_KILL,                 // 杀死任意单位时
+    MODIFIER_EVENT_ON_KILL_HERO,            // 杀死英雄时
+    MODIFIER_EVENT_ON_RESPAWN,              // 重生时
+    MODIFIER_EVENT_ON_ORB,                  // 创建法球
+    MODIFIER_EVENT_ON_ORB_FIRE,             // 法球发射时
+    MODIFIER_EVENT_ON_ORB_IMPACT,           // 法球命中目标时
+    MODIFIER_EVENT_ON_ABILITY_START,        // 施法开始时
+    MODIFIER_EVENT_ON_ABILITY_EXECUTED,     // 施法结束时
+    MODIFIER_EVENT_ON_HEAL_RECEIVED,        // 受到治疗时
+    MODIFIER_EVENT_ON_HEALTH_GAINED,        // 主动获得生命值时
+    MODIFIER_EVENT_ON_MANA_GAINED,          // 主动获得魔法值时
+    MODIFIER_EVENT_ON_MANA_SPENT,           // 消耗魔法值时
+    MODIFIER_EVENT_ON_ENTITY_MOVED,         // 移动时
+    MODIFIER_EVENT_ON_TELEPORTED,           // 传送结束时
+    MODIFIER_EVENT_ON_TELEPORTING,          // 传送开始时
+    MODIFIER_EVENT_ON_PROJECTILE_DODGE,     // 躲避投射物时
+    MODIFIER_EVENT_ON_INTERVAL,             // 定时器
+};
+
 // 特效附着点类型
 enum MODIFIER_EFFECT_ATTACH_TYPE {
     MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN,     //  原点
@@ -136,6 +166,16 @@ enum ENTITY_ATTRIBUTES {
     ENTITY_ATTRIBUTE_VISION_RANGE,          // 视野范围
 };
 
+enum ABILITY_ATTRIBUTES {
+    ABILITY_ATTRIBUTES_COOLDOWN_GAIN_PERCENT,       // 冷却加成百分比，例10s冷却，加成10%，冷却9s
+    ABILITY_ATTRIBUTES_COOLDOWN_GAIN,               // 冷却加成秒数
+    ABILITY_ATTRIBUTES_MANACOST_GAIN_PERCENT,       // 法术消耗加成百分比
+    ABILITY_ATTRIBUTES_CRYSTALCOST_GAIN_PERCENT,    // 晶石消耗加成百分比
+    ABILITY_ATTRIBUTES_HPCOST_GAIN_PERCENT,
+    ABILITY_ATTRIBUTES_DURATION_GAIN_PERCENT,       // 持续时间加成百分比
+    ABILITY_ATTRIBUTES_DURATION_GAIN,               // 持续时间加成
+};
+
 // 主属性类型
 enum ENTITY_ATTRIBUTE_PRIMARY {
     ENTITY_ATTRIBUTE_PRIMARY_STRENGTH,     // 物理
@@ -156,10 +196,10 @@ enum ENTITY_ATTACK_CAPABILITY {
     ENTITY_ATTACK_CAPABILITY_RANGED,        // 远程
 };
 
-enum MODIFIER_ATTRIBUTES {
-    MODIFIER_ATTRIBUTES_ARMOR,
-    MODIFIER_ATTRIBUTES_
-};
+//enum MODIFIER_ATTRIBUTES {
+//    MODIFIER_ATTRIBUTES_ARMOR,
+//    MODIFIER_ATTRIBUTES_
+//};
 
 
 // 实体类型

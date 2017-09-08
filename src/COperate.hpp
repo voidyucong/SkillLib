@@ -9,14 +9,17 @@
 #ifndef COperate_hpp
 #define COperate_hpp
 #include "SkillTypes.h"
+#include "CObject.hpp"
 
 class CEvent;
-class CTargetType;
+class CTargetSearcher;
+class CAbility;
+class CAbilityEntity;
 
-class COperate {
+class COperate : public CObject {
     // CEntity* target_;
 public:
-    virtual int Execute();
+    virtual int Execute(CAbilityEntity* entity, CAbility* ability);
     
     COperate();
     virtual ~COperate();
@@ -28,7 +31,7 @@ public:
 class COperateAddAbility : public COperate {
     
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     COperateAddAbility();
     ~COperateAddAbility();
@@ -41,7 +44,7 @@ private:
  */
 class CActOnTargets : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CActOnTargets();
     ~CActOnTargets();
@@ -54,7 +57,7 @@ private:
  */
 class CApplyModifier : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CApplyModifier();
     ~CApplyModifier();
@@ -67,7 +70,7 @@ private:
  */
 class CAttachEffect : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CAttachEffect();
     ~CAttachEffect();
@@ -80,7 +83,7 @@ private:
  */
 class CBlink : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CBlink();
     ~CBlink();
@@ -91,11 +94,13 @@ public:
  */
 class CCreateThinker : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CCreateThinker();
     CCreateThinker(float interval);
     ~CCreateThinker();
+    
+    void update(float dt);
 private:
     float interval_;
 };
@@ -105,7 +110,7 @@ private:
  */
 class CDamage : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CDamage();
     ~CDamage();
@@ -121,7 +126,7 @@ private:
  */
 class CDelayedAction : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CDelayedAction();
     ~CDelayedAction();
@@ -135,7 +140,7 @@ private:
  */
 class CFireEffect : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CFireEffect();
     ~CFireEffect();
@@ -150,7 +155,7 @@ private:
  */
 class CFireSound : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CFireSound();
     ~CFireSound();
@@ -163,7 +168,7 @@ private:
  */
 class CHeal : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CHeal();
     ~CHeal();
@@ -176,7 +181,7 @@ private:
  */
 class CKnockback : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CKnockback();
     ~CKnockback();
@@ -191,7 +196,7 @@ private:
  */
 class CLevelUpAbility : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CLevelUpAbility();
     ~CLevelUpAbility();
@@ -204,7 +209,7 @@ private:
  */
 class CLifesteal : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CLifesteal();
     ~CLifesteal();
@@ -217,7 +222,7 @@ private:
  */
 class CLinearProjectile : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CLinearProjectile();
     ~CLinearProjectile();
@@ -225,7 +230,7 @@ private:
     const char* effectName_;
     float moveSpeed_;
     unsigned startPosition_;
-    CTargetType* targetType_;
+    CTargetSearcher* targetSearcher_;
     bool isProvidesVision_;     // 是否提供视野
     float visionRadius_;        // 视野范围
 };
@@ -235,7 +240,7 @@ private:
  */
 class CTrackingProjectile : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CTrackingProjectile();
     ~CTrackingProjectile();
@@ -243,7 +248,7 @@ private:
     const char* effectName_;
     float moveSpeed_;
     unsigned startPosition_;
-    CTargetType* targetType_;
+    CTargetSearcher* targetSearcher_;
     bool isProvidesVision_;     // 是否提供视野
     float visionRadius_;        // 视野范围
 };
@@ -253,7 +258,7 @@ private:
  */
 class CRandom : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CRandom();
     ~CRandom();
@@ -268,7 +273,7 @@ private:
  */
 class CRemoveAbility : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CRemoveAbility();
     ~CRemoveAbility();
@@ -281,7 +286,7 @@ private:
  */
 class CRemoveModifier : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CRemoveModifier();
     ~CRemoveModifier();
@@ -294,7 +299,7 @@ private:
  */
 class CRunScript : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CRunScript();
     ~CRunScript();
@@ -308,7 +313,7 @@ private:
  */
 class CSpawnUnit : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CSpawnUnit();
     ~CSpawnUnit();
@@ -325,7 +330,7 @@ private:
  */
 class CStun : public COperate {
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CStun();
     ~CStun();
@@ -338,7 +343,7 @@ private:
  */
 class CSpendMana : public COperate{
 public:
-    int Execute();
+    int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CSpendMana();
     ~CSpendMana();

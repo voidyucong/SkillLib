@@ -11,41 +11,15 @@
 
 #include <map>
 #include <vector>
+#include "CObject.hpp"
+#include "SkillTypes.h"
 
 class CModifierEvent;
 class COperate;
+class CAbility;
+class CAbilityEntity;
 
-enum MODIFIER_EVENT_TYPE{
-    MODIFIER_EVENT_ON_CREATED,              // 创建时
-    MODIFIER_EVENT_ON_DESTROY,              // 销毁时
-    MODIFIER_EVENT_ON_ATTACK,               // 攻击时
-    MODIFIER_EVENT_ON_ATTACKED,             // 被攻击时
-    MODIFIER_EVENT_ON_ATTACK_LADNED,        // 攻击到时
-    MODIFIER_EVENT_ON_ATTACK_FAILED,        // 攻击单位丢失时
-    MODIFIER_EVENT_ON_ATTACK_ALLIED,        // 攻击同盟时
-    MODIFIER_EVENT_ON_DEAL_DAMAGE,          // 施加伤害时
-    MODIFIER_EVENT_ON_TAKE_DAMAGE,          // 收到伤害时
-    MODIFIER_EVENT_ON_DEATH,                // 死亡时
-    MODIFIER_EVENT_ON_KILL,                 // 杀死任意单位时
-    MODIFIER_EVENT_ON_KILL_HERO,            // 杀死英雄时
-    MODIFIER_EVENT_ON_RESPAWN,              // 重生时
-    MODIFIER_EVENT_ON_ORB,                  // 创建法球
-    MODIFIER_EVENT_ON_ORB_FIRE,             // 法球发射时
-    MODIFIER_EVENT_ON_ORB_IMPACT,           // 法球命中目标时
-    MODIFIER_EVENT_ON_ABILITY_START,        // 施法开始时
-    MODIFIER_EVENT_ON_ABILITY_EXECUTED,     // 施法结束时
-    MODIFIER_EVENT_ON_HEAL_RECEIVED,        // 受到治疗时
-    MODIFIER_EVENT_ON_HEALTH_GAINED,        // 主动获得生命值时
-    MODIFIER_EVENT_ON_MANA_GAINED,          // 主动获得魔法值时
-    MODIFIER_EVENT_ON_MANA_SPENT,           // 消耗魔法值时
-    MODIFIER_EVENT_ON_ENTITY_MOVED,         // 移动时
-    MODIFIER_EVENT_ON_TELEPORTED,           // 传送结束时
-    MODIFIER_EVENT_ON_TELEPORTING,          // 传送开始时
-    MODIFIER_EVENT_ON_PROJECTILE_DODGE,     // 躲避投射物时
-    MODIFIER_EVENT_ON_INTERVAL,             // 定时器
-};
-
-class CModifier {
+class CModifier : public CObject {
     
 public:
     void SetModifierEvent(MODIFIER_EVENT_TYPE type, CModifierEvent* event);
@@ -54,7 +28,7 @@ public:
     
     int ExecuteEvent(MODIFIER_EVENT_TYPE type);
     
-    void ExecuteOperate();
+    void ExecuteOperate(CAbilityEntity* entity, CAbility* ability);
     
     bool IsMulti() { return isMulti_; }
     bool IsPassive() { return isPassive_; }
@@ -62,17 +36,21 @@ public:
     bool IsBuff() { return isBuff_; }
     bool IsDebuff() { return isDebuff_; }
     bool IsPurgable() { return isPurgable_; }
+    int GetMaxMulti() { return maxMulti_; }
     float GetDuration() { return duration_; }
     float GetThinkInterval() { return thinkInterval_; }
     const char* GetTextureName() { return textureName_; }
     const char* GetEffectName() { return effectName_; }
     const char* GetModelName() { return modelName_; }
+    const char* GetName() { return name_; }
     
     CModifier();
     virtual ~CModifier();
+    void Destroy();
     
 private:
     bool isMulti_;      // 是否可叠加
+    int maxMulti_;    // 最高叠加层数
     float duration_;    // 持续时间
     bool isPassive_;    // 是否被动
     bool isHidden_;     // 是否隐藏图标
@@ -83,6 +61,7 @@ private:
     const char* textureName_;   // 图标名称
     const char* effectName_;    // 特效名
     const char* modelName_;     // 模型名，默认空
+    const char* name_;
 private:
     std::map<MODIFIER_EVENT_TYPE, CModifierEvent*> events_;  // 事件集合
     std::vector<COperate*> operators_;

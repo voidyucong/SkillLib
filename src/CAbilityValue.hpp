@@ -20,7 +20,7 @@ public:
     typedef std::string String;
 private:
     union {
-        int i;
+//        int i;
         float f;
         String s;
         Array a;
@@ -29,8 +29,8 @@ private:
         NONE, NUMBER, FLOAT, STRING, ARRAY,
     };
 public:
-    CAbilityValue(): i(0), type_(NONE) {}
-    CAbilityValue(int value): i(value), type_(NUMBER) {}
+    CAbilityValue(): type_(NONE) {}
+    CAbilityValue(int value): f(value), type_(FLOAT) {}
     CAbilityValue(float value): f(value), type_(FLOAT) {}
     CAbilityValue(const String& value): s(value), type_(STRING) {}
     CAbilityValue(String&& value): s(std::move(value)), type_(STRING) {}
@@ -39,30 +39,22 @@ public:
     CAbilityValue(Array&& value): a(std::move(value)), type_(ARRAY) {}
     CAbilityValue(const CAbilityValue& instance) {
         if (this != &instance) {
-            if (instance.IsInt()) SetInt(instance.i);
-            else if (instance.IsFloat()) SetFloat(instance.f);
+//            if (instance.IsInt()) SetInt(instance.i);
+            if (instance.IsFloat()) SetFloat(instance.f);
             else if (instance.IsString()) SetString(instance.s);
             else if (instance.IsArray()) SetArray(instance.a);
-        }
-    }
-    CAbilityValue(const CAbilityValue* instance) {
-        if (this != instance) {
-            if (instance->IsInt()) SetInt(instance->i);
-            else if (instance->IsFloat()) SetFloat(instance->f);
-            else if (instance->IsString()) SetString(instance->s);
-            else if (instance->IsArray()) SetArray(instance->a);
         }
     }
     ~CAbilityValue() {}
     
     CAbilityValue& operator= (const CAbilityValue& instance);
     
-    bool IsInt() const { return type_ == NUMBER; }
+//    bool IsInt() const { return type_ == NUMBER; }
     bool IsFloat() const { return type_ == FLOAT; }
     bool IsString() const { return type_ == STRING; }
     bool IsArray() const { return type_ == ARRAY; }
 
-    void SetInt(int value) { i = value; type_ = NUMBER; }
+//    void SetInt(int value) { i = value; type_ = NUMBER; }
     void SetFloat(float value) { f = value; type_ = FLOAT; }
     void SetString(const String& value) { s = value; type_ = STRING; }
     void SetArray(const Array& value) { a = value; type_ = ARRAY; }
@@ -94,8 +86,8 @@ inline bool CAbilityValue::IsType<CAbilityValue::Array>() const { return type_ =
 
 
 inline CAbilityValue& CAbilityValue::operator= (const CAbilityValue& instance) {
-    if (instance.IsType<int>()) SetInt(instance.i);
-    else if (instance.IsType<float>()) SetFloat(instance.f);
+//    if (instance.IsType<int>()) SetInt(instance.i);
+    if (instance.IsType<float>()) SetFloat(instance.f);
     else if (instance.IsType<CAbilityValue::String>()) SetString(instance.s);
     else if (instance.IsType<CAbilityValue::Array>()) SetArray(instance.a);
     return *this;
@@ -108,26 +100,26 @@ inline CAbilityValue* CAbilityValue::GetArrayValueByIndex(unsigned index) {
 }
 
 
-template<>
-inline int& CAbilityValue::GetValue<int>() { assert(IsType<int>()); return i; }
+//template<>
+//inline int& CAbilityValue::GetValue<int>() { assert(IsType<int>()); return i; }
 
 template<>
 inline float& CAbilityValue::GetValue<float>() { assert(IsType<float>()); return f; }
 
 template<>
-inline CAbilityValue::String & CAbilityValue::GetValue<CAbilityValue::String>() { assert(IsType<CAbilityValue::String>()); return s; }
+inline CAbilityValue::String & CAbilityValue::GetValue<std::string>() { assert(IsType<CAbilityValue::String>()); return s; }
 
 template<>
 inline CAbilityValue::Array& CAbilityValue::GetValue<CAbilityValue::Array>() { assert(IsType<CAbilityValue::Array>()); return a; }
 
-template<>
-inline const int& CAbilityValue::GetValue<int>() const { assert(IsType<int>()); return i; }
+//template<>
+//inline const int& CAbilityValue::GetValue<int>() const { assert(IsType<int>()); return i; }
 
 template<>
 inline const float& CAbilityValue::GetValue<float>() const { assert(IsType<float>()); return f; }
 
 template<>
-inline const CAbilityValue::String& CAbilityValue::GetValue<CAbilityValue::String>() const { assert(IsType<CAbilityValue::String>()); return s; }
+inline const CAbilityValue::String& CAbilityValue::GetValue<std::string>() const { assert(IsType<CAbilityValue::String>()); return s; }
 
 template<>
 inline const CAbilityValue::Array& CAbilityValue::GetValue<CAbilityValue::Array>() const { assert(IsType<CAbilityValue::Array>()); return a; }
