@@ -11,12 +11,15 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <time.h>
 
-long GetNow() {
-    time_t t;
-    t = time(NULL);
-    struct tm *lt;
-    return time(&t);
+namespace SKB {
+    long GetNow() {
+        time_t t;
+        t = time(NULL);
+        return time(&t);
+    }
 }
+
 
 #endif /* TimeUtil_h */

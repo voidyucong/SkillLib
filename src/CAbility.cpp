@@ -17,7 +17,7 @@
 
 CAbility::CAbility()
 : level_(1)
-, cooldown_(GetNow())
+, cooldown_(SKB::GetNow())
 , elapsed_(0.f)
 , isValid_(true)
 {
@@ -51,7 +51,7 @@ void CAbility::Cast(CAbilityEntity* entity) {
         return;
     }
     // check cd
-    if (cooldown_ < GetNow()) {
+    if (cooldown_ < SKB::GetNow()) {
         std::cout << "冷却中 " << cooldown_ << "s" << std::endl;
         return;
     }
@@ -97,7 +97,7 @@ void CAbility::Cast(CAbilityEntity* entity) {
     
     
     auto cooldown = this->GetLevelSpecialValueFor("cooldown", level_);
-    cooldown_ = GetNow() + cooldown->GetValue<float>()
+    cooldown_ = SKB::GetNow() + cooldown->GetValue<float>()
                 * (1 - this->GetModifyAttribute(ABILITY_ATTRIBUTES_COOLDOWN_GAIN_PERCENT))
                 - this->GetModifyAttribute(ABILITY_ATTRIBUTES_COOLDOWN_GAIN);
     

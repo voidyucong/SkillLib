@@ -10,6 +10,7 @@
 #define CTargetSearcher_hpp
 
 #include <iostream>
+#include <vector>
 #include "SkillTypes.h"
 #include "CObject.hpp"
 

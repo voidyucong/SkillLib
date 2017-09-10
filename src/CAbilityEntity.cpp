@@ -9,6 +9,7 @@
 #include "CAbilityEntity.hpp"
 #include <assert.h>
 #include "CModifier.h"
+#include "CScheduleManager.h"
 
 CAbilityEntity::CAbilityEntity()
 : abilityContainer_(new CAbilityContainer())
@@ -36,6 +37,18 @@ CAbilityEntity::~CAbilityEntity() {
     }
 }
 
+void CAbilityEntity::update(float dt) {
+    
+}
+
+void CAbilityEntity::Destroy() {
+    CScheduleManager::getInstance()->RemoveSchedule(this);
+}
+
+void CAbilityEntity::Execute() {
+    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbilityEntity::update), 1);
+}
+
 void CAbilityEntity::ExecuteAbility(unsigned index) {
     assert(index < abilityContainer_->GetAbilityLayout());
     auto ability = abilityContainer_->GetAbility(index);
@@ -43,6 +56,9 @@ void CAbilityEntity::ExecuteAbility(unsigned index) {
     ability->Cast(this);
 }
 
+
+#pragma mark -
+#pragma mark attributes
 void CAbilityEntity::SetEntityAbility(CAbility* ability, unsigned index) {
     abilityContainer_->SetAbility(ability, index);
 }

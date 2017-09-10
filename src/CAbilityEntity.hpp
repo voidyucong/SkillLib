@@ -29,8 +29,19 @@ public:
     CAbilityEntity();
     ~CAbilityEntity();
     
+    void update(float dt);
+    
+    //
+    void Execute();
+    //
+    void Destroy();
+    // 执行指定的技能
     void ExecuteAbility(unsigned index);
     
+    
+    
+    // attributes
+    // ------------------------------------------------------
     void SetEntityAbility(CAbility* ability, unsigned index);
     void SetEntityAbilityLayout(unsigned layout);
     
