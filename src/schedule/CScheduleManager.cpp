@@ -8,13 +8,16 @@
 
 #include "CScheduleManager.h"
 #include <vector>
+extern "C" {
+#include "TimeUtil.h"
+}
 
 #define MAX(x,y) (((x) < (y)) ? (y) : (x))
 
 static CScheduleManager* s_pInstance = NULL;
 
 CScheduleManager::CScheduleManager() {
-     gettimeofday(&lastTime_, NULL);
+    lastTime_ = SKB::GetSeconds();
 }
 
 CScheduleManager::~CScheduleManager() {
@@ -31,9 +34,8 @@ CScheduleManager* CScheduleManager::getInstance() {
 }
 
 void CScheduleManager::update() {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    float deltaTime = (now.tv_sec - lastTime_.tv_sec) + (now.tv_usec - lastTime_.tv_usec) / 1000000.0f;
+    double now = SKB::GetSeconds();
+    float deltaTime = now - lastTime_;
     deltaTime = MAX(0, deltaTime);
     std::vector<CObject*> deletions;
     for (auto iter = schedules_.begin(); iter != schedules_.end(); iter++) {

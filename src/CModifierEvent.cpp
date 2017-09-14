@@ -7,6 +7,7 @@
 //
 
 #include "CModifierEvent.hpp"
+#include "COperate.hpp"
 
 CModifierEvent::CModifierEvent() {
     
@@ -16,6 +17,14 @@ CModifierEvent::~CModifierEvent() {
     
 }
 
-int CModifierEvent::Execute() {
-    return 1;
+int CModifierEvent::Execute(CAbilityEntity *entity, CAbility *ability) {
+    return CEvent::Execute(entity, ability);
+}
+
+CModifierEvent* CModifierEvent::Clone() {
+    CModifierEvent* event = new CModifierEvent();
+    for (COperate* op : operators_) {
+        event->AddOperate(op->Clone());
+    }
+    return event;
 }

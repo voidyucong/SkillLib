@@ -54,7 +54,7 @@ public:
     bool IsString() const { return type_ == STRING; }
     bool IsArray() const { return type_ == ARRAY; }
 
-//    void SetInt(int value) { i = value; type_ = NUMBER; }
+//    void SetInt(int value) { f = (float)value; type_ = NUMBER; }
     void SetFloat(float value) { f = value; type_ = FLOAT; }
     void SetString(const String& value) { s = value; type_ = STRING; }
     void SetArray(const Array& value) { a = value; type_ = ARRAY; }

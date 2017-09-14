@@ -40,7 +40,7 @@ enum ABILITY_BEHAVIOR {
 
 // 技能事件
 enum EVENT_TYPE {
-    EVENT_TYPE_ON_SPELL_START, 			// 当技能施法开始
+    EVENT_TYPE_ON_SPELL_START = 1, 		// 当技能施法开始
     EVENT_TYPE_ON_TOGGLE_ON,			// 当切换为开启状态
     EVENT_TYPE_ON_TOGGLE_OFF,			// 当切换为关闭状态
     EVENT_TYPE_ON_CHANNEL_FINISH,		// 当持续性施法完成
@@ -53,7 +53,7 @@ enum EVENT_TYPE {
 };
 
 enum MODIFIER_EVENT_TYPE{
-    MODIFIER_EVENT_ON_CREATED,              // 创建时
+    MODIFIER_EVENT_ON_CREATED = 1,              // 创建时
     MODIFIER_EVENT_ON_DESTROY,              // 销毁时
     MODIFIER_EVENT_ON_ATTACK,               // 攻击时
     MODIFIER_EVENT_ON_ATTACKED,             // 被攻击时
@@ -84,35 +84,38 @@ enum MODIFIER_EVENT_TYPE{
 
 // 特效附着点类型
 enum MODIFIER_EFFECT_ATTACH_TYPE {
-    MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN,     //  原点
+    MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN = 1,     //  原点
     MODIFIER_EFFECT_ATTACH_TYPE_HEAD,       //  头顶
 };
 
 // 伤害类型
 enum ABILITY_DAMAGE_TYPE {
-    ABILITY_DAMAGE_TYPE_NONE,
+    ABILITY_DAMAGE_TYPE_NONE = 1,
     ABILITY_DAMAGE_TYPE_PHYSICAL,           // 物理伤害
     ABILITY_DAMAGE_TYPE_MAGICAL,            // 法术伤害
     ABILITY_DAMAGE_TYPE_PURE,               // 纯粹伤害
 };
 
+//
+//
 enum TARGET_CENTER {
-    TARGET_CENTER_CASTER,       // 施法者
-    TARGET_CENTER_TARGET,       // 目标
-    TARGET_CENTER_POINT,        // 点
-    TARGET_CENTER_ATTACKER,     // 攻击者
-    TARGET_CENTER_PROJECTILE,   // 抛射物
+    TARGET_CENTER_CASTER = 1,       // 施法者(单体、群体)
+    TARGET_CENTER_TARGET,       // 目标（单体、群体）
+    TARGET_CENTER_POINT,        // 点（单体、群体）
+    TARGET_CENTER_ATTACKER,     // 攻击者（单体、群体）
+    TARGET_CENTER_PROJECTILE,   // 抛射物（群体）
+    TARGET_CENTER_UNIT,         // 单位（单体、群体）
 };
 
 enum TARGET_TEAMS {
-    TARGET_TEAM_BOTH,           // 全部
+    TARGET_TEAM_BOTH = 1,           // 全部
     TARGET_TEAM_ENEMY,          // 敌方
     TARGET_TEAM_FRIENDLY,       // 友方
     TARGET_TEAM_NONE,           // 无
 };
 
 enum TARGET_TYPES {
-    TARGET_TYPE_ALL,
+    TARGET_TYPE_ALL = 1,
     TARGET_TYPE_HERO,           // 英雄
     TARGET_TYPE_BASIC,          // 基本单位, 包括召唤单位
     TARGET_TYPE_MECHANICAL,     // 机械
@@ -122,7 +125,7 @@ enum TARGET_TYPES {
 };
 
 enum TARGET_FLAGS {
-    TARGET_FLAG_NONE,           //  缺省默认值
+    TARGET_FLAG_NONE = 1,           //  缺省默认值
     TARGET_FLAG_DEAD,           //  死亡单位忽略
     TARGET_FLAG_NO_INVIS,       // 不可见单位
     TARGET_FLAG_MAGIC_IMMUNE_ENEMIES,       // 魔法免疫的敌人单位
@@ -131,8 +134,9 @@ enum TARGET_FLAGS {
     TARGET_FLAG_OUT_OF_WORLD,               // 离开游戏的单位
 };
 
+
 enum ENTITY_ATTRIBUTES {
-    ENTITY_ATTRIBUTE_STRENGTH,             // 力量
+    ENTITY_ATTRIBUTE_STRENGTH = 1,             // 力量
     ENTITY_ATTRIBUTE_STRENGTH_GAIN,        // 力量成长
     ENTITY_ATTRIBUTE_INTELLIGENCE,         // 智力
     ENTITY_ATTRIBUTE_INTELLIGENCE_GAIN,    // 智力成长
@@ -166,32 +170,34 @@ enum ENTITY_ATTRIBUTES {
     ENTITY_ATTRIBUTE_VISION_RANGE,          // 视野范围
 };
 
-enum ABILITY_ATTRIBUTES {
-    ABILITY_ATTRIBUTES_COOLDOWN_GAIN_PERCENT,       // 冷却加成百分比，例10s冷却，加成10%，冷却9s
-    ABILITY_ATTRIBUTES_COOLDOWN_GAIN,               // 冷却加成秒数
-    ABILITY_ATTRIBUTES_MANACOST_GAIN_PERCENT,       // 法术消耗加成百分比
-    ABILITY_ATTRIBUTES_CRYSTALCOST_GAIN_PERCENT,    // 晶石消耗加成百分比
-    ABILITY_ATTRIBUTES_HPCOST_GAIN_PERCENT,
-    ABILITY_ATTRIBUTES_DURATION_GAIN_PERCENT,       // 持续时间加成百分比
-    ABILITY_ATTRIBUTES_DURATION_GAIN,               // 持续时间加成
+enum MODIFIER_ATTRIBUTES {
+    MODIFIER_ATTRIBUTE_COOLDOWN_GAIN_PERCENT = 1,       // 冷却加成百分比，例10s冷却，加成10%，冷却9s
+    MODIFIER_ATTRIBUTE_COOLDOWN_GAIN,               // 冷却加成秒数
+    MODIFIER_ATTRIBUTE_MANACOST_GAIN_PERCENT,       // 法术消耗加成百分比
+    MODIFIER_ATTRIBUTE_CRYSTALCOST_GAIN_PERCENT,    // 晶石消耗加成百分比
+    MODIFIER_ATTRIBUTE_HPCOST_GAIN_PERCENT,
+    MODIFIER_ATTRIBUTE_DURATION_GAIN_PERCENT,       // 持续时间加成百分比
+    MODIFIER_ATTRIBUTE_DURATION_GAIN,               // 持续时间加成
+    
+    MODIFIER_ATTRIBUTE_ARMOR_BONUS,                 // 增加护甲
 };
 
 // 主属性类型
 enum ENTITY_ATTRIBUTE_PRIMARY {
-    ENTITY_ATTRIBUTE_PRIMARY_STRENGTH,     // 物理
+    ENTITY_ATTRIBUTE_PRIMARY_STRENGTH = 1,     // 物理
     ENTITY_ATTRIBUTE_PRIMARY_MAGIC,        // 魔法
 };
 
 // 移动能力
 enum ENTITY_MOVEMENT_CAPABILITY {
-    ENTITY_MOVEMENT_CAPABILITY_NONE,        // 不能移动
+    ENTITY_MOVEMENT_CAPABILITY_NONE = 1,        // 不能移动
     ENTITY_MOVEMENT_CAPABILITY_GROUND,      // 地面
     ENTITY_MOVEMENT_CAPABILITY_FLY,         // 飞行
 };
 
 // 攻击能力
 enum ENTITY_ATTACK_CAPABILITY {
-    ENTITY_ATTACK_CAPABILITY_NONE,          // 不能攻击
+    ENTITY_ATTACK_CAPABILITY_NONE = 1,          // 不能攻击
     ENTITY_ATTACK_CAPABILITY_MELEE,         // 近战
     ENTITY_ATTACK_CAPABILITY_RANGED,        // 远程
 };
@@ -203,8 +209,9 @@ enum ENTITY_ATTACK_CAPABILITY {
 
 
 // 实体类型
+// 与TARGET_TYPE对应
 enum ENTITY_TYPE {
-    ENTITY_TYPE_HERO,           // 英雄
+    ENTITY_TYPE_HERO = 2,       // 英雄
     ENTITY_TYPE_BASIC,          // 基本单位, 包括召唤单位
     ENTITY_TYPE_MECHANICAL,     // 机械
     ENTITY_TYPE_BUILDING,       // 建筑

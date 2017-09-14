@@ -14,16 +14,11 @@ CEvent::CEvent()
     
 }
 
-CEvent::CEvent(EVENT_TYPE type)
-: type_(type)
-{
-    
-}
-
 CEvent::~CEvent() {
     for (auto op : operators_) {
         delete op;
     }
+    operators_.clear();
 }
 
 int CEvent::Execute(CAbilityEntity* entity, CAbility* ability) {
@@ -36,4 +31,12 @@ int CEvent::Execute(CAbilityEntity* entity, CAbility* ability) {
 
 void CEvent::AddOperate(COperate* op) {
     operators_.push_back(op);
+}
+
+CEvent* CEvent::Clone() {
+    CEvent* event = new CEvent();
+    for (COperate* op : operators_) {
+        event->AddOperate(op->Clone());
+    }
+    return event;
 }

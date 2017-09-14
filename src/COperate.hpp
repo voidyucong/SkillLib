@@ -8,6 +8,7 @@
 
 #ifndef COperate_hpp
 #define COperate_hpp
+#include <iostream>
 #include "SkillTypes.h"
 #include "CObject.hpp"
 
@@ -15,11 +16,30 @@ class CEvent;
 class CTargetSearcher;
 class CAbility;
 class CAbilityEntity;
+class CAbilityValue;
 
 class COperate : public CObject {
-    // CEntity* target_;
+protected:
+    CTargetSearcher* targetSearcher_;
 public:
     virtual int Execute(CAbilityEntity* entity, CAbility* ability);
+    virtual void Update(float dt);
+    virtual COperate* Clone();
+    
+    void SetCenter(TARGET_CENTER center);
+    TARGET_CENTER GetCenter();
+    
+    void SetRadius(CAbilityValue* radius);
+    CAbilityValue* GetRadius();
+    
+    void SetTeams(TARGET_TEAMS teams);
+    TARGET_TEAMS GetTeams();
+    
+    void SetTypes(TARGET_TYPES types);
+    TARGET_TYPES GetTypes();
+    
+    void SetFlags(TARGET_FLAGS flags);
+    TARGET_FLAGS GetFlags();
     
     COperate();
     virtual ~COperate();
@@ -36,7 +56,7 @@ public:
     COperateAddAbility();
     ~COperateAddAbility();
 private:
-    const char* abilityName_;
+    std::string abilityName_;
 };
 
 /**
@@ -49,7 +69,7 @@ public:
     CActOnTargets();
     ~CActOnTargets();
 private:
-    const char* modelName_;
+    std::string modelName_;
 };
 
 /**
@@ -60,9 +80,10 @@ public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CApplyModifier();
+    CApplyModifier(std::string modifierName);
     ~CApplyModifier();
 private:
-    const char* modifierName_;
+    std::string modifierName_;
 };
 
 /**
@@ -97,12 +118,13 @@ public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
     CCreateThinker();
-    CCreateThinker(float interval);
+    CCreateThinker(float interval, float duration);
     ~CCreateThinker();
     
-    void update(float dt);
+    virtual void Update(float dt);
 private:
     float interval_;
+    float duration_;  // 默认-1，代表永远不停
 };
 
 /**
@@ -145,7 +167,7 @@ public:
     CFireEffect();
     ~CFireEffect();
 private:
-    const char* effectName_;
+    std::string effectName_;
     unsigned int attackType_;
     
 };
@@ -160,7 +182,7 @@ public:
     CFireSound();
     ~CFireSound();
 private:
-    const char* effectName_;
+    std::string effectName_;
 };
 
 /**
@@ -201,7 +223,7 @@ public:
     CLevelUpAbility();
     ~CLevelUpAbility();
 private:
-    const char* abilityName_;
+    std::string abilityName_;
 };
 
 /**
@@ -227,10 +249,9 @@ public:
     CLinearProjectile();
     ~CLinearProjectile();
 private:
-    const char* effectName_;
+    std::string effectName_;
     float moveSpeed_;
     unsigned startPosition_;
-    CTargetSearcher* targetSearcher_;
     bool isProvidesVision_;     // 是否提供视野
     float visionRadius_;        // 视野范围
 };
@@ -245,10 +266,9 @@ public:
     CTrackingProjectile();
     ~CTrackingProjectile();
 private:
-    const char* effectName_;
+    std::string effectName_;
     float moveSpeed_;
     unsigned startPosition_;
-    CTargetSearcher* targetSearcher_;
     bool isProvidesVision_;     // 是否提供视野
     float visionRadius_;        // 视野范围
 };
@@ -278,7 +298,7 @@ public:
     CRemoveAbility();
     ~CRemoveAbility();
 private:
-    const char* abilityName_;
+    std::string abilityName_;
 };
 
 /**
@@ -291,7 +311,7 @@ public:
     CRemoveModifier();
     ~CRemoveModifier();
 private:
-    const char* modifierName_;
+    std::string modifierName_;
 };
 
 /**
@@ -304,8 +324,8 @@ public:
     CRunScript();
     ~CRunScript();
 private:
-    const char* scriptFile_;
-    const char* function_;
+    std::string scriptFile_;
+    std::string function_;
 };
 
 /**
@@ -318,7 +338,7 @@ public:
     CSpawnUnit();
     ~CSpawnUnit();
 private:
-    const char* unitName_;
+    std::string unitName_;
     unsigned int unitCount_;
     unsigned int unitLimit_;
     float spawnRadius_;
@@ -349,6 +369,21 @@ public:
     ~CSpendMana();
 private:
     unsigned int mana_;
+};
+
+/**
+ * log
+ */
+class CLog : public COperate {
+public:
+    virtual int Execute(CAbilityEntity* entity, CAbility* ability);
+    void SetText(std::string text) { text_ = text; }
+    
+    CLog();
+    CLog(std::string text);
+    ~CLog();
+private:
+    std::string text_;
 };
 
 

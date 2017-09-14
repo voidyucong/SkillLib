@@ -13,15 +13,15 @@
 #include <map>
 #include "SkillTypes.h"
 #include "CObject.hpp"
+#include "CTargetSearcher.hpp"
 
 class CEvent;
 class CAbilityValue;
 class CAbilityEntity;
 class CModifier;
-class CTargetSearcher;
 
 class CAbility : public CObject {
-    
+    typedef std::map<std::string, CAbilityValue*> SPECIAL_VALUE;
 public:
     CAbility();
     virtual ~CAbility();
@@ -38,82 +38,110 @@ public:
     
     
     // special value
-    void SetSpecialValue(const char* key, CAbilityValue* value);
-    CAbilityValue* GetLevelSpecialValueFor(const char* key, int level);
+    void AddSpecialValue(CAbilityValue* value, std::string name) { base.specials_[name] = value; }
+    const SPECIAL_VALUE& GetSpecial() { return base.specials_; }
+    CAbilityValue* GetSpecialValue(std::string name) { return base.specials_[name]; }
+    CAbilityValue* GetLevelSpecialValueFor(std::string key, int level);
     
-    void ModifyAttribute(ABILITY_ATTRIBUTES attribute, float value);
-    float GetModifyAttribute(ABILITY_ATTRIBUTES attribute);
+    void ModifyAttribute(MODIFIER_ATTRIBUTES attribute, float value);
+    float GetModifyAttribute(MODIFIER_ATTRIBUTES attribute);
     
     // modifier
-    void SetModifier(const char* name, CModifier* modifier);
-    CModifier* GetModifier(const char* name);
+    void SetModifier(std::string name, CModifier* modifier);
+    CModifier* GetModifier(std::string name);
     
     
     // set get
-    void SetBehavior(int behavior) { behavior_ = behavior; }
-    void SetDamageType(ABILITY_DAMAGE_TYPE type) { damageType_ = type; }
-    void SetIsIgnoreSpellImmunity(bool ignore) { isIgnoreSpellImmunity_ = ignore; }
-    void SetBeginLevel(int level) { beginLevel_ = level; }
-    void SetStepLevel(int step) { stepLevel_ = step; }
-    void SetTextureIconName(const char* name) { textureIconName_ = name; }
-    void SetTargetType(CTargetSearcher* searcher) { targetSearcher_ = searcher; }
-    void SetCastPoint(CAbilityValue* castPoint) { castPoint_ = castPoint; }
-    void SetCastRange(CAbilityValue* castRange) { castRange_ = castRange; }
-    void SetCastRangeBuffer(CAbilityValue* castRangeBuffer) { castRangeBuffer_ = castRangeBuffer; }
-    void SetDamage(CAbilityValue* damage) { damage_ = damage; }
-    void SetManaCost(CAbilityValue* manaCost) { manaCost_ = manaCost; }
-    void SetCrystalCost(CAbilityValue* crystalCost) { crystalCost_ = crystalCost; }
-    void SetHpCost(CAbilityValue* hpCost) { hpCost_ = hpCost; }
-    void SetChannelTime(CAbilityValue* channelTime) { channelTime_ = channelTime; }
-    void SetChannelManaCostPerSecond(CAbilityValue* cost) { channelledManaCostPerSecond_ = cost; }
+    void SetName(std::string name) { base.name_ = name; }
+    void SetBehavior(long behavior) { base.behavior_ = behavior; }
+    void SetDamageType(ABILITY_DAMAGE_TYPE type) { base.damageType_ = type; }
+    void SetIsIgnoreSpellImmunity(bool ignore) { base.isIgnoreSpellImmunity_ = ignore; }
+    void SetBeginLevel(int level) { base.beginLevel_ = level; }
+    void SetStepLevel(int step) { base.stepLevel_ = step; }
+    void SetTextureIconName(std::string name) { base.textureIconName_ = name; }
+    void SetCastPoint(CAbilityValue* castPoint) { base.castPoint_ = castPoint; }
+    void SetCastRange(CAbilityValue* castRange) { base.castRange_ = castRange; }
+    void SetCastRangeBuffer(CAbilityValue* castRangeBuffer) { base.castRangeBuffer_ = castRangeBuffer; }
+    void SetDamage(CAbilityValue* damage) { base.damage_ = damage; }
+    void SetManaCost(CAbilityValue* manaCost) { base.manaCost_ = manaCost; }
+    void SetCrystalCost(CAbilityValue* crystalCost) { base.crystalCost_ = crystalCost; }
+    void SetHpCost(CAbilityValue* hpCost) { base.hpCost_ = hpCost; }
+    void SetChannelTime(CAbilityValue* channelTime) { base.channelTime_ = channelTime; }
+    void SetChannelManaCostPerSecond(CAbilityValue* cost) { base.channelledManaCostPerSecond_ = cost; }
+    void SetBaseCooldown(CAbilityValue* value) { base.cooldown_ = value; }
     
-    int GetBehavior() { return behavior_; }
-    ABILITY_DAMAGE_TYPE GetDamageType() { return damageType_; }
-    bool GetIsIgnoreSpellImmunity() { return isIgnoreSpellImmunity_; }
-    int GetBeginLevel() { return beginLevel_; }
-    int GetStepLevel() { return stepLevel_; }
-    const char* GetTextureIconName() { return textureIconName_; }
-    CTargetSearcher* GetTargetSearcher() { return targetSearcher_; }
-    CAbilityValue* GetCastPoint() { return castPoint_; }
-    CAbilityValue* GetCastRange() { return castRange_; }
-    CAbilityValue* GetCastRangeBuffer() { return castRangeBuffer_; }
-    CAbilityValue* GetDamage() { return damage_; }
-    CAbilityValue* GetManaCost() { return manaCost_; }
-    CAbilityValue* GetCrystalCost() { return crystalCost_; }
-    CAbilityValue* GetHpCost() { return hpCost_; }
-    CAbilityValue* GetChannelTime() { return channelTime_; }
-    CAbilityValue* GetChannelManaCostPerSecond() { return channelledManaCostPerSecond_; }
+    
+    std::string GetName() { return base.name_.c_str(); }
+    long GetBehavior() { return base.behavior_; }
+    ABILITY_DAMAGE_TYPE GetDamageType() { return base.damageType_; }
+    bool GetIsIgnoreSpellImmunity() { return base.isIgnoreSpellImmunity_; }
+    int GetBeginLevel() { return base.beginLevel_; }
+    int GetStepLevel() { return base.stepLevel_; }
+    std::string GetTextureIconName() { return base.textureIconName_; }
+    CAbilityValue* GetCastPoint() { return base.castPoint_; }
+    CAbilityValue* GetCastRange() { return base.castRange_; }
+    CAbilityValue* GetCastRangeBuffer() { return base.castRangeBuffer_; }
+    CAbilityValue* GetDamage() { return base.damage_; }
+    CAbilityValue* GetManaCost() { return base.manaCost_; }
+    CAbilityValue* GetCrystalCost() { return base.crystalCost_; }
+    CAbilityValue* GetHpCost() { return base.hpCost_; }
+    CAbilityValue* GetChannelTime() { return base.channelTime_; }
+    CAbilityValue* GetChannelManaCostPerSecond() { return base.channelledManaCostPerSecond_; }
+    CAbilityValue* GetBaseCooldown() { return base.cooldown_; }
+    double GetCooldown() { return cooldown_; }
+    
+    void SetCenter(TARGET_CENTER center) { base.targetSearcher_->SetCenter(center); }
+    TARGET_CENTER GetCenter() { return base.targetSearcher_->GetCenter(); }
+    
+    void SetRadius(CAbilityValue* radius) { base.targetSearcher_->SetRadius(radius); }
+    CAbilityValue* GetRadius() { return base.targetSearcher_->GetRadius(); }
+    
+    void SetTeams(TARGET_TEAMS teams) { base.targetSearcher_->SetTeams(teams); }
+    TARGET_TEAMS GetTeams() { return base.targetSearcher_->GetTeams(); }
+    
+    void SetTypes(TARGET_TYPES types) { base.targetSearcher_->SetTypes(types); }
+    TARGET_TYPES GetTypes() { return base.targetSearcher_->GetTypes(); }
+    
+    void SetFlags(TARGET_FLAGS flags) { base.targetSearcher_->SetFlags(flags); }
+    TARGET_FLAGS GetFlags() { return base.targetSearcher_->GetFlags(); }
+    
+    void SetLevel(int level) { level_ = level; }
+    int GetLevel() { return level_; }
     
 
 private:
-    int behavior_;
-    ABILITY_DAMAGE_TYPE damageType_;  // 伤害类型
-    bool isIgnoreSpellImmunity_;      // 是否无视魔免
-    unsigned int beginLevel_;   // 初始等级
-    unsigned int stepLevel_;    // 每x级升一次
-    const char* textureIconName_;   // 图标
-    CTargetSearcher* targetSearcher_;   // 目标
-    CAbilityValue* castPoint_;  // 施法前摇时间
-    CAbilityValue* castRange_;  // 技能释放范围
-    CAbilityValue* castRangeBuffer_;    // 释放范围缓冲，当 castRange_ < 目标 < castRangeBuffer_也会自己攻击
-    CAbilityValue* damage_;     // 伤害
-    CAbilityValue* manaCost_;   // 法术消耗
-    CAbilityValue* crystalCost_;// 晶石消耗
-    CAbilityValue* hpCost_;     // 血量消耗
-    // 需要behavier包含 ABILITY_BEHAVIOR_CHANNELLED
-    CAbilityValue* channelTime_;    // 持续施法时间
-    CAbilityValue* channelledManaCostPerSecond_;    // 持续施法每秒的法术消耗
-    
-    std::map<EVENT_TYPE, CEvent*> events_;
-    std::map<const char*, CAbilityValue*> specials_;
+    struct {
+        std::string name_;
+        long behavior_;
+        ABILITY_DAMAGE_TYPE damageType_;  // 伤害类型
+        bool isIgnoreSpellImmunity_;      // 是否无视魔免
+        unsigned int beginLevel_;   // 初始等级
+        unsigned int stepLevel_;    // 每x级升一次
+        std::string textureIconName_;   // 图标
+        CTargetSearcher* targetSearcher_;   // 目标
+        CAbilityValue* castPoint_;  // 施法前摇时间
+        CAbilityValue* castRange_;  // 技能释放范围
+        CAbilityValue* castRangeBuffer_;    // 释放范围缓冲，当 castRange_ < 目标 < castRangeBuffer_也会自己攻击
+        CAbilityValue* cooldown_;
+        CAbilityValue* damage_;     // 伤害
+        CAbilityValue* manaCost_;   // 法术消耗
+        CAbilityValue* crystalCost_;// 晶石消耗
+        CAbilityValue* hpCost_;     // 血量消耗
+        // 需要behavier包含 ABILITY_BEHAVIOR_CHANNELLED
+        CAbilityValue* channelTime_;    // 持续施法时间
+        CAbilityValue* channelledManaCostPerSecond_;    // 持续施法每秒的法术消耗
+        
+        std::map<EVENT_TYPE, CEvent*> events_;
+        SPECIAL_VALUE specials_;
+    } base;
     
 private:
     int level_;
-    float cooldown_;
+    double cooldown_;
     float elapsed_;
     bool isValid_;
-    std::map<ABILITY_ATTRIBUTES, float> modifyAttributes_;
-    std::map<const char*, CModifier*> modifiers_;
+    std::map<MODIFIER_ATTRIBUTES, float> modifyAttributes_;
+    std::map<std::string, CModifier*> modifiers_;
 };
 
 #endif /* CAbility_hpp */

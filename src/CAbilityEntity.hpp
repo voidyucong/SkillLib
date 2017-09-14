@@ -38,7 +38,8 @@ public:
     // 执行指定的技能
     void ExecuteAbility(unsigned index);
     
-    
+    void SetTeamId(int teamId) { teamId_ = teamId; }
+    int GetTeamId() { return teamId_; }
     
     // attributes
     // ------------------------------------------------------
@@ -60,8 +61,11 @@ public:
     // buff
     void AddModifer(CModifier* modifer);
     void RemoveModifier(CModifier* modifier);
-    void ClearModifier(const char* name);
+    void ClearModifier(std::string name);
     
+    // type
+    void SetType(ENTITY_TYPE type) { type_ = type; }
+    ENTITY_TYPE GetType() { return type_; }
     
     // 获取最大值
     float GetHPMax(int level) {
@@ -87,17 +91,17 @@ private:
     // base data
     //----------------------------------------------------------------
     int level_;                         // 单位等级
-    const char* modelName_;             // 模型文件
+    std::string modelName_;             // 模型文件
     float modelScale_;                  // 模型缩放大小，
-    const char* minimapIconName_;       // 小地图图标
+    std::string minimapIconName_;       // 小地图图标
     float minimapIconSize_;             // 小地图图标尺寸
-    const char* tag_;                   // 单位标签，可以是任何名字字符，使用Lua代码GetUnitLabel()可以获取到这里的键值
+    std::string tag_;                   // 单位标签，可以是任何名字字符，使用Lua代码GetUnitLabel()可以获取到这里的键值
     bool isNeutralUnitType_;            // 是否是中立单位，相关Lua函数: IsNeutralUnitType()
     bool isAutoAttacks_;                // 是否自动攻击，0为不自动攻击
     
     float healthBarOffset_;                             // 血条高度，缺省值为 "-1"，意味着使用默认的模型高度
-    const char* vscript_;                               // 这会在单位诞生后立即装载一个脚本文件,使用诞生函数 ( entityKeyValues ) 可以启动一个计时器来进行任何操作
-    const char* projectileModelName_;                   // 抛射物模型
+    std::string vscript_;                               // 这会在单位诞生后立即装载一个脚本文件,使用诞生函数 ( entityKeyValues ) 可以启动一个计时器来进行任何操作
+    std::string projectileModelName_;                   // 抛射物模型
     
     CAbilityContainer* abilityContainer_;               // 技能
     
@@ -110,9 +114,10 @@ private:
 
     // 变化的数据
     //----------------------------------------------------------------
+    int teamId_;                                        // 队伍id
     std::map<ENTITY_ATTRIBUTES, float> modifyAttributes_;   // 变动属性
-    std::map<const char*, ModifierNode*> buffs_;
-    std::map<const char*, ModifierNode*> debuffs_;
+    std::map<std::string, ModifierNode*> buffs_;
+    std::map<std::string, ModifierNode*> debuffs_;
     
     // 边界设置
     //----------------------------------------------------------------

@@ -28,6 +28,7 @@ CAbilityEntity::~CAbilityEntity() {
         }
         delete iter->second;
     }
+    buffs_.clear();
     for (auto iter = debuffs_.begin(); iter != debuffs_.end(); iter++) {
         for (auto modifier : iter->second->sameModifiers) {
             delete modifier;
@@ -35,6 +36,8 @@ CAbilityEntity::~CAbilityEntity() {
         }
         delete iter->second;
     }
+    debuffs_.clear();
+    
 }
 
 void CAbilityEntity::update(float dt) {
@@ -101,7 +104,7 @@ float CAbilityEntity::GetCurrentAttribute(ENTITY_ATTRIBUTES attribute) {
 
 void CAbilityEntity::AddModifer(CModifier* modifier) {
     if (modifier) {
-        std::map<const char*, ModifierNode*>* buff = NULL;
+        std::map<std::string, ModifierNode*>* buff = NULL;
         if (modifier->IsBuff()) {
             buff = &buffs_;
         }
@@ -125,7 +128,7 @@ void CAbilityEntity::AddModifer(CModifier* modifier) {
 }
 
 void CAbilityEntity::RemoveModifier(CModifier* modifier) {
-    std::map<const char*, ModifierNode*>* buff = NULL;
+    std::map<std::string, ModifierNode*>* buff = NULL;
     if (modifier->IsBuff()) {
         buff = &buffs_;
     }
@@ -148,7 +151,7 @@ void CAbilityEntity::RemoveModifier(CModifier* modifier) {
 //    modifier = NULL;
 }
 
-void CAbilityEntity::ClearModifier(const char* name) {
+void CAbilityEntity::ClearModifier(std::string name) {
     if (buffs_.find(name) != buffs_.end()) {
         auto node = buffs_[name];
         for (auto modifier : node->sameModifiers) {

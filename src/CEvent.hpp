@@ -25,10 +25,10 @@ public:
     CEvent();
     CEvent(EVENT_TYPE type);
     virtual ~CEvent();
+    CEvent* Clone();
     
     void AddOperate(COperate* op);
-private:
-    EVENT_TYPE type_;
+protected:
     std::vector<COperate*> operators_;
 };
 

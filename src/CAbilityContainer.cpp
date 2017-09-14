@@ -19,6 +19,7 @@ CAbilityContainer::~CAbilityContainer() {
         delete a;
         a = 0;
     }
+    abilities_.clear();
 }
 
 void CAbilityContainer::SetAbility(CAbility* ability, int index) {

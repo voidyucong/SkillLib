@@ -15,28 +15,29 @@
 #include "CObject.hpp"
 
 class CAbilityEntity;
+class CAbilityValue;
+class CAbility;
 
 class CTargetSearcher : public CObject {
     struct {
-    public:
         TARGET_CENTER center_;
-        float radius_;      // 半径
         TARGET_TEAMS teams_;
         TARGET_TYPES types_;
         TARGET_FLAGS flags_;
+        CAbilityValue* radius_;      // 半径，默认NULL
     };
 public:
     CTargetSearcher();
     ~CTargetSearcher();
     
-    bool IsHaveTargets(CAbilityEntity* caster);
-    std::vector<CAbilityEntity*> GetTargets(CAbilityEntity* caster);
+    bool IsHaveTargets(CAbilityEntity* caster, CAbility* ability);
+    std::vector<CAbilityEntity*> GetTargets(CAbilityEntity* caster, CAbility* ability);
     
     void SetCenter(TARGET_CENTER center) { center_ = center; }
     TARGET_CENTER GetCenter() { return center_; }
     
-    void SetRadius(float radius) { radius_ = radius; }
-    float GetRadius() { return radius_; }
+    void SetRadius(CAbilityValue* radius) { if (radius_) { delete radius_; radius_ = 0; } radius_ = radius; }
+    CAbilityValue* GetRadius() { return radius_; }
     
     void SetTeams(TARGET_TEAMS teams) { teams_ = teams; }
     TARGET_TEAMS GetTeams() { return teams_; }
@@ -46,6 +47,9 @@ public:
     
     void SetFlags(TARGET_FLAGS flags) { flags_ = flags; }
     TARGET_FLAGS GetFlags() { return flags_; }
+    
+private:
+    std::vector<CAbilityEntity*> targets_;
 };
 
 #endif /* CTargetSearcher_hpp */

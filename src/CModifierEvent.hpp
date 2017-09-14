@@ -16,12 +16,11 @@ class COperate;
 
 class CModifierEvent : public CEvent {
 public:
-    virtual int Execute();
+    virtual int Execute(CAbilityEntity *entity, CAbility *ability);
+    CModifierEvent* Clone();
     
     CModifierEvent();
     virtual ~CModifierEvent();
-private:
-    std::vector<COperate*> operators_;
 };
 
 #endif /* CModifierEvent_hpp */

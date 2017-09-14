@@ -9,8 +9,6 @@
 #ifndef CSchedule_hpp
 #define CSchedule_hpp
 
-#include <stdio.h>
-#include <iostream>
 #include "CObject.hpp"
 
 class CSchedule final {

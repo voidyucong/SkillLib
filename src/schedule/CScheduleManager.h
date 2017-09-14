@@ -10,7 +10,6 @@
 #define CScheduleManager_hpp
 
 #include <map>
-#include <sys/time.h>
 #include "CSchedule.h"
 
 struct ScheduleNode {
@@ -33,7 +32,7 @@ public:
     void RemoveSchedule(CObject* target);
 private:
     std::map<CObject*, ScheduleNode*> schedules_;
-    struct timeval lastTime_;
+    double lastTime_;
 };
 
 
