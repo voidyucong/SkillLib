@@ -98,6 +98,7 @@ namespace SKB {
         {"TARGET_CENTER_ATTACKER", 4},     // 攻击者（单体、群体）
         {"TARGET_CENTER_PROJECTILE", 5},   // 抛射物（群体）
         {"TARGET_CENTER_UNIT", 6},         // 单位（单体、群体）
+        {"TARGET_CENTER_NONE", 7},
         
         {"TARGET_TEAM_BOTH", 1},           // 全部
         {"TARGET_TEAM_ENEMY", 2},          // 敌方
@@ -184,6 +185,9 @@ namespace SKB {
         {"ENTITY_TYPE_BUILDING", 5},       // 建筑
         {"ENTITY_TYPE_CREEP", 6},          // 野怪
     };
-    
+ 
+    int GetEnumByString(std::string name) {
+        return g_skillTypeMapping[name];
+    }
 }
 #endif /* SkillTypesMapping_h */

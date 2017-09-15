@@ -13,6 +13,7 @@
 #include "CAbilityEntity.hpp"
 #include "CScheduleManager.h"
 #include "CTargetSearcher.hpp"
+#include "CModifierData.hpp"
 #include "TimeUtil.h"
 
 CAbility::CAbility()
@@ -22,6 +23,16 @@ CAbility::CAbility()
 , isValid_(true)
 {
     base.targetSearcher_ = new CTargetSearcher();
+    base.castPoint_ = NULL;
+    base.castRange_ = NULL;
+    base.castRangeBuffer_ = NULL;
+    base.cooldown_ = NULL;
+    base.damage_ = NULL;
+    base.manaCost_ = NULL;
+    base.crystalCost_ = NULL;
+    base.hpCost_ = NULL;
+    base.channelTime_ = NULL;
+    base.channelledManaCostPerSecond_ = NULL;
 }
 
 
@@ -39,7 +50,7 @@ CAbility::~CAbility() {
     base.specials_.clear();
 }
 
-void CAbility::update(float dt) {
+void CAbility::Update(float dt) {
     elapsed_ += dt;
     if (base.channelTime_) {
         float channelTime = 0.f;
@@ -57,7 +68,7 @@ void CAbility::Cast(CAbilityEntity* entity) {
         return;
     }
     // check cd
-    double now = SKB::GetSeconds();
+    double now = SKB::TimeUtil::GetSeconds();
     std::cout << "cooldown:" << std::fixed << cooldown_ << " now:" << std::fixed << now << std::endl;
     if (cooldown_ > now) {
         std::cout << "冷却中 " << cooldown_ << std::endl;
@@ -65,7 +76,7 @@ void CAbility::Cast(CAbilityEntity* entity) {
     }
     
     // target
-    if ((base.behavior_ & ABILITY_BEHAVIOR_UNIT_TARGET) && !base.targetSearcher_->IsHaveTargets(entity, this)) {
+    if ((base.behavior_ & ABILITY_BEHAVIOR_UNIT_TARGET) && !base.targetSearcher_->IsHaveTargets(entity)) {
         std::cout << "技能需要目标才能释放" << std::endl;
         return;
     }
@@ -109,7 +120,7 @@ void CAbility::Cast(CAbilityEntity* entity) {
                 * (1 - this->GetModifyAttribute(MODIFIER_ATTRIBUTE_COOLDOWN_GAIN_PERCENT))
                 - this->GetModifyAttribute(MODIFIER_ATTRIBUTE_COOLDOWN_GAIN);
     
-    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbility::update), 1/60);
+    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbility::Update), 1/60);
     this->ExecutEvent(EVENT_TYPE_ON_SPELL_START, entity);
 }
 
@@ -150,12 +161,12 @@ float CAbility::GetModifyAttribute(MODIFIER_ATTRIBUTES attribute) {
 }
 
 // modifier
-void CAbility::SetModifier(std::string name, CModifier* modifier) {
-    modifiers_[name] = modifier;
+void CAbility::SetModifierData(std::string name, CModifierData* modifier) {
+    modifierData_[name] = modifier;
 }
 
-CModifier* CAbility::GetModifier(std::string name) {
-    return modifiers_[name];
+CModifierData* CAbility::GetModifierData(std::string name) {
+    return modifierData_[name];
 }
 
 

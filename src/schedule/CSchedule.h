@@ -19,7 +19,7 @@ public:
     
     void AddCallback(CObject* target, CObject::CALLBACK callback);
     
-    void update(float dt);
+    void Update(float dt);
 private:
     float interval_;
     float elapsed_;

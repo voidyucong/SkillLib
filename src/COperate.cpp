@@ -12,7 +12,9 @@
 #include "CAbility.hpp"
 #include "CAbilityEntity.hpp"
 #include "CModifier.h"
+#include "CModifierData.hpp"
 #include "CScheduleManager.h"
+#include "CRunScprite.hpp"
 
 // COperate
 COperate::COperate()
@@ -35,15 +37,26 @@ void COperate::Update(float dt) {
 }
 
 COperate* COperate::Clone() {
-    COperate* operate = new COperate();
+    COperate* operate = CreateCloneInstance();
     operate->targetSearcher_->SetCenter(targetSearcher_->GetCenter());
     operate->targetSearcher_->SetTeams(targetSearcher_->GetTeams());
     operate->targetSearcher_->SetTypes(targetSearcher_->GetTypes());
     operate->targetSearcher_->SetFlags(targetSearcher_->GetFlags());
     operate->targetSearcher_->SetRadius(targetSearcher_->GetRadius());
+    CloneProperties(operate);
     return operate;
 }
 
+COperate* COperate::CreateCloneInstance() {
+    return new COperate();
+}
+
+void COperate::CloneProperties(COperate* operate) {
+    
+}
+
+void COperate::SetSingle(TARGET_CENTER single) { targetSearcher_->SetSingle(single); }
+TARGET_CENTER COperate::GetSingle() { return targetSearcher_->GetSingle(); }
 void COperate::SetCenter(TARGET_CENTER center) { targetSearcher_->SetCenter(center); }
 TARGET_CENTER COperate::GetCenter() { return targetSearcher_->GetCenter(); }
 void COperate::SetRadius(CAbilityValue* radius) { targetSearcher_->SetRadius(radius); }
@@ -56,135 +69,136 @@ void COperate::SetFlags(TARGET_FLAGS flags) { targetSearcher_->SetFlags(flags); 
 TARGET_FLAGS COperate::GetFlags() { return targetSearcher_->GetFlags(); }
 
 #pragma mark -
-#pragma mark COperateAddAbility
-// COperateAddAbility
-COperateAddAbility::COperateAddAbility()
+#pragma mark COpAddAbility
+// COpAddAbility
+COpAddAbility::COpAddAbility()
 : abilityName_(0)
 {
     
 }
 
-COperateAddAbility::~COperateAddAbility() {
+COpAddAbility::~COpAddAbility() {
     
 }
 
-int COperateAddAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpAddAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CActOnTargets
-// CActOnTargets
-CActOnTargets::CActOnTargets()
+#pragma mark COpActOnTargets
+// COpActOnTargets
+COpActOnTargets::COpActOnTargets()
 : modelName_(0)
 {
     
 }
 
-CActOnTargets::~CActOnTargets() {
+COpActOnTargets::~COpActOnTargets() {
     
 }
 
-int CActOnTargets::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpActOnTargets::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CApplyModifier
-// CApplyModifier
-CApplyModifier::CApplyModifier()
-: CApplyModifier(0)
+#pragma mark COpApplyModifier
+// COpApplyModifier
+COpApplyModifier::COpApplyModifier()
+: COpApplyModifier(0)
 {
     
 }
 
-CApplyModifier::CApplyModifier(std::string modifierName)
+COpApplyModifier::COpApplyModifier(std::string modifierName)
 : modifierName_(modifierName)
 {
     
 }
 
-CApplyModifier::~CApplyModifier() {
+COpApplyModifier::~COpApplyModifier() {
     
 }
 
-int CApplyModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
-    auto targets = targetSearcher_->GetTargets(entity, ability);
-    auto modifier = ability->GetModifier(modifierName_);
-    assert(modifier);
+int COpApplyModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
+    auto targets = targetSearcher_->GetTargets(entity);
+    auto modifierData = ability->GetModifierData(modifierName_);
+    assert(modifierData);
     for (auto target : targets) {
-        target->AddModifer(modifier->Clone());
-        
-        modifier->ExecuteEvent(MODIFIER_EVENT_ON_CREATED, entity, ability);
+        CModifier* modifier = new CModifier();
+        target->AddModifer(modifier);
+        modifier->SetModifierData(modifierData->Clone());
+        modifier->Activate(entity, ability);
     }
     
     return 1;
 }
 
 #pragma mark -
-#pragma mark CAttachEffect
-// CAttachEffect
-CAttachEffect::CAttachEffect()
+#pragma mark COpAttachEffect
+// COpAttachEffect
+COpAttachEffect::COpAttachEffect()
 : attachType_(0)
 {
     
 }
 
-CAttachEffect::~CAttachEffect() {
+COpAttachEffect::~COpAttachEffect() {
     
 }
 
-int CAttachEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpAttachEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CBlink
-// CBlink
-CBlink::CBlink() {
+#pragma mark COpBlink
+// COpBlink
+COpBlink::COpBlink() {
     
 }
 
-CBlink::~CBlink() {
+COpBlink::~COpBlink() {
     
 }
 
-int CBlink::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpBlink::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CCreateThinker
-// CCreateThinker
-CCreateThinker::CCreateThinker()
-: CCreateThinker(0, -1)
+#pragma mark COpCreateThinker
+// COpCreateThinker
+COpCreateThinker::COpCreateThinker()
+: COpCreateThinker(0, -1)
 {
 }
 
-CCreateThinker::CCreateThinker(float interval, float duration)
+COpCreateThinker::COpCreateThinker(float interval, float duration)
 : interval_(interval)
 , duration_(duration)
 {
 }
 
-CCreateThinker::~CCreateThinker() {
+COpCreateThinker::~COpCreateThinker() {
     CScheduleManager::getInstance()->RemoveSchedule(this);
 }
 
-int CCreateThinker::Execute(CAbilityEntity* entity, CAbility* ability) {
-    std::cout << "CCreateThinker Execute" << std::endl;
-    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CCreateThinker::Update), interval_);
+int COpCreateThinker::Execute(CAbilityEntity* entity, CAbility* ability) {
+    std::cout << "COpCreateThinker Execute" << std::endl;
+    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&COpCreateThinker::Update), interval_);
     return 1;
 }
 
-void CCreateThinker::Update(float dt) {
-    std::cout << "CCreateThinker update" << std::endl;
+void COpCreateThinker::Update(float dt) {
+    std::cout << "COpCreateThinker Update" << std::endl;
 }
 
 #pragma mark -
-#pragma mark CDamage
-// CDamage
-CDamage::CDamage()
+#pragma mark COpDamage
+// COpDamage
+COpDamage::COpDamage()
 : damageType_(ABILITY_DAMAGE_TYPE_NONE)
 , damage_(0)
 , currentHealthPercentBasedDamage_(0)
@@ -193,140 +207,156 @@ CDamage::CDamage()
     
 }
 
-CDamage::~CDamage() {
+COpDamage::~COpDamage() {
     
 }
 
-int CDamage::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpDamage::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CDelayedAction
-// CDelayedAction
-CDelayedAction::CDelayedAction()
+#pragma mark COpDelayedAction
+// COpDelayedAction
+COpDelayedAction::COpDelayedAction()
 : delay_(0.f)
 , action_(0)
 {
     
 }
 
-CDelayedAction::~CDelayedAction() {
+COpDelayedAction::~COpDelayedAction() {
     
 }
 
-int CDelayedAction::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpDelayedAction::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CFireEffect
-// CFireEffect
-CFireEffect::CFireEffect()
+#pragma mark COpFireEffect
+// COpFireEffect
+COpFireEffect::COpFireEffect()
 : effectName_("")
 , attackType_(0)
 {
     
 }
 
-CFireEffect::~CFireEffect() {
+COpFireEffect::~COpFireEffect() {
     
 }
 
-int CFireEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
-    std::cout << "CFireEffect Execute" << std::endl;
+int COpFireEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
+    std::cout << "COpFireEffect Execute" << std::endl;
     return 1;
 }
 
 #pragma mark -
-#pragma mark CFireSound
-// CFireSound
-CFireSound::CFireSound()
+#pragma mark COpFireSound
+// COpFireSound
+COpFireSound::COpFireSound()
 : effectName_("")
 {
     
 }
 
-CFireSound::~CFireSound() {
+COpFireSound::~COpFireSound() {
     
 }
 
-int CFireSound::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpFireSound::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CHeal
-// CHeal
-CHeal::CHeal()
-: healAmount_(0)
+#pragma mark COpHeal
+// COpHeal
+COpHeal::COpHeal()
+: COpHeal(0)
 {
     
 }
 
-CHeal::~CHeal() {
+COpHeal::COpHeal(float amount)
+: healAmount_(amount)
+{
     
 }
 
-int CHeal::Execute(CAbilityEntity* entity, CAbility* ability) {
+COpHeal::~COpHeal() {
+    
+}
+
+int COpHeal::Execute(CAbilityEntity* entity, CAbility* ability) {
+    std::cout << "Heal " << healAmount_ << std::endl;
     return 1;
 }
 
+COperate* COpHeal::CreateCloneInstance() {
+    return new COpHeal();
+}
+
+void COpHeal::CloneProperties(COperate* operate) {
+    COpHeal* op = dynamic_cast<COpHeal*>(operate);
+    op->SetHealAmount(healAmount_);
+}
+
 #pragma mark -
-#pragma mark CKnockback
-// CKnockback
-CKnockback::CKnockback()
+#pragma mark COpKnockback
+// COpKnockback
+COpKnockback::COpKnockback()
 : distance_(0)
 , height_(0)
 {
     
 }
-CKnockback::~CKnockback() {
+COpKnockback::~COpKnockback() {
     
 }
 
-int CKnockback::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpKnockback::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CLevelUpAbility
-// CLevelUpAbility
-CLevelUpAbility::CLevelUpAbility()
+#pragma mark COpLevelUpAbility
+// COpLevelUpAbility
+COpLevelUpAbility::COpLevelUpAbility()
 : abilityName_(0)
 {
     
 }
 
-CLevelUpAbility::~CLevelUpAbility() {
+COpLevelUpAbility::~COpLevelUpAbility() {
     
 }
 
-int CLevelUpAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLevelUpAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CLifesteal
-// CLifesteal
-CLifesteal::CLifesteal()
+#pragma mark COpLifesteal
+// COpLifesteal
+COpLifesteal::COpLifesteal()
 : lifestealPercent_(0.f)
 {
     
 }
 
-CLifesteal::~CLifesteal() {
+COpLifesteal::~COpLifesteal() {
     
 }
 
-int CLifesteal::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLifesteal::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CLinearProjectile
-// CLinearProjectile
-CLinearProjectile::CLinearProjectile()
+#pragma mark COpLinearProjectile
+// COpLinearProjectile
+COpLinearProjectile::COpLinearProjectile()
 : effectName_(0)
 , moveSpeed_(0.f)
 , startPosition_(0)
@@ -336,18 +366,18 @@ CLinearProjectile::CLinearProjectile()
     
 }
 
-CLinearProjectile::~CLinearProjectile() {
+COpLinearProjectile::~COpLinearProjectile() {
     
 }
 
-int CLinearProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLinearProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CTrackingProjectile
-// CTrackingProjectile
-CTrackingProjectile::CTrackingProjectile()
+#pragma mark COpTrackingProjectile
+// COpTrackingProjectile
+COpTrackingProjectile::COpTrackingProjectile()
 : effectName_(0)
 , moveSpeed_(0.f)
 , startPosition_(0)
@@ -357,18 +387,18 @@ CTrackingProjectile::CTrackingProjectile()
     
 }
 
-CTrackingProjectile::~CTrackingProjectile() {
+COpTrackingProjectile::~COpTrackingProjectile() {
     
 }
 
-int CTrackingProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpTrackingProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CRandom
-// CRandom
-CRandom::CRandom()
+#pragma mark COpRandom
+// COpRandom
+COpRandom::COpRandom()
 : chance_(0.f)
 , onSuccess_(0)
 , onFailed_(0)
@@ -376,70 +406,70 @@ CRandom::CRandom()
     
 }
 
-CRandom::~CRandom() {
+COpRandom::~COpRandom() {
     
 }
 
-int CRandom::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRandom::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CRemoveAbility
-// CRemoveAbility
-CRemoveAbility::CRemoveAbility()
+#pragma mark COpRemoveAbility
+// COpRemoveAbility
+COpRemoveAbility::COpRemoveAbility()
 : abilityName_(0)
 {
     
 }
 
-CRemoveAbility::~CRemoveAbility() {
+COpRemoveAbility::~COpRemoveAbility() {
     
 }
 
-int CRemoveAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRemoveAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CRemoveModifier
-// CRemoveModifier
-CRemoveModifier::CRemoveModifier()
+#pragma mark COpRemoveModifier
+// COpRemoveModifier
+COpRemoveModifier::COpRemoveModifier()
 : modifierName_(0)
 {
     
 }
 
-CRemoveModifier::~CRemoveModifier() {
+COpRemoveModifier::~COpRemoveModifier() {
     
 }
 
-int CRemoveModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRemoveModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CRunScript
-// CRunScript
-CRunScript::CRunScript()
+#pragma mark COpRunScript
+// COpRunScript
+COpRunScript::COpRunScript()
 : scriptFile_(0)
 , function_(0)
 {
     
 }
 
-CRunScript::~CRunScript() {
+COpRunScript::~COpRunScript() {
     
 }
 
-int CRunScript::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRunScript::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CSpawnUnit
-// CSpawnUnit
-CSpawnUnit::CSpawnUnit()
+#pragma mark COpSpawnUnit
+// COpSpawnUnit
+COpSpawnUnit::COpSpawnUnit()
 : unitName_(0)
 , unitCount_(0)
 , unitLimit_(0)
@@ -449,56 +479,65 @@ CSpawnUnit::CSpawnUnit()
     
 }
 
-CSpawnUnit::~CSpawnUnit() {
+COpSpawnUnit::~COpSpawnUnit() {
     
 }
 
-int CSpawnUnit::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpSpawnUnit::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CStun
-// CStun
-CStun::CStun()
+#pragma mark COpStun
+// COpStun
+COpStun::COpStun()
 : duration_(0.f)
 {
     
 }
 
-CStun::~CStun() {
+COpStun::~COpStun() {
     
 }
 
-int CStun::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpStun::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CSpendMana
-// CSpendMana
-CSpendMana::CSpendMana()
+#pragma mark COpSpendMana
+// COpSpendMana
+COpSpendMana::COpSpendMana()
 : mana_(0.f)
 {
     
 }
 
-CSpendMana::~CSpendMana() {
+COpSpendMana::~COpSpendMana() {
     
 }
 
-int CSpendMana::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpSpendMana::Execute(CAbilityEntity* entity, CAbility* ability) {
     return 1;
 }
 
 #pragma mark -
-#pragma mark CLog
-// CLog
-CLog::CLog() {}
-CLog::CLog(std::string text): text_(text) {}
-CLog::~CLog() {}
+#pragma mark COpLog
+// COpLog
+COpLog::COpLog() {}
+COpLog::COpLog(std::string text): text_(text) {}
+COpLog::~COpLog() {}
 
-int CLog::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLog::Execute(CAbilityEntity* entity, CAbility* ability) {
     std::cout << "Operate:" << text_ << std::endl;
     return 1;
+}
+
+COperate* COpLog::CreateCloneInstance() {
+    return new COpLog();
+}
+void COpLog::CloneProperties(COperate* operate) {
+    COpLog* log = dynamic_cast<COpLog*>(operate);
+    log->SetText(text_);
+    
 }

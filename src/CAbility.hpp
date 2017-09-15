@@ -19,15 +19,15 @@ class CEvent;
 class CAbilityValue;
 class CAbilityEntity;
 class CModifier;
+class CModifierData;
 
 class CAbility : public CObject {
     typedef std::map<std::string, CAbilityValue*> SPECIAL_VALUE;
 public:
     CAbility();
     virtual ~CAbility();
-    
+    void Update(float dt);
     void Cast(CAbilityEntity* entity);
-    void update(float dt);
     
     // attributes
     
@@ -47,8 +47,8 @@ public:
     float GetModifyAttribute(MODIFIER_ATTRIBUTES attribute);
     
     // modifier
-    void SetModifier(std::string name, CModifier* modifier);
-    CModifier* GetModifier(std::string name);
+    void SetModifierData(std::string name, CModifierData* modifier);
+    CModifierData* GetModifierData(std::string name);
     
     
     // set get
@@ -58,8 +58,10 @@ public:
     void SetIsIgnoreSpellImmunity(bool ignore) { base.isIgnoreSpellImmunity_ = ignore; }
     void SetBeginLevel(int level) { base.beginLevel_ = level; }
     void SetStepLevel(int step) { base.stepLevel_ = step; }
+    void SetMaxLevel(int max) { base.maxLevel_ = max; }
     void SetTextureIconName(std::string name) { base.textureIconName_ = name; }
     void SetCastPoint(CAbilityValue* castPoint) { base.castPoint_ = castPoint; }
+    void SetCastWidth(CAbilityValue* castWidth) { base.castWidth_ = castWidth; }
     void SetCastRange(CAbilityValue* castRange) { base.castRange_ = castRange; }
     void SetCastRangeBuffer(CAbilityValue* castRangeBuffer) { base.castRangeBuffer_ = castRangeBuffer; }
     void SetDamage(CAbilityValue* damage) { base.damage_ = damage; }
@@ -77,8 +79,10 @@ public:
     bool GetIsIgnoreSpellImmunity() { return base.isIgnoreSpellImmunity_; }
     int GetBeginLevel() { return base.beginLevel_; }
     int GetStepLevel() { return base.stepLevel_; }
+    int GetMaxLevel() { return base.maxLevel_; }
     std::string GetTextureIconName() { return base.textureIconName_; }
     CAbilityValue* GetCastPoint() { return base.castPoint_; }
+    CAbilityValue* GetCastWidth() { return base.castWidth_; }
     CAbilityValue* GetCastRange() { return base.castRange_; }
     CAbilityValue* GetCastRangeBuffer() { return base.castRangeBuffer_; }
     CAbilityValue* GetDamage() { return base.damage_; }
@@ -117,9 +121,11 @@ private:
         bool isIgnoreSpellImmunity_;      // 是否无视魔免
         unsigned int beginLevel_;   // 初始等级
         unsigned int stepLevel_;    // 每x级升一次
+        unsigned int maxLevel_;     // 最大等级
         std::string textureIconName_;   // 图标
         CTargetSearcher* targetSearcher_;   // 目标
         CAbilityValue* castPoint_;  // 施法前摇时间
+        CAbilityValue* castWidth_;  // 技能宽度
         CAbilityValue* castRange_;  // 技能释放范围
         CAbilityValue* castRangeBuffer_;    // 释放范围缓冲，当 castRange_ < 目标 < castRangeBuffer_也会自己攻击
         CAbilityValue* cooldown_;
@@ -141,7 +147,7 @@ private:
     float elapsed_;
     bool isValid_;
     std::map<MODIFIER_ATTRIBUTES, float> modifyAttributes_;
-    std::map<std::string, CModifier*> modifiers_;
+    std::map<std::string, CModifierData*> modifierData_;
 };
 
 #endif /* CAbility_hpp */

@@ -40,8 +40,20 @@ CAbilityEntity::~CAbilityEntity() {
     
 }
 
-void CAbilityEntity::update(float dt) {
-    
+void CAbilityEntity::Update(float dt) {
+    // 移除无效的buff
+    for (auto iter = buffs_.begin(); iter != buffs_.end(); ++iter) {
+        for (auto miter = iter->second->sameModifiers.begin(); miter != iter->second->sameModifiers.end();) {
+            auto modifier = *miter;
+            if (modifier->IsWaitDestroy()) {
+                iter->second->sameModifiers.erase(miter);
+                modifier->Destroy();
+            }
+            else {
+                ++miter;
+            }
+        }
+    }
 }
 
 void CAbilityEntity::Destroy() {
@@ -49,7 +61,7 @@ void CAbilityEntity::Destroy() {
 }
 
 void CAbilityEntity::Execute() {
-    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbilityEntity::update), 1);
+    CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbilityEntity::Update), 1.f/60);
 }
 
 void CAbilityEntity::ExecuteAbility(unsigned index) {

@@ -14,8 +14,8 @@
 
 CTargetSearcher::CTargetSearcher()
 : center_(TARGET_CENTER_CASTER)
-, teams_(TARGET_TEAM_BOTH)
-, types_(TARGET_TYPE_ALL)
+, teams_(TARGET_TEAM_NONE)
+, types_(TARGET_TYPE_NONE)
 , flags_(TARGET_FLAG_NONE)
 , radius_(0)
 {
@@ -25,19 +25,35 @@ CTargetSearcher::~CTargetSearcher() {
     targets_.clear();
 }
 
-bool CTargetSearcher::IsHaveTargets(CAbilityEntity* caster, CAbility* ability) {
-    return GetTargets(caster, ability).size() > 0;
+bool CTargetSearcher::IsHaveTargets(CAbilityEntity* caster) {
+    return GetTargets(caster).size() > 0;
 }
 
-std::vector<CAbilityEntity*> CTargetSearcher::GetTargets(CAbilityEntity* caster, CAbility* ability) {
-    if (teams_ == TARGET_TEAM_NONE) return {};
+std::vector<CAbilityEntity*> CTargetSearcher::GetTargets(CAbilityEntity* caster) {
     std::vector<CAbilityEntity*> team;
     
     // radius
-    if (radius_) {  // 群体
+    if (radius_ == NULL) {  // 不用搜索
+        switch (single_) {
+            case TARGET_CENTER_CASTER:
+                team.push_back(caster);
+                return team;
+            case TARGET_CENTER_TARGET:
+                break;
+            case TARGET_CENTER_POINT:
+                break;
+            case TARGET_CENTER_ATTACKER:
+                break;
+            case TARGET_CENTER_PROJECTILE:
+                break;
+            default:
+                break;
+        }
+    }
+    else {  // 单体
         float radius = 0.f;
         if (radius_->IsArray()) {
-            radius = radius_->GetArrayValueByIndex(ability->GetLevel())->GetValue<float>();
+            radius = radius_->GetArrayValueByIndex(0)->GetValue<float>();
         }
         else {
             radius = radius_->GetValue<float>();
@@ -53,24 +69,6 @@ std::vector<CAbilityEntity*> CTargetSearcher::GetTargets(CAbilityEntity* caster,
                 break;
             case TARGET_TEAM_ENEMY:
                 team = CAbilityEntityManager::getInstance()->GetOtherTeam(caster->GetTeamId());
-                break;
-            default:
-                break;
-        }
-    }
-    else {  // 单体
-        // center
-        switch (center_) {
-            case TARGET_CENTER_CASTER:
-                team.push_back(caster);
-                break;
-            case TARGET_CENTER_TARGET:
-                break;
-            case TARGET_CENTER_POINT:
-                break;
-            case TARGET_CENTER_ATTACKER:
-                break;
-            case TARGET_CENTER_PROJECTILE:
                 break;
             default:
                 break;

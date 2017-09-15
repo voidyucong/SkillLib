@@ -11,34 +11,73 @@
 #include "COperate.hpp"
 #include "CAbility.hpp"
 #include "CAbilityEntity.hpp"
+#include "CScheduleManager.h"
+#include "TimeUtil.h"
 
 CModifier::CModifier()
+: entity_(0)
+, ability_(0)
+, modifierData_(0)
+, spawnTime_(0.f)
+, isWaitDestroy_(false)
 {
     
 }
 
 CModifier::~CModifier() {
-    for (auto iter = base.events_.begin(); iter != base.events_.end(); iter++) {
+    for (auto iter = modifierData_->events_.begin(); iter != modifierData_->events_.end(); iter++) {
         delete iter->second;
     }
-    base.events_.clear();
-    for (auto operate : base.operators_) {
+    modifierData_->events_.clear();
+    for (auto operate : modifierData_->operators_) {
         delete operate;
         operate = NULL;
     }
-    base.operators_.clear();
+    modifierData_->operators_.clear();
+    delete modifierData_;
+    modifierData_ = 0;
+}
+
+void CModifier::Activate() {
+    spawnTime_ = SKB::TimeUtil::GetSeconds();
+    isWaitDestroy_ = false;
+    if (entity_ && ability_) {
+        ExecuteEvent(MODIFIER_EVENT_ON_CREATED, entity_, ability_);
+        
+        // 处理properties
+        AddEntityProperty();
+        
+        if (modifierData_->GetThinkInterval() > 0)
+            CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CModifier::Update), modifierData_->GetThinkInterval());
+    }
+}
+
+void CModifier::Activate(CAbilityEntity* entity, CAbility* ability) {
+    SetEntity(entity);
+    SetAbility(ability);
+    Activate();
 }
 
 void CModifier::Destroy() {
+    ExecuteEvent(MODIFIER_EVENT_ON_DESTROY, entity_, ability_);
+    spawnTime_ = 0.f;
+    isWaitDestroy_ = false;
+    RemoveEntityProperty();
+    CScheduleManager::getInstance()->RemoveSchedule(this);
     delete this;
 }
 
-void CModifier::SetModifierEvent(MODIFIER_EVENT_TYPE type, CModifierEvent* event) {
-    base.events_[type] = event;
+void CModifier::Update(float dt) {
+//    std::cout << "CModifier Update" << std::endl;
+    ExecuteEvent(MODIFIER_EVENT_ON_INTERVAL, entity_, ability_);
+    if (spawnTime_ + modifierData_->GetDuration() < SKB::TimeUtil::GetSeconds()) {
+        isWaitDestroy_ = true;  // 标记可销毁，由拥有的entity删除
+    }
 }
 
+
 int CModifier::ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *entity, CAbility *ability) {
-    CModifierEvent* event = this->GetModifierEvent(type);
+    CModifierEvent* event = modifierData_->GetModifierEvent(type);
     if (event) {
         return event->Execute(entity, ability);
     }
@@ -46,37 +85,22 @@ int CModifier::ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *entity, CA
 }
 
 void CModifier::ExecuteOperate(CAbilityEntity* entity, CAbility* ability) {
-    for (COperate* operate : base.operators_) {
+    for (COperate* operate : modifierData_->operators_) {
         operate->Execute(entity, ability);
     }
 }
 
-CModifier* CModifier::Clone() {
-    CModifier* modifier = new CModifier();
-    modifier->base.isMulti_ = base.isMulti_;      // 是否可叠加
-    modifier->base.maxMulti_ = base.maxMulti_;    // 最高叠加层数
-    modifier->base.duration_ = base.duration_;    // 持续时间
-    modifier->base.isPassive_ = base.isPassive_;    // 是否被动
-    modifier->base.isHidden_ = base.isHidden_;     // 是否隐藏图标
-    modifier->base.isBuff_ = base.isBuff_;       // 是否正面buff
-    modifier->base.isDebuff_ = base.isDebuff_;     // 是否负面buff
-    modifier->base.isPurgable_ = base.isPurgable_;   // 是否可被清除
-    modifier->base.thinkInterval_ = base.thinkInterval_;       // 间隔
-    modifier->base.textureName_ = base.textureName_;   // 图标名称
-    modifier->base.effectName_ = base.effectName_;    // 特效名
-    modifier->base.modelName_ = base.modelName_;     // 模型名，默认空
-    modifier->base.name_ = base.name_;
-    
-    // 事件集合
-    for (auto iter = base.events_.begin(); iter != base.events_.end(); ++iter) {
-        modifier->SetModifierEvent(iter->first, iter->second->Clone());
+void CModifier::AddEntityProperty() {
+    for (auto iter = modifierData_->properties_.begin(); iter != modifierData_->properties_.end(); ++iter) {
+        entity_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, iter->second);
+        std::cout << "AddEntityProperty " << iter->first << " add value: " << iter->second << std::endl;
     }
-    // 操作集合
-    for (auto iter = base.operators_.begin(); iter != base.operators_.end(); ++iter) {
-        modifier->AddOperate((*iter)->Clone());
-    }
-    
-    modifier->base.properties_ = base.properties_;
-    
-    return modifier;
 }
+
+void CModifier::RemoveEntityProperty() {
+    for (auto iter = modifierData_->properties_.begin(); iter != modifierData_->properties_.end(); ++iter) {
+        entity_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, -iter->second);
+        std::cout << "RemoveEntityProperty " << iter->first << " remove value: " << iter->second << std::endl;
+    }
+}
+

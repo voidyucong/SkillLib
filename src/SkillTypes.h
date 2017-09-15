@@ -105,6 +105,7 @@ enum TARGET_CENTER {
     TARGET_CENTER_ATTACKER,     // 攻击者（单体、群体）
     TARGET_CENTER_PROJECTILE,   // 抛射物（群体）
     TARGET_CENTER_UNIT,         // 单位（单体、群体）
+    TARGET_CENTER_NONE,
 };
 
 enum TARGET_TEAMS {

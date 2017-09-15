@@ -17,21 +17,30 @@
 class CAbilityEntity;
 class CAbilityValue;
 class CAbility;
+class COpRunScript;
 
 class CTargetSearcher : public CObject {
     struct {
-        TARGET_CENTER center_;
-        TARGET_TEAMS teams_;
-        TARGET_TYPES types_;
-        TARGET_FLAGS flags_;
-        CAbilityValue* radius_;      // 半径，默认NULL
+        TARGET_CENTER single_;      // 单体，只在radius_=NULL时有效
+        TARGET_CENTER center_;      // 中心点
+        TARGET_TEAMS teams_;        // 队伍
+        TARGET_TYPES types_;        // 实体类型
+        TARGET_FLAGS flags_;        //
+        CAbilityValue* radius_;     // 半径，默认NULL单体
+        CAbilityValue* maxTargets_; // 最大目标数
+        
     };
 public:
     CTargetSearcher();
     ~CTargetSearcher();
     
-    bool IsHaveTargets(CAbilityEntity* caster, CAbility* ability);
-    std::vector<CAbilityEntity*> GetTargets(CAbilityEntity* caster, CAbility* ability);
+    bool IsHaveTargets(CAbilityEntity* caster);
+    //
+    std::vector<CObject*> GetTargets(CAbilityEntity* caster);
+    
+    //------------------------------------
+    void SetSingle(TARGET_CENTER single) { single_ = single; }
+    TARGET_CENTER GetSingle() { return single_; }
     
     void SetCenter(TARGET_CENTER center) { center_ = center; }
     TARGET_CENTER GetCenter() { return center_; }

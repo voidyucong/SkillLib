@@ -17,6 +17,7 @@ class CTargetSearcher;
 class CAbility;
 class CAbilityEntity;
 class CAbilityValue;
+class CRunScprite;
 
 class COperate : public CObject {
 protected:
@@ -25,6 +26,11 @@ public:
     virtual int Execute(CAbilityEntity* entity, CAbility* ability);
     virtual void Update(float dt);
     virtual COperate* Clone();
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
+    
+    void SetSingle(TARGET_CENTER single);
+    TARGET_CENTER GetSingle();
     
     void SetCenter(TARGET_CENTER center);
     TARGET_CENTER GetCenter();
@@ -48,13 +54,13 @@ public:
 /**
  * 添加技能
  */
-class COperateAddAbility : public COperate {
+class COpAddAbility : public COperate {
     
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    COperateAddAbility();
-    ~COperateAddAbility();
+    COpAddAbility();
+    ~COpAddAbility();
 private:
     std::string abilityName_;
 };
@@ -62,12 +68,12 @@ private:
 /**
  * 目标执行模型动作
  */
-class CActOnTargets : public COperate {
+class COpActOnTargets : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CActOnTargets();
-    ~CActOnTargets();
+    COpActOnTargets();
+    ~COpActOnTargets();
 private:
     std::string modelName_;
 };
@@ -75,13 +81,13 @@ private:
 /**
  * 应用modifier
  */
-class CApplyModifier : public COperate {
+class COpApplyModifier : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CApplyModifier();
-    CApplyModifier(std::string modifierName);
-    ~CApplyModifier();
+    COpApplyModifier();
+    COpApplyModifier(std::string modifierName);
+    ~COpApplyModifier();
 private:
     std::string modifierName_;
 };
@@ -89,12 +95,12 @@ private:
 /**
  * 附加特效
  */
-class CAttachEffect : public COperate {
+class COpAttachEffect : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CAttachEffect();
-    ~CAttachEffect();
+    COpAttachEffect();
+    ~COpAttachEffect();
 private:
     unsigned int attachType_;
 };
@@ -102,24 +108,24 @@ private:
 /**
  * 闪现
  */
-class CBlink : public COperate {
+class COpBlink : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CBlink();
-    ~CBlink();
+    COpBlink();
+    ~COpBlink();
 };
 
 /**
  * 创建计时器
  */
-class CCreateThinker : public COperate {
+class COpCreateThinker : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CCreateThinker();
-    CCreateThinker(float interval, float duration);
-    ~CCreateThinker();
+    COpCreateThinker();
+    COpCreateThinker(float interval, float duration);
+    ~COpCreateThinker();
     
     virtual void Update(float dt);
 private:
@@ -130,12 +136,12 @@ private:
 /**
  * 制造伤害
  */
-class CDamage : public COperate {
+class COpDamage : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CDamage();
-    ~CDamage();
+    COpDamage();
+    ~COpDamage();
 private:
     ABILITY_DAMAGE_TYPE damageType_;
     float damage_;      // 伤害
@@ -146,12 +152,12 @@ private:
 /**
  * 延迟
  */
-class CDelayedAction : public COperate {
+class COpDelayedAction : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CDelayedAction();
-    ~CDelayedAction();
+    COpDelayedAction();
+    ~COpDelayedAction();
 private:
     float delay_;
     COperate* action_;
@@ -160,12 +166,12 @@ private:
 /**
  * 播放特效
  */
-class CFireEffect : public COperate {
+class COpFireEffect : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CFireEffect();
-    ~CFireEffect();
+    COpFireEffect();
+    ~COpFireEffect();
 private:
     std::string effectName_;
     unsigned int attackType_;
@@ -175,12 +181,12 @@ private:
 /**
  * 播放音效
  */
-class CFireSound : public COperate {
+class COpFireSound : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CFireSound();
-    ~CFireSound();
+    COpFireSound();
+    ~COpFireSound();
 private:
     std::string effectName_;
 };
@@ -188,12 +194,16 @@ private:
 /**
  * 治疗
  */
-class CHeal : public COperate {
+class COpHeal : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
+    void SetHealAmount(float amount) { healAmount_ = amount; }
     
-    CHeal();
-    ~CHeal();
+    COpHeal();
+    COpHeal(float amount);
+    ~COpHeal();
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
 private:
     float healAmount_;  // 治疗量
 };
@@ -201,12 +211,12 @@ private:
 /**
  * 击退
  */
-class CKnockback : public COperate {
+class COpKnockback : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CKnockback();
-    ~CKnockback();
+    COpKnockback();
+    ~COpKnockback();
 private:
     float distance_;
     float height_;
@@ -216,12 +226,12 @@ private:
 /**
  * 升级技能
  */
-class CLevelUpAbility : public COperate {
+class COpLevelUpAbility : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CLevelUpAbility();
-    ~CLevelUpAbility();
+    COpLevelUpAbility();
+    ~COpLevelUpAbility();
 private:
     std::string abilityName_;
 };
@@ -229,12 +239,12 @@ private:
 /**
  * 吸血
  */
-class CLifesteal : public COperate {
+class COpLifesteal : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CLifesteal();
-    ~CLifesteal();
+    COpLifesteal();
+    ~COpLifesteal();
 private:
     float lifestealPercent_;    // 吸血比例
 };
@@ -242,12 +252,12 @@ private:
 /**
  * 创建线性投射物
  */
-class CLinearProjectile : public COperate {
+class COpLinearProjectile : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CLinearProjectile();
-    ~CLinearProjectile();
+    COpLinearProjectile();
+    ~COpLinearProjectile();
 private:
     std::string effectName_;
     float moveSpeed_;
@@ -259,12 +269,12 @@ private:
 /**
  * 创建追踪抛射物
  */
-class CTrackingProjectile : public COperate {
+class COpTrackingProjectile : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CTrackingProjectile();
-    ~CTrackingProjectile();
+    COpTrackingProjectile();
+    ~COpTrackingProjectile();
 private:
     std::string effectName_;
     float moveSpeed_;
@@ -276,12 +286,12 @@ private:
 /**
  * 概率
  */
-class CRandom : public COperate {
+class COpRandom : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CRandom();
-    ~CRandom();
+    COpRandom();
+    ~COpRandom();
 private:
     float chance_;  // 0 - 100
     CEvent* onSuccess_;
@@ -291,12 +301,12 @@ private:
 /**
  * 移除技能
  */
-class CRemoveAbility : public COperate {
+class COpRemoveAbility : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CRemoveAbility();
-    ~CRemoveAbility();
+    COpRemoveAbility();
+    ~COpRemoveAbility();
 private:
     std::string abilityName_;
 };
@@ -304,12 +314,12 @@ private:
 /**
  * 移除modifier
  */
-class CRemoveModifier : public COperate {
+class COpRemoveModifier : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CRemoveModifier();
-    ~CRemoveModifier();
+    COpRemoveModifier();
+    ~COpRemoveModifier();
 private:
     std::string modifierName_;
 };
@@ -317,12 +327,12 @@ private:
 /**
  * 执行脚本
  */
-class CRunScript : public COperate {
+class COpRunScript : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CRunScript();
-    ~CRunScript();
+    COpRunScript();
+    ~COpRunScript();
 private:
     std::string scriptFile_;
     std::string function_;
@@ -331,12 +341,12 @@ private:
 /**
  * 生产单位
  */
-class CSpawnUnit : public COperate {
+class COpSpawnUnit : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CSpawnUnit();
-    ~CSpawnUnit();
+    COpSpawnUnit();
+    ~COpSpawnUnit();
 private:
     std::string unitName_;
     unsigned int unitCount_;
@@ -348,12 +358,12 @@ private:
 /**
  * 眩晕
  */
-class CStun : public COperate {
+class COpStun : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CStun();
-    ~CStun();
+    COpStun();
+    ~COpStun();
 private:
     float duration_;
 };
@@ -361,12 +371,12 @@ private:
 /**
  * 消耗法术值
  */
-class CSpendMana : public COperate{
+class COpSpendMana : public COperate{
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability);
     
-    CSpendMana();
-    ~CSpendMana();
+    COpSpendMana();
+    ~COpSpendMana();
 private:
     unsigned int mana_;
 };
@@ -374,14 +384,17 @@ private:
 /**
  * log
  */
-class CLog : public COperate {
+class COpLog : public COperate {
 public:
     virtual int Execute(CAbilityEntity* entity, CAbility* ability);
+    std::string GetText() { return text_; }
     void SetText(std::string text) { text_ = text; }
     
-    CLog();
-    CLog(std::string text);
-    ~CLog();
+    COpLog();
+    COpLog(std::string text);
+    ~COpLog();
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
 private:
     std::string text_;
 };

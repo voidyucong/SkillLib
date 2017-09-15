@@ -12,8 +12,9 @@
 #include <iostream>
 #include <assert.h>
 #include <string.h>
+#include "CObject.hpp"
 
-class CAbilityValue final {
+class CAbilityValue : public CObject {
     
 public:
     typedef std::vector<CAbilityValue> Array;

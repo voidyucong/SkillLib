@@ -33,7 +33,7 @@ void CSchedule::AddCallback(CObject* target, CObject::CALLBACK callback) {
     callback_ = callback;
 }
 
-void CSchedule::update(float dt) {
+void CSchedule::Update(float dt) {
     elapsed_ += dt;
     if (elapsed_ >= interval_) {
         if (target_ && callback_) {

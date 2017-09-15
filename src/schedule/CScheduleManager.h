@@ -9,6 +9,7 @@
 #ifndef CScheduleManager_hpp
 #define CScheduleManager_hpp
 
+#include <iostream>
 #include <map>
 #include "CSchedule.h"
 
@@ -26,7 +27,7 @@ public:
     
     static CScheduleManager* getInstance();
     
-    void update();
+    void Update();
     
     void AddSchedule(CObject* target, CObject::CALLBACK callback, float interval);
     void RemoveSchedule(CObject* target);

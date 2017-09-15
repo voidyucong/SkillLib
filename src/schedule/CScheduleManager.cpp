@@ -17,7 +17,7 @@ extern "C" {
 static CScheduleManager* s_pInstance = NULL;
 
 CScheduleManager::CScheduleManager() {
-    lastTime_ = SKB::GetSeconds();
+    lastTime_ = SKB::TimeUtil::GetSeconds();
 }
 
 CScheduleManager::~CScheduleManager() {
@@ -33,14 +33,16 @@ CScheduleManager* CScheduleManager::getInstance() {
     return s_pInstance;
 }
 
-void CScheduleManager::update() {
-    double now = SKB::GetSeconds();
-    float deltaTime = now - lastTime_;
+void CScheduleManager::Update() {
+    double now = SKB::TimeUtil::GetSeconds();
+//    std::cout << std::fixed << now << std::endl;
+//    std::cout << "lastTime_:" << std::fixed << lastTime_ << " now:" << std::fixed << now << std::endl;
+    double deltaTime = now - lastTime_;
     deltaTime = MAX(0, deltaTime);
     std::vector<CObject*> deletions;
     for (auto iter = schedules_.begin(); iter != schedules_.end(); iter++) {
         if (!iter->second->markedDeletion)
-            iter->second->schedule->update(deltaTime);
+            iter->second->schedule->Update(deltaTime);
         else
             deletions.push_back(iter->first);
     }

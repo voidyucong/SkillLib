@@ -28,13 +28,10 @@ class CAbilityEntity : public CObject {
 public:
     CAbilityEntity();
     ~CAbilityEntity();
-    
-    void update(float dt);
-    
-    //
     void Execute();
-    //
     void Destroy();
+    void Update(float dt);
+    
     // 执行指定的技能
     void ExecuteAbility(unsigned index);
     

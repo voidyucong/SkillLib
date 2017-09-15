@@ -19,7 +19,7 @@ class CAbilityValue;
 class CEvent;
 class CModifierEvent;
 class COperate;
-class CModifier;
+class CModifierData;
 
 class SkillReaderJson {
 public:
@@ -36,14 +36,14 @@ public:
     void ParseAbilityEvent(const rapidjson::Value& json, CAbility* ability);
     CEvent* CreateAbilityEvent(const rapidjson::Value& json, std::string eventName);
     
-    void ParseModifierEvent(const rapidjson::Value& json, CModifier* modifier);
+    void ParseModifierEvent(const rapidjson::Value& json, CModifierData* modifier);
     CModifierEvent* CreateModifierEvnt(const rapidjson::Value& json, std::string eventName);
     
     void ParseOperate(const rapidjson::Value& json, CEvent* event);
     void ParseOperateTarget(const rapidjson::Value& json, COperate* operate);
     
     void ParseModifiers(const rapidjson::Value& json, CAbility* ability);
-    CModifier* CreateModifier(const rapidjson::Value& json, std::string name);
+    CModifierData* CreateModifier(const rapidjson::Value& json, std::string name);
 private:
     
 };
