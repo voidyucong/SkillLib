@@ -13,13 +13,15 @@
 #include "CAbilityEntity.hpp"
 #include "CScheduleManager.h"
 #include "TimeUtil.h"
+#include "CTargetStack.hpp"
 
 CModifier::CModifier()
-: entity_(0)
+: caster_(0)
 , ability_(0)
 , modifierData_(0)
 , spawnTime_(0.f)
 , isWaitDestroy_(false)
+, targetStack_(new CTargetStack())
 {
     
 }
@@ -34,6 +36,10 @@ CModifier::~CModifier() {
         operate = NULL;
     }
     modifierData_->operators_.clear();
+    if (targetStack_) {
+        delete targetStack_;
+        targetStack_ = 0;
+    }
     delete modifierData_;
     modifierData_ = 0;
 }
@@ -41,8 +47,8 @@ CModifier::~CModifier() {
 void CModifier::Activate() {
     spawnTime_ = SKB::TimeUtil::GetSeconds();
     isWaitDestroy_ = false;
-    if (entity_ && ability_) {
-        ExecuteEvent(MODIFIER_EVENT_ON_CREATED, entity_, ability_);
+    if (caster_ && ability_) {
+        ExecuteEvent(MODIFIER_EVENT_ON_CREATED, caster_, ability_);
         
         // 处理properties
         AddEntityProperty();
@@ -59,7 +65,7 @@ void CModifier::Activate(CAbilityEntity* entity, CAbility* ability) {
 }
 
 void CModifier::Destroy() {
-    ExecuteEvent(MODIFIER_EVENT_ON_DESTROY, entity_, ability_);
+    ExecuteEvent(MODIFIER_EVENT_ON_DESTROY, caster_, ability_);
     spawnTime_ = 0.f;
     isWaitDestroy_ = false;
     RemoveEntityProperty();
@@ -69,38 +75,42 @@ void CModifier::Destroy() {
 
 void CModifier::Update(float dt) {
 //    std::cout << "CModifier Update" << std::endl;
-    ExecuteEvent(MODIFIER_EVENT_ON_INTERVAL, entity_, ability_);
+    ExecuteEvent(MODIFIER_EVENT_ON_INTERVAL, caster_, ability_);
     if (spawnTime_ + modifierData_->GetDuration() < SKB::TimeUtil::GetSeconds()) {
         isWaitDestroy_ = true;  // 标记可销毁，由拥有的entity删除
     }
 }
 
 
-int CModifier::ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *entity, CAbility *ability) {
+int CModifier::ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *caster, CAbility *ability) {
     CModifierEvent* event = modifierData_->GetModifierEvent(type);
     if (event) {
-        return event->Execute(entity, ability);
+        return event->Execute(caster, ability, targetStack_);
     }
     return 0;
 }
 
-void CModifier::ExecuteOperate(CAbilityEntity* entity, CAbility* ability) {
+void CModifier::ExecuteOperate(CAbilityEntity* caster, CAbility* ability) {
     for (COperate* operate : modifierData_->operators_) {
-        operate->Execute(entity, ability);
+        operate->Execute(caster, ability, targetStack_);
     }
 }
 
 void CModifier::AddEntityProperty() {
     for (auto iter = modifierData_->properties_.begin(); iter != modifierData_->properties_.end(); ++iter) {
-        entity_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, iter->second);
-        std::cout << "AddEntityProperty " << iter->first << " add value: " << iter->second << std::endl;
+        caster_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, iter->second);
+        std::cout << "AddEntityProperty " << iter->first << " to " << caster_ << "," << " add value: " << iter->second << std::endl;
     }
 }
 
 void CModifier::RemoveEntityProperty() {
     for (auto iter = modifierData_->properties_.begin(); iter != modifierData_->properties_.end(); ++iter) {
-        entity_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, -iter->second);
-        std::cout << "RemoveEntityProperty " << iter->first << " remove value: " << iter->second << std::endl;
+        caster_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, -iter->second);
+        std::cout << "RemoveEntityProperty " << iter->first << " from " << caster_ << "," << " remove value: " << iter->second << std::endl;
     }
 }
+
+//const std::vector<CAbilityEntity*>& CModifier::FindTargets(CAbilityEntity* entity) {
+//    
+//}
 

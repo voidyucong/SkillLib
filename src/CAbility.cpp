@@ -12,9 +12,11 @@
 #include "CAbilityValue.hpp"
 #include "CAbilityEntity.hpp"
 #include "CScheduleManager.h"
-#include "CTargetSearcher.hpp"
+#include "CTargetSearchType.hpp"
 #include "CModifierData.hpp"
 #include "TimeUtil.h"
+#include "CTargetSearcher.hpp"
+#include "CTargetStack.hpp"
 
 CAbility::CAbility()
 : level_(1)
@@ -22,7 +24,7 @@ CAbility::CAbility()
 , elapsed_(0.f)
 , isValid_(true)
 {
-    base.targetSearcher_ = new CTargetSearcher();
+    base.targetSearchType_ = new CTargetSearchType();
     base.castPoint_ = NULL;
     base.castRange_ = NULL;
     base.castRangeBuffer_ = NULL;
@@ -33,6 +35,8 @@ CAbility::CAbility()
     base.hpCost_ = NULL;
     base.channelTime_ = NULL;
     base.channelledManaCostPerSecond_ = NULL;
+    
+    targetStack_ = new CTargetStack();
 }
 
 
@@ -48,6 +52,11 @@ CAbility::~CAbility() {
         delete iter->second;
     }
     base.specials_.clear();
+    
+    if (targetStack_) {
+        delete targetStack_;
+        targetStack_ = 0;
+    }
 }
 
 void CAbility::Update(float dt) {
@@ -63,7 +72,7 @@ void CAbility::Update(float dt) {
     }
 }
 
-void CAbility::Cast(CAbilityEntity* entity) {
+void CAbility::Cast() {
     if (!isValid_) {
         return;
     }
@@ -76,7 +85,8 @@ void CAbility::Cast(CAbilityEntity* entity) {
     }
     
     // target
-    if ((base.behavior_ & ABILITY_BEHAVIOR_UNIT_TARGET) && !base.targetSearcher_->IsHaveTargets(entity)) {
+    HandleTargetStack();
+    if ((base.behavior_ & ABILITY_BEHAVIOR_UNIT_TARGET) && targetStack_->GetSelf()->Size() == 0) {
         std::cout << "技能需要目标才能释放" << std::endl;
         return;
     }
@@ -121,7 +131,27 @@ void CAbility::Cast(CAbilityEntity* entity) {
                 - this->GetModifyAttribute(MODIFIER_ATTRIBUTE_COOLDOWN_GAIN);
     
     CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbility::Update), 1/60);
-    this->ExecutEvent(EVENT_TYPE_ON_SPELL_START, entity);
+    this->ExecutEvent(EVENT_TYPE_ON_SPELL_START);
+}
+
+void CAbility::HandleTargetStack() {
+    if (!targetStack_->GetSelf()) {
+        targetStack_->SetSelf(new CTargetStackItem());
+    }
+    auto item = targetStack_->GetSelf();
+    CTargetSearcher::FindAbilityTargets(item->GetTargets(),
+                                        caster_,
+                                        caster_->GetPosition(),
+                                        GetRadius() ? GetRadius()->GetArrayValueByIndex(level_ - 1) : NULL,
+                                        GetTeams(),
+                                        GetTypes(),
+                                        GetFlags(),
+                                        GetBehavior(),
+                                        GetMaxTargets() ? GetMaxTargets()->GetArrayValueByIndex(level_ - 1) : NULL);
+    
+    for (auto target : targetStack_->GetValid()->GetTargets()) {
+        std::cout << "Ability " << GetName() << " targets:" << target << std::endl;
+    }
 }
 
 
@@ -130,12 +160,12 @@ void CAbility::SetEvent(EVENT_TYPE type, CEvent* event) {
     base.events_[type] = event;
 }
 
-int CAbility::ExecutEvent(EVENT_TYPE type, CAbilityEntity* entity) {
+int CAbility::ExecutEvent(EVENT_TYPE type) {
     CEvent* event = base.events_[type];
     if (not event) {
         return 0;
     }
-    return event->Execute(entity, this);
+    return event->Execute(caster_, this, targetStack_);
 }
 
 
@@ -144,9 +174,15 @@ int CAbility::ExecutEvent(EVENT_TYPE type, CAbilityEntity* entity) {
 CAbilityValue* CAbility::GetLevelSpecialValueFor(std::string key, int level) {
     CAbilityValue* value = base.specials_[key];
     assert(value);
-    assert(value->IsType<CAbilityValue::Array>());
-    assert(value->GetValue<CAbilityValue::Array>().size() > level - 1);
     return value->GetArrayValueByIndex(level - 1);
+//    if (value->IsArray()) {
+//        assert(value->GetValue<CAbilityValue::Array>().size() > level - 1);
+//        return value->GetArrayValueByIndex(level - 1);
+//        
+//    }
+//    else {
+//        return value;
+//    }
 }
 
 

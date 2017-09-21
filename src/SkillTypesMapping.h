@@ -56,7 +56,7 @@ namespace SKB {
         {"MODIFIER_EVENT_ON_DESTROY", 2},              // 销毁时
         {"MODIFIER_EVENT_ON_ATTACK", 3},               // 攻击时
         {"MODIFIER_EVENT_ON_ATTACKED", 4},             // 被攻击时
-        {"MODIFIER_EVENT_ON_ATTACK_LADNED", 5},        // 攻击到时
+        {"MODIFIER_EVENT_ON_ATTACK_LANDED", 5},        // 攻击到时
         {"MODIFIER_EVENT_ON_ATTACK_FAILED", 6},        // 攻击单位丢失时
         {"MODIFIER_EVENT_ON_ATTACK_ALLIED", 7},        // 攻击同盟时
         {"MODIFIER_EVENT_ON_DEAL_DAMAGE", 8},          // 施加伤害时

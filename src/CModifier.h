@@ -20,14 +20,16 @@ class CModifierEvent;
 class COperate;
 class CAbility;
 class CAbilityEntity;
+class CTargetStack;
 
 class CModifier : public CObject {
-    
+    typedef std::vector<CAbilityEntity*> COLLISION_TYPE;
 public:
     CModifier();
     virtual ~CModifier();
+    // 开始执行
     void Activate();
-    void Activate(CAbilityEntity* entity, CAbility* ability);
+    void Activate(CAbilityEntity* caster, CAbility* ability);
     void Destroy();
     void Update(float dt);
     
@@ -35,19 +37,25 @@ public:
     void AddEntityProperty();
     void RemoveEntityProperty();
     
-    int ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *entity, CAbility *ability);
-    void ExecuteOperate(CAbilityEntity* entity, CAbility* ability);
+    int ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *caster, CAbility *ability);
+    void ExecuteOperate(CAbilityEntity* caster, CAbility* ability);
     
     // 所属的entity和ability
-    void SetEntity(CAbilityEntity* entity) { entity_ = entity; }
+    void SetEntity(CAbilityEntity* caster) { caster_ = caster; }
     void SetAbility(CAbility* ability) { ability_ = ability; }
+    
+    // collision
+    void AddCollision(CAbilityEntity* caster) { collisions_.push_back(caster); }
+    COLLISION_TYPE GetAllCollisions() { return collisions_; }
 
     void SetModifierData(CModifierData* data) { modifierData_ = data; }
     CModifierData* GetModifierData() { return modifierData_; }
     
     // 是否可销毁了
     bool IsWaitDestroy() { return isWaitDestroy_; }
-
+    
+    CTargetStack* GetTargetStack() { return targetStack_; }
+    
     bool IsMulti() { return modifierData_->isMulti_; }
     bool IsPassive() { return modifierData_->isPassive_; }
     bool IsHidden() { return modifierData_->isHidden_; }
@@ -64,14 +72,18 @@ public:
     
 private:
     // 所属的entity和ability
-    CAbilityEntity* entity_;
+    CAbilityEntity* caster_;
     CAbility* ability_;
+    // 碰到的目标
+    COLLISION_TYPE collisions_;
     // 原型数据
     CModifierData* modifierData_;
     // 存在的时间
     double spawnTime_;
     // 等待销毁
     bool isWaitDestroy_;
+    //
+    CTargetStack* targetStack_;
 };
 
 #endif /* CModifier_hpp */

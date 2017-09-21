@@ -84,6 +84,15 @@ public:
     float GetAgilityMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_AGILITY) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_AGILITY_GAIN); }
     
+    //
+    void SetAttacker(CAbilityEntity* attacker) { attacker_ = attacker; }
+    CAbilityEntity* GetAttacker() { return attacker_; }
+    
+    void SetPosition(float x, float y) { position_.SetX(x); position_.SetY(y); }
+    void SetPositionX(float x) { position_.SetX(x); }
+    void SetPositionY(float y) { position_.SetY(y); }
+    const CVector& GetPosition() { return position_; }
+    
 private:
     // base data
     //----------------------------------------------------------------
@@ -108,10 +117,13 @@ private:
     ENTITY_ATTACK_CAPABILITY attackCapability_;         // 攻击能力 不能攻击|近战|远程
     
     std::map<ENTITY_ATTRIBUTES, float> baseAttributes_;     // 所有基础属性
+    
+    CAbilityEntity* attacker_;          // 攻击者
 
     // 变化的数据
     //----------------------------------------------------------------
     int teamId_;                                        // 队伍id
+    CVector position_;                                   // 位置
     std::map<ENTITY_ATTRIBUTES, float> modifyAttributes_;   // 变动属性
     std::map<std::string, ModifierNode*> buffs_;
     std::map<std::string, ModifierNode*> debuffs_;

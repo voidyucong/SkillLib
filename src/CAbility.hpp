@@ -13,13 +13,14 @@
 #include <map>
 #include "SkillTypes.h"
 #include "CObject.hpp"
-#include "CTargetSearcher.hpp"
+#include "CTargetSearchType.hpp"
 
 class CEvent;
 class CAbilityValue;
 class CAbilityEntity;
 class CModifier;
 class CModifierData;
+class CTargetStack;
 
 class CAbility : public CObject {
     typedef std::map<std::string, CAbilityValue*> SPECIAL_VALUE;
@@ -27,14 +28,14 @@ public:
     CAbility();
     virtual ~CAbility();
     void Update(float dt);
-    void Cast(CAbilityEntity* entity);
+    void Cast();
     
     // attributes
     
     
     // events
     void SetEvent(EVENT_TYPE behavior, CEvent* event);
-    int ExecutEvent(EVENT_TYPE behavior, CAbilityEntity* entity);
+    int ExecutEvent(EVENT_TYPE behavior);
     
     
     // special value
@@ -50,6 +51,9 @@ public:
     void SetModifierData(std::string name, CModifierData* modifier);
     CModifierData* GetModifierData(std::string name);
     
+    // 处理目标栈
+    void HandleTargetStack();
+    CTargetStack* GetTargetStack() { return targetStack_; }
     
     // set get
     void SetName(std::string name) { base.name_ = name; }
@@ -94,24 +98,28 @@ public:
     CAbilityValue* GetBaseCooldown() { return base.cooldown_; }
     double GetCooldown() { return cooldown_; }
     
-    void SetCenter(TARGET_CENTER center) { base.targetSearcher_->SetCenter(center); }
-    TARGET_CENTER GetCenter() { return base.targetSearcher_->GetCenter(); }
+    void SetCenter(TARGET_CENTER center) { base.targetSearchType_->SetCenter(center); }
+    TARGET_CENTER GetCenter() { return base.targetSearchType_->GetCenter(); }
     
-    void SetRadius(CAbilityValue* radius) { base.targetSearcher_->SetRadius(radius); }
-    CAbilityValue* GetRadius() { return base.targetSearcher_->GetRadius(); }
+    void SetRadius(CAbilityValue* radius) { base.targetSearchType_->SetRadius(radius); }
+    CAbilityValue* GetRadius() { return base.targetSearchType_->GetRadius(); }
     
-    void SetTeams(TARGET_TEAMS teams) { base.targetSearcher_->SetTeams(teams); }
-    TARGET_TEAMS GetTeams() { return base.targetSearcher_->GetTeams(); }
+    void SetTeams(TARGET_TEAMS teams) { base.targetSearchType_->SetTeams(teams); }
+    TARGET_TEAMS GetTeams() { return base.targetSearchType_->GetTeams(); }
     
-    void SetTypes(TARGET_TYPES types) { base.targetSearcher_->SetTypes(types); }
-    TARGET_TYPES GetTypes() { return base.targetSearcher_->GetTypes(); }
+    void SetTypes(TARGET_TYPES types) { base.targetSearchType_->SetTypes(types); }
+    TARGET_TYPES GetTypes() { return base.targetSearchType_->GetTypes(); }
     
-    void SetFlags(TARGET_FLAGS flags) { base.targetSearcher_->SetFlags(flags); }
-    TARGET_FLAGS GetFlags() { return base.targetSearcher_->GetFlags(); }
+    void SetFlags(TARGET_FLAGS flags) { base.targetSearchType_->SetFlags(flags); }
+    TARGET_FLAGS GetFlags() { return base.targetSearchType_->GetFlags(); }
     
     void SetLevel(int level) { level_ = level; }
     int GetLevel() { return level_; }
     
+    CAbilityValue* GetMaxTargets() { return base.targetSearchType_->GetMaxTargets(); }
+    
+    void SetCaster(CAbilityEntity* caster) { caster_ = caster; }
+    CAbilityEntity* GetCaster() { return caster_; }
 
 private:
     struct {
@@ -123,7 +131,6 @@ private:
         unsigned int stepLevel_;    // 每x级升一次
         unsigned int maxLevel_;     // 最大等级
         std::string textureIconName_;   // 图标
-        CTargetSearcher* targetSearcher_;   // 目标
         CAbilityValue* castPoint_;  // 施法前摇时间
         CAbilityValue* castWidth_;  // 技能宽度
         CAbilityValue* castRange_;  // 技能释放范围
@@ -136,6 +143,7 @@ private:
         // 需要behavier包含 ABILITY_BEHAVIOR_CHANNELLED
         CAbilityValue* channelTime_;    // 持续施法时间
         CAbilityValue* channelledManaCostPerSecond_;    // 持续施法每秒的法术消耗
+        CTargetSearchType* targetSearchType_;   // 目标
         
         std::map<EVENT_TYPE, CEvent*> events_;
         SPECIAL_VALUE specials_;
@@ -146,8 +154,11 @@ private:
     double cooldown_;
     float elapsed_;
     bool isValid_;
+    CAbilityEntity* caster_;
     std::map<MODIFIER_ATTRIBUTES, float> modifyAttributes_;
     std::map<std::string, CModifierData*> modifierData_;
+    // 包括选中的、击中的
+    CTargetStack* targetStack_;
 };
 
 #endif /* CAbility_hpp */

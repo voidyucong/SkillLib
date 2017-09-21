@@ -38,17 +38,17 @@ public:
     CAbilityValue(const char* value): s(value), type_(STRING) {}
     CAbilityValue(const Array& value): a(value), type_(ARRAY) {}
     CAbilityValue(Array&& value): a(std::move(value)), type_(ARRAY) {}
-    CAbilityValue(const CAbilityValue& instance) {
-        if (this != &instance) {
-//            if (instance.IsInt()) SetInt(instance.i);
-            if (instance.IsFloat()) SetFloat(instance.f);
-            else if (instance.IsString()) SetString(instance.s);
-            else if (instance.IsArray()) SetArray(instance.a);
+    CAbilityValue(const CAbilityValue& other) {
+        if (this != &other) {
+//            if (other()) SetInt(other);
+            if (other.IsFloat()) SetFloat(other.f);
+            else if (other.IsString()) SetString(other.s);
+            else if (other.IsArray()) SetArray(other.a);
         }
     }
     ~CAbilityValue() {}
     
-    CAbilityValue& operator= (const CAbilityValue& instance);
+    CAbilityValue& operator= (const CAbilityValue& other);
     
 //    bool IsInt() const { return type_ == NUMBER; }
     bool IsFloat() const { return type_ == FLOAT; }
@@ -86,23 +86,28 @@ template<>
 inline bool CAbilityValue::IsType<CAbilityValue::Array>() const { return type_ == ARRAY; }
 
 
-inline CAbilityValue& CAbilityValue::operator= (const CAbilityValue& instance) {
-//    if (instance.IsType<int>()) SetInt(instance.i);
-    if (instance.IsType<float>()) SetFloat(instance.f);
-    else if (instance.IsType<CAbilityValue::String>()) SetString(instance.s);
-    else if (instance.IsType<CAbilityValue::Array>()) SetArray(instance.a);
+inline CAbilityValue& CAbilityValue::operator= (const CAbilityValue& other) {
+//    if (other<int>()) SetInt(other);
+    if (other.IsType<float>()) SetFloat(other.f);
+    else if (other.IsType<CAbilityValue::String>()) SetString(other.s);
+    else if (other.IsType<CAbilityValue::Array>()) SetArray(other.a);
     return *this;
 }
 
 inline CAbilityValue* CAbilityValue::GetArrayValueByIndex(unsigned index) {
-    assert(IsArray());
-    assert(index < a.size());
-    return &a[index];
+//    assert(IsArray());
+    if (IsArray()) {
+        assert(index < a.size());
+        return &a[index];
+    }
+    else {
+        return this;
+    }
 }
 
 
 //template<>
-//inline int& CAbilityValue::GetValue<int>() { assert(IsType<int>()); return i; }
+//inline int CAbilityValue::GetValue<int>() { assert(IsType<float>()); return f; }
 
 template<>
 inline float& CAbilityValue::GetValue<float>() { assert(IsType<float>()); return f; }

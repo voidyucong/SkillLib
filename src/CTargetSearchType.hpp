@@ -1,13 +1,13 @@
 //
-//  CTargetSearcher.hpp
+//  CTargetSearchType.hpp
 //  SkillLib
 //
 //  Created by yucong on 2017/9/6.
 //  Copyright © 2017年 yucong. All rights reserved.
 //
 
-#ifndef CTargetSearcher_hpp
-#define CTargetSearcher_hpp
+#ifndef CTargetSearchType_hpp
+#define CTargetSearchType_hpp
 
 #include <iostream>
 #include <vector>
@@ -18,8 +18,9 @@ class CAbilityEntity;
 class CAbilityValue;
 class CAbility;
 class COpRunScript;
+class CTargetSets;
 
-class CTargetSearcher : public CObject {
+class CTargetSearchType : public CObject {
     struct {
         TARGET_CENTER single_;      // 单体，只在radius_=NULL时有效
         TARGET_CENTER center_;      // 中心点
@@ -28,15 +29,12 @@ class CTargetSearcher : public CObject {
         TARGET_FLAGS flags_;        //
         CAbilityValue* radius_;     // 半径，默认NULL单体
         CAbilityValue* maxTargets_; // 最大目标数
-        
     };
 public:
-    CTargetSearcher();
-    ~CTargetSearcher();
+    CTargetSearchType(): center_(TARGET_CENTER_CASTER), teams_(TARGET_TEAM_NONE), types_(TARGET_TYPE_NONE), flags_(TARGET_FLAG_NONE), radius_(0), maxTargets_(0)
+    {}
+    ~CTargetSearchType() { targets_.clear(); }
     
-    bool IsHaveTargets(CAbilityEntity* caster);
-    //
-    std::vector<CObject*> GetTargets(CAbilityEntity* caster);
     
     //------------------------------------
     void SetSingle(TARGET_CENTER single) { single_ = single; }
@@ -57,8 +55,11 @@ public:
     void SetFlags(TARGET_FLAGS flags) { flags_ = flags; }
     TARGET_FLAGS GetFlags() { return flags_; }
     
+    void SetMaxTargets(CAbilityValue* max) { maxTargets_ = max; }
+    CAbilityValue* GetMaxTargets() { return maxTargets_; }
+    
 private:
     std::vector<CAbilityEntity*> targets_;
 };
 
-#endif /* CTargetSearcher_hpp */
+#endif /* CTargetSearchType_hpp */

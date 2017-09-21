@@ -15,15 +15,15 @@ enum ABILITY_BEHAVIOR {
     ABILITY_BEHAVIOR_PASSIVE              = 1 << 1, //这个技能是一个被动技能，不能被使用，但是会在HUD上显示。
     ABILITY_BEHAVIOR_NO_TARGET            = 1 << 2, //不需要指定目标就能释放的技能，当按下技能按钮的时候，这个技能就会被释放。
     ABILITY_BEHAVIOR_UNIT_TARGET          = 1 << 3, //技能需要指定一个目标来释放。
-    ABILITY_BEHAVIOR_POINT                = 1 << 4, //技能将会在鼠标指定的位置释放（如果鼠标指向了一个单位，会在单位所在的位置释放）。
-    ABILITY_BEHAVIOR_AOE                  = 1 << 5, //这个技能将会显示技能释放的范围，有点像ABILITY_BEHAVIOR_POINT类的技能，但是会显示一个范围。
+    ABILITY_BEHAVIOR_POINT                = 1 << 4, //技能将会在鼠标指定的位置释放，例如扁鹊1技能、鲁班1技能（如果鼠标指向了一个单位，会在单位所在的位置释放）。
+    ABILITY_BEHAVIOR_AOE                  = 1 << 5, //这个技能将会显示技能释放的范围，例如王昭君大招，有点像ABILITY_BEHAVIOR_POINT类的技能，但是会显示一个范围。
     ABILITY_BEHAVIOR_NOT_LEARNABLE        = 1 << 6, //这个技能将能被释放，或者拥有对应的释放机制，但是不能被学习。（一般是用在类似炸弹人的引爆炸弹技能）。
-    ABILITY_BEHAVIOR_CHANNELLED           = 1 << 7, //持续性施法技能，如果施法者移动或者被沉默，这个技能将会被中断。
+    ABILITY_BEHAVIOR_CHANNELLED           = 1 << 7, //持续性施法技能，例如安琪拉大招，如果施法者移动或者被沉默，这个技能将会被中断。
     ABILITY_BEHAVIOR_ITEM                 = 1 << 8, //这个技能绑定了一个物品。
     ABILITY_BEHAVIOR_TOGGLE               = 1 << 9, //切换类技能。
-    ABILITY_BEHAVIOR_DIRECTIONAL          = 1 << 10, //这个技能是一个从英雄出发的方向性技能，比如米拉娜的月之神剑或者屠夫的肉钩。
+    ABILITY_BEHAVIOR_DIRECTIONAL          = 1 << 10, //这个技能是一个从英雄出发的方向性技能，例如后羿大招、扁鹊2技能，如果配合ABILITY_BEHAVIOR_UNIT_TARGET使用则是妲己2技能。
     ABILITY_BEHAVIOR_IMMEDIATE            = 1 << 11, //这个技能将会被立即释放，不会进入操作序列。
-    ABILITY_BEHAVIOR_AUTOCAST             = 1 << 12, //这个技能可以被自动释放。
+    ABILITY_BEHAVIOR_AUTOCAST             = 1 << 12, //这个技能可以被自动释放，防御塔的攻击。
     ABILITY_BEHAVIOR_NOASSIST             = 1 << 13, //这个技能将不会有辅助网格。
     ABILITY_BEHAVIOR_AURA                 = 1 << 14, //这个技能是一个光环技能，Not really used other than to tag the ability as such.
     ABILITY_BEHAVIOR_ORB                  = 1 << 15, //这个技能是一个法球技能，不能对魔法免疫目标生效，
@@ -35,7 +35,7 @@ enum ABILITY_BEHAVIOR {
     ABILITY_BEHAVIOR_DONT_ALERT_TARGET    = 1 << 21, //这个技能在指定敌人释放的时候将不会惊醒他们。
     ABILITY_BEHAVIOR_DONT_RESUME_ATTACK   = 1 << 22, //这个技能在释放完成之后，将不会恢复对之前目标的自动攻击，只能配合无目标，非立即释放类和指定单位目标类技能使用。
     ABILITY_BEHAVIOR_NORMAL_WHEN_STOLEN   = 1 << 23, //这个技能在被偷取之后，依然使用之前的施法前摇。
-    ABILITY_BEHAVIOR_IGNORE_BACKSWING     = 1 << 24, //这个技能将会无视施法后摇。
+    ABILITY_BEHAVIOR_IGNORE_BACKSWING     = 1 << 24, //这个技能将会无视施法后摇，例如墨子2技能。
 };
 
 // 技能事件
@@ -57,7 +57,7 @@ enum MODIFIER_EVENT_TYPE{
     MODIFIER_EVENT_ON_DESTROY,              // 销毁时
     MODIFIER_EVENT_ON_ATTACK,               // 攻击时
     MODIFIER_EVENT_ON_ATTACKED,             // 被攻击时
-    MODIFIER_EVENT_ON_ATTACK_LADNED,        // 攻击到时
+    MODIFIER_EVENT_ON_ATTACK_LANDED,        // 攻击到时
     MODIFIER_EVENT_ON_ATTACK_FAILED,        // 攻击单位丢失时
     MODIFIER_EVENT_ON_ATTACK_ALLIED,        // 攻击同盟时
     MODIFIER_EVENT_ON_DEAL_DAMAGE,          // 施加伤害时

@@ -15,20 +15,25 @@
 #include "CModifierData.hpp"
 #include "CScheduleManager.h"
 #include "CRunScprite.hpp"
+#include "CTargetStack.hpp"
+#include "CTargetSearcher.hpp"
+#include "CAbilityValue.hpp"
 
 // COperate
 COperate::COperate()
 {
-    targetSearcher_ = new CTargetSearcher();
+    targetSearchType_ = new CTargetSearchType();
+    targetStack_ = new CTargetStack();
 }
 
 COperate::~COperate() {
-    delete targetSearcher_;
-    targetSearcher_ = 0;
+    delete targetSearchType_;
+    targetSearchType_ = 0;
 }
 
-int COperate::Execute(CAbilityEntity* entity, CAbility* ability) {
-    
+int COperate::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
+    targetStack_->SetParent(parentStack);
+    CTargetSearcher::HandleTargetStack(entity, ability, targetStack_, targetSearchType_);
     return 1;
 }
 
@@ -38,11 +43,11 @@ void COperate::Update(float dt) {
 
 COperate* COperate::Clone() {
     COperate* operate = CreateCloneInstance();
-    operate->targetSearcher_->SetCenter(targetSearcher_->GetCenter());
-    operate->targetSearcher_->SetTeams(targetSearcher_->GetTeams());
-    operate->targetSearcher_->SetTypes(targetSearcher_->GetTypes());
-    operate->targetSearcher_->SetFlags(targetSearcher_->GetFlags());
-    operate->targetSearcher_->SetRadius(targetSearcher_->GetRadius());
+    operate->targetSearchType_->SetCenter(targetSearchType_->GetCenter());
+    operate->targetSearchType_->SetTeams(targetSearchType_->GetTeams());
+    operate->targetSearchType_->SetTypes(targetSearchType_->GetTypes());
+    operate->targetSearchType_->SetFlags(targetSearchType_->GetFlags());
+    operate->targetSearchType_->SetRadius(targetSearchType_->GetRadius());
     CloneProperties(operate);
     return operate;
 }
@@ -55,18 +60,29 @@ void COperate::CloneProperties(COperate* operate) {
     
 }
 
-void COperate::SetSingle(TARGET_CENTER single) { targetSearcher_->SetSingle(single); }
-TARGET_CENTER COperate::GetSingle() { return targetSearcher_->GetSingle(); }
-void COperate::SetCenter(TARGET_CENTER center) { targetSearcher_->SetCenter(center); }
-TARGET_CENTER COperate::GetCenter() { return targetSearcher_->GetCenter(); }
-void COperate::SetRadius(CAbilityValue* radius) { targetSearcher_->SetRadius(radius); }
-CAbilityValue* COperate::GetRadius() { return targetSearcher_->GetRadius(); }
-void COperate::SetTeams(TARGET_TEAMS teams) { targetSearcher_->SetTeams(teams); }
-TARGET_TEAMS COperate::GetTeams() { return targetSearcher_->GetTeams(); }
-void COperate::SetTypes(TARGET_TYPES types) { targetSearcher_->SetTypes(types); }
-TARGET_TYPES COperate::GetTypes() { return targetSearcher_->GetTypes(); }
-void COperate::SetFlags(TARGET_FLAGS flags) { targetSearcher_->SetFlags(flags); }
-TARGET_FLAGS COperate::GetFlags() { return targetSearcher_->GetFlags(); }
+void COperate::SetSingle(TARGET_CENTER single) { targetSearchType_->SetSingle(single); }
+TARGET_CENTER COperate::GetSingle() { return targetSearchType_->GetSingle(); }
+void COperate::SetCenter(TARGET_CENTER center) { targetSearchType_->SetCenter(center); }
+TARGET_CENTER COperate::GetCenter() { return targetSearchType_->GetCenter(); }
+void COperate::SetRadius(CAbilityValue* radius) { targetSearchType_->SetRadius(radius); }
+CAbilityValue* COperate::GetRadius() { return targetSearchType_->GetRadius(); }
+void COperate::SetTeams(TARGET_TEAMS teams) { targetSearchType_->SetTeams(teams); }
+TARGET_TEAMS COperate::GetTeams() { return targetSearchType_->GetTeams(); }
+void COperate::SetTypes(TARGET_TYPES types) { targetSearchType_->SetTypes(types); }
+TARGET_TYPES COperate::GetTypes() { return targetSearchType_->GetTypes(); }
+void COperate::SetFlags(TARGET_FLAGS flags) { targetSearchType_->SetFlags(flags); }
+TARGET_FLAGS COperate::GetFlags() { return targetSearchType_->GetFlags(); }
+void COperate::SetMaxTargets(CAbilityValue* max) { targetSearchType_->SetMaxTargets(max); }
+CAbilityValue* COperate::GetMaxTargets() { return targetSearchType_->GetMaxTargets(); }
+
+void COperate::SetParentTargets(CTargetStack* parent) {
+    targetStack_->SetParent(parent);
+}
+
+void COperate::SetSelfTargets(TARGET_LIST targets) {
+    targetStack_->SetSelf(new CTargetStackItem(targets));
+}
+
 
 #pragma mark -
 #pragma mark COpAddAbility
@@ -81,7 +97,7 @@ COpAddAbility::~COpAddAbility() {
     
 }
 
-int COpAddAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpAddAbility::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -98,7 +114,7 @@ COpActOnTargets::~COpActOnTargets() {
     
 }
 
-int COpActOnTargets::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpActOnTargets::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -121,14 +137,15 @@ COpApplyModifier::~COpApplyModifier() {
     
 }
 
-int COpApplyModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
-    auto targets = targetSearcher_->GetTargets(entity);
+int COpApplyModifier::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
+    COperate::Execute(entity, ability, parentStack);
     auto modifierData = ability->GetModifierData(modifierName_);
     assert(modifierData);
-    for (auto target : targets) {
+    for (auto target : targetStack_->GetValid()->GetTargets()) {
         CModifier* modifier = new CModifier();
-        target->AddModifer(modifier);
         modifier->SetModifierData(modifierData->Clone());
+        modifier->GetTargetStack()->SetParent(parentStack);
+        target->AddModifer(modifier);
         modifier->Activate(entity, ability);
     }
     
@@ -148,7 +165,7 @@ COpAttachEffect::~COpAttachEffect() {
     
 }
 
-int COpAttachEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpAttachEffect::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -163,7 +180,7 @@ COpBlink::~COpBlink() {
     
 }
 
-int COpBlink::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpBlink::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -185,7 +202,7 @@ COpCreateThinker::~COpCreateThinker() {
     CScheduleManager::getInstance()->RemoveSchedule(this);
 }
 
-int COpCreateThinker::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpCreateThinker::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     std::cout << "COpCreateThinker Execute" << std::endl;
     CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&COpCreateThinker::Update), interval_);
     return 1;
@@ -211,7 +228,7 @@ COpDamage::~COpDamage() {
     
 }
 
-int COpDamage::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpDamage::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -229,7 +246,7 @@ COpDelayedAction::~COpDelayedAction() {
     
 }
 
-int COpDelayedAction::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpDelayedAction::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -247,7 +264,7 @@ COpFireEffect::~COpFireEffect() {
     
 }
 
-int COpFireEffect::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpFireEffect::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     std::cout << "COpFireEffect Execute" << std::endl;
     return 1;
 }
@@ -265,7 +282,7 @@ COpFireSound::~COpFireSound() {
     
 }
 
-int COpFireSound::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpFireSound::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -288,8 +305,13 @@ COpHeal::~COpHeal() {
     
 }
 
-int COpHeal::Execute(CAbilityEntity* entity, CAbility* ability) {
-    std::cout << "Heal " << healAmount_ << std::endl;
+int COpHeal::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
+    COperate::Execute(entity, ability, parentStack);
+    auto targets = targetStack_->GetValid()->GetTargets();
+    for (auto target : targets) {
+        std::cout << "Heal " << target << " " << healAmount_ << std::endl;
+    }
+    
     return 1;
 }
 
@@ -315,7 +337,7 @@ COpKnockback::~COpKnockback() {
     
 }
 
-int COpKnockback::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpKnockback::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -332,7 +354,7 @@ COpLevelUpAbility::~COpLevelUpAbility() {
     
 }
 
-int COpLevelUpAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLevelUpAbility::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -349,7 +371,7 @@ COpLifesteal::~COpLifesteal() {
     
 }
 
-int COpLifesteal::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLifesteal::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -358,10 +380,12 @@ int COpLifesteal::Execute(CAbilityEntity* entity, CAbility* ability) {
 // COpLinearProjectile
 COpLinearProjectile::COpLinearProjectile()
 : effectName_(0)
-, moveSpeed_(0.f)
-, startPosition_(0)
+, moveSpeed_(0)
+, startRadius_(0)
+, endRadius_(0)
+, distance_(0)
 , isProvidesVision_(false)
-, visionRadius_ (0.f)
+, visionRadius_ (0)
 {
     
 }
@@ -370,7 +394,7 @@ COpLinearProjectile::~COpLinearProjectile() {
     
 }
 
-int COpLinearProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLinearProjectile::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -391,7 +415,7 @@ COpTrackingProjectile::~COpTrackingProjectile() {
     
 }
 
-int COpTrackingProjectile::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpTrackingProjectile::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -410,7 +434,7 @@ COpRandom::~COpRandom() {
     
 }
 
-int COpRandom::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRandom::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -427,7 +451,7 @@ COpRemoveAbility::~COpRemoveAbility() {
     
 }
 
-int COpRemoveAbility::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRemoveAbility::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -444,7 +468,7 @@ COpRemoveModifier::~COpRemoveModifier() {
     
 }
 
-int COpRemoveModifier::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRemoveModifier::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -462,7 +486,7 @@ COpRunScript::~COpRunScript() {
     
 }
 
-int COpRunScript::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpRunScript::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -483,7 +507,7 @@ COpSpawnUnit::~COpSpawnUnit() {
     
 }
 
-int COpSpawnUnit::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpSpawnUnit::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -500,7 +524,7 @@ COpStun::~COpStun() {
     
 }
 
-int COpStun::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpStun::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -517,7 +541,7 @@ COpSpendMana::~COpSpendMana() {
     
 }
 
-int COpSpendMana::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpSpendMana::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     return 1;
 }
 
@@ -528,7 +552,7 @@ COpLog::COpLog() {}
 COpLog::COpLog(std::string text): text_(text) {}
 COpLog::~COpLog() {}
 
-int COpLog::Execute(CAbilityEntity* entity, CAbility* ability) {
+int COpLog::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     std::cout << "Operate:" << text_ << std::endl;
     return 1;
 }

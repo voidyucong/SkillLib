@@ -1,0 +1,75 @@
+{
+	"name": "扁鹊2",
+	"AbilityBehavior": ["ABILITY_BEHAVIOR_DIRECTIONAL", "ABILITY_BEHAVIOR_IGNORE_BACKSWING"],
+	"AbilityUnitDamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
+	"AbilityUnitTargetTeam": "TARGET_TEAM_BOTH",
+	"AbilityUnitTargetType": "TARGET_TYPE_HERO",
+	"IsIgnoreSpellImmunity": false,
+	"BeginLevel": 1,
+	"StepLevel": 1,
+	"MaxLevel": 3,
+	"AbilityTextureName": "puck_dream_coil",
+
+	"AbilityCastWidth": 50,
+	"AbilityCastRange": [750, 750, 750],
+	"AbilityCastPoint": [0.1, 0.1, 0.1],
+	"AbilityCooldown": [20.0, 20.0, 20.0],
+	"AbilityManaCost": [20, 15, 10],
+	"AbilityDamage": [100, 130, 160],
+
+	"AbilitySpecial": [
+		{
+			"type": "float",
+			"key": "radius",
+			"value": [750, 750, 750]
+		},
+		{
+			"type": "float",
+			"key": "damage",
+			"value": [100, 130, 160]
+		},
+		{
+			"type": "float",
+			"key": "manaCost",
+			"value": [20, 15, 10]
+		},
+		{
+			"type": "float",
+			"key": "heal",
+			"value": [100, 130, 150]
+		}
+	],
+
+	"OnSpellStart": {
+		"LinearProjectile": {
+			"Target": {
+				"Teams": "DOTA_UNIT_TARGET_TEAM_BOTH",
+				"Types": "DOTA_UNIT_TARGET_HERO",
+			},
+			"EffectName": "particles/units/heroes/hero_drow/drow_silence_wave.vpcf",
+			"MoveSpeed": 10,
+			"StartRadius": 50,
+			"EndRadius": 50,
+			"AttachType": "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN",
+			"Distance": 1000
+		}
+	},
+
+	"OnProjectileHitUnit": {
+		"Damage": {
+			"Target": {
+				"Teams": "TARGET_TEAM_ENEMY",
+				"Types": "DOTA_UNIT_TARGET_HERO",
+			},
+			"DamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
+			"Damage": 100,
+		},
+		"Heal": {
+			"Target": {
+				"Teams": "TARGET_TEAM_FRIENDLY",
+				"Types": "DOTA_UNIT_TARGET_HERO",
+			},
+			"HealAmount": 80,
+		}
+	}
+}

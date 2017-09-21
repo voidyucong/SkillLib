@@ -1,0 +1,87 @@
+{
+	"name": "治疗",
+	"AbilityBehavior": ["ABILITY_BEHAVIOR_NO_TARGET"],
+	"AbilityUnitDamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
+	"AbilityUnitTargetTeam": "TARGET_TEAM_FRIENDLY",
+	"AbilityUnitTargetType": "TARGET_TYPE_HERO",
+	"IsIgnoreSpellImmunity": true,
+	"BeginLevel": 1,
+	"StepLevel": 1,
+	"MaxLevel": 3,
+	"AbilityTextureName": "puck_dream_coil",
+
+	"AbilityCastWidth": 50,
+	"AbilityCastRange": 100,
+	"AbilityCastPoint": [0.1, 0.1, 0.1],
+	"AbilityCooldown": [20.0, 20.0, 20.0],
+	"AbilityManaCost": [20, 15, 10],
+	"AbilityDamage": [100, 130, 160],
+
+	"AbilitySpecial": [
+		{
+			"type": "float",
+			"key": "damage",
+			"value": [100, 130, 160]
+		},
+		{
+			"type": "float",
+			"key": "manaCost",
+			"value": [20, 15, 10]
+		},
+		{
+			"type": "float",
+			"key": "duration",
+			"value": 10
+		},
+		{
+			"type": "float",
+			"key": "cooldown",
+			"value": [20.0, 20.0, 20.0]
+		}
+	],
+
+	"OnSpellStart": {
+		"ApplyModifier": {
+			"Target": "CASTER",
+			"ModifierName": "modifier_test"
+		}
+	},
+
+	"Modifiers": {
+		"modifier_test": {
+			"IsBuff": true,
+			"IsHidden": false,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": true,
+			"MaxMulti": 5,
+			"Duration": 1,
+
+			"ThinkInterval": 0.5,
+			"OnIntervalThink": {
+				"Log": {
+					"text": "modifier_test OnIntervalThink"
+				},
+				"Heal": {
+					"HealAmount": 100
+				}
+			},
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_test OnCreated"
+				}
+			},
+
+			"OnDestroy": {
+				"Log": {
+					"text": "modifier_test OnDestroy"
+				}
+			},
+
+			"Properties": {
+				"MODIFIER_ATTRIBUTE_ARMOR_BONUS": 50
+			}
+		}
+	}
+}

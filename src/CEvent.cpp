@@ -8,6 +8,8 @@
 
 #include "CEvent.hpp"
 #include "COperate.hpp"
+#include "CAbility.hpp"
+#include "CTargetStack.hpp"
 
 CEvent::CEvent()
 {
@@ -21,10 +23,10 @@ CEvent::~CEvent() {
     operators_.clear();
 }
 
-int CEvent::Execute(CAbilityEntity* entity, CAbility* ability) {
+int CEvent::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     int ok = 1;
     for (COperate* op : operators_) {
-        ok &= op->Execute(entity, ability);
+        ok &= op->Execute(entity, ability, parentStack);
     }
     return ok;
 }

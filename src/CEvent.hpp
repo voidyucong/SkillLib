@@ -16,11 +16,12 @@
 class COperate;
 class CAbility;
 class CAbilityEntity;
+class CTargetStack;
 
 class CEvent : public CObject {
     
 public:
-    virtual int Execute(CAbilityEntity* entity, CAbility* ability);
+    virtual int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     CEvent();
     CEvent(EVENT_TYPE type);

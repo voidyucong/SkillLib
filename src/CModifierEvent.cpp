@@ -8,6 +8,7 @@
 
 #include "CModifierEvent.hpp"
 #include "COperate.hpp"
+#include "CTargetStack.hpp"
 
 CModifierEvent::CModifierEvent() {
     
@@ -17,8 +18,8 @@ CModifierEvent::~CModifierEvent() {
     
 }
 
-int CModifierEvent::Execute(CAbilityEntity *entity, CAbility *ability) {
-    return CEvent::Execute(entity, ability);
+int CModifierEvent::Execute(CAbilityEntity *entity, CAbility *ability, CTargetStack* parentStack) {
+    return CEvent::Execute(entity, ability, parentStack);
 }
 
 CModifierEvent* CModifierEvent::Clone() {

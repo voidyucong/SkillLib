@@ -13,6 +13,7 @@
 
 CAbilityEntity::CAbilityEntity()
 : abilityContainer_(new CAbilityContainer())
+, attacker_(0)
 {
     
 }
@@ -68,7 +69,7 @@ void CAbilityEntity::ExecuteAbility(unsigned index) {
     assert(index < abilityContainer_->GetAbilityLayout());
     auto ability = abilityContainer_->GetAbility(index);
     assert(ability);
-    ability->Cast(this);
+    ability->Cast();
 }
 
 
@@ -76,6 +77,7 @@ void CAbilityEntity::ExecuteAbility(unsigned index) {
 #pragma mark attributes
 void CAbilityEntity::SetEntityAbility(CAbility* ability, unsigned index) {
     abilityContainer_->SetAbility(ability, index);
+    ability->SetCaster(this);
 }
 
 void CAbilityEntity::SetEntityAbilityLayout(unsigned layout) {

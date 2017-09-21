@@ -152,15 +152,17 @@ CAbility* SkillReaderJson::CreateAbility(const rapidjson::Value& json) {
     if (behavior & ABILITY_BEHAVIOR_UNIT_TARGET) {
         assert(CheckJsonIsKeyNotNull(json, "AbilityUnitTargetTeam"));
         // team
-        std::string team_str = GetJsonStringValueFromDic(json, "AbilityUnitTargetTeam");
-        ability->SetTeams((TARGET_TEAMS)SKB::GetEnumByString(team_str));
+        ability->SetTeams((TARGET_TEAMS)SKB::GetEnumByString(GetJsonStringValueFromDic(json, "AbilityUnitTargetTeam", "TARGET_TEAM_NONE")));
         // type
         ability->SetTypes((TARGET_TYPES)SKB::GetEnumByString(GetJsonStringValueFromDic(json, "AbilityUnitTargetType", "TARGET_TYPE_ALL")));
         // flags
         ability->SetFlags((TARGET_FLAGS)SKB::GetEnumByString(GetJsonStringValueFromDic(json, "AbilityUnitTargetFlags", "TARGET_FLAG_NONE")));
-        
         // center
         ability->SetCenter(TARGET_CENTER_CASTER);
+        // radius
+        ability->SetRadius(CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? CreateVariableList(json["AbilityCastRange"], "float") : NULL);
+        // max targets
+        ability->SetRadius(CheckJsonIsKeyNotNull(json, "MaxTargets") ? CreateVariableList(json["MaxTargets"], "float") : NULL);
     }
     // damage type
     ability->SetDamageType((ABILITY_DAMAGE_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(json, "AbilityUnitDamageType")));
@@ -177,7 +179,7 @@ CAbility* SkillReaderJson::CreateAbility(const rapidjson::Value& json) {
     // cast width
     ability->SetCastWidth(CreateVariableList(json["AbilityCastWidth"], "float"));
     // cast range
-    ability->SetCastRange(CreateVariableList(json["AbilityCastRange"], "float"));
+    ability->SetCastRange(CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? CreateVariableList(json["AbilityCastRange"], "float") : NULL);
     // cast point
     ability->SetCastPoint(CreateVariableList(json["AbilityCastPoint"], "float"));
     // cooldown
@@ -206,8 +208,9 @@ void SkillReaderJson::ParseSpecialValue(const rapidjson::Value& json, CAbility* 
     }
 }
 
-// 创建参数列表，json可为int、float、string、list
+// 创建参数列表，json可为float、string、list
 CAbilityValue* SkillReaderJson::CreateVariableList(const rapidjson::Value& item, std::string type) {
+    if (item.IsNull()) return NULL;
     if (item.IsArray()) {
         CAbilityValue::Array array;
         
@@ -260,7 +263,7 @@ void SkillReaderJson::ParseModifierEvent(const rapidjson::Value& json, CModifier
         {MODIFIER_EVENT_ON_DESTROY, "OnDestroy"},                   // 销毁时
         {MODIFIER_EVENT_ON_ATTACK, "OnAttack"},                     // 攻击时
         {MODIFIER_EVENT_ON_ATTACKED, "OnAttacked"},                 // 被攻击时
-        {MODIFIER_EVENT_ON_ATTACK_LADNED, "OnAttackLanded"},        // 攻击到时
+        {MODIFIER_EVENT_ON_ATTACK_LANDED, "OnAttackLanded"},        // 攻击到时
         {MODIFIER_EVENT_ON_ATTACK_FAILED, "OnAttackFailed"},        // 攻击单位丢失时
         {MODIFIER_EVENT_ON_ATTACK_ALLIED, "OnAttackAllied"},        // 攻击同盟时
         {MODIFIER_EVENT_ON_DEAL_DAMAGE, "OnDealDamage"},            // 施加伤害时
@@ -317,9 +320,34 @@ void SkillReaderJson::ParseOperate(const rapidjson::Value& json, CEvent* event) 
         ParseOperateTarget(item, operate);
         if (operate) event->AddOperate(operate);
     }
+    if (CheckJsonIsKeyNotNull(json, "Damage")) {
+        const rapidjson::Value& item = json["Damage"];
+        assert(CheckJsonIsKeyNotNull(item, "HealAmount"));
+        COpDamage* operate = new COpDamage();
+        operate->SetDamageType((ABILITY_DAMAGE_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(item, "DamageType", "ABILITY_DAMAGE_TYPE_MAGICAL")));
+        operate->SetDamage(CreateVariableList(item, "Damage"));
+        operate->SetCurrentPercent(CreateVariableList(item, "CurrentHealthPercentBasedDamage"));
+        operate->SetMaxPercent(CreateVariableList(item, "MaxHealthPercentBasedDamage"));
+        ParseOperateTarget(item, operate);
+        if (operate) event->AddOperate(operate);
+    }
     if (CheckJsonIsKeyNotNull(json, "Log")) {
         const rapidjson::Value& item = json["Log"];
         COpLog* operate = new COpLog(GetJsonStringValueFromDic(item, "text"));
+        ParseOperateTarget(item, operate);
+        if (operate) event->AddOperate(operate);
+    }
+    if (CheckJsonIsKeyNotNull(json, "LinearProjectile")) {
+        const rapidjson::Value& item = json["LinearProjectile"];
+        COpLinearProjectile* operate = new COpLinearProjectile();
+        operate->SetEffectName(GetJsonStringValueFromDic(item, "EffectName", ""));
+        operate->SetMoveSpeed(CreateVariableList(item, "MoveSpeed"));
+        operate->SetStartRadius(CreateVariableList(item, "StartRadius"));
+        operate->SetEndRadius(CreateVariableList(item, "EndRadius"));
+        operate->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
+        operate->SetDistance(CreateVariableList(item, "Distance"));
+        operate->SetIsProvidesVision(GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
+        operate->SetVisionRadius(CreateVariableList(item, "VisionRadius"));
         ParseOperateTarget(item, operate);
         if (operate) event->AddOperate(operate);
     }
@@ -328,7 +356,7 @@ void SkillReaderJson::ParseOperate(const rapidjson::Value& json, CEvent* event) 
 void SkillReaderJson::ParseOperateTarget(const rapidjson::Value& json, COperate* operate) {
     if (json.IsNull() || !CheckJsonIsKeyNotNull(json, "Target")) return;
     // 范围搜索
-    if (json["Target"].IsArray()) {
+    if (json["Target"].IsObject()) {
         std::string center = GetJsonStringValueFromDic(json, "Center");
         if (center == "TARGET") operate->SetCenter(TARGET_CENTER_TARGET);
         else if (center == "CASTER" ) operate->SetCenter(TARGET_CENTER_CASTER);
@@ -343,6 +371,9 @@ void SkillReaderJson::ParseOperateTarget(const rapidjson::Value& json, COperate*
         operate->SetTypes((TARGET_TYPES)SKB::GetEnumByString(type_str));
         
         operate->SetRadius(CreateVariableList(json["Target"]["Radius"], "float"));
+        
+        // max targets
+        operate->SetMaxTargets(CheckJsonIsKeyNotNull(json, "MaxTargets") ? CreateVariableList(json["MaxTargets"], "float") : NULL);
     }
     // 已存在
     else {

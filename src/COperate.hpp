@@ -9,21 +9,25 @@
 #ifndef COperate_hpp
 #define COperate_hpp
 #include <iostream>
+#include <assert.h>
+#include <vector>
 #include "SkillTypes.h"
 #include "CObject.hpp"
 
 class CEvent;
-class CTargetSearcher;
+class CTargetSearchType;
 class CAbility;
 class CAbilityEntity;
 class CAbilityValue;
 class CRunScprite;
+class CTargetStack;
 
 class COperate : public CObject {
 protected:
-    CTargetSearcher* targetSearcher_;
+    CTargetSearchType* targetSearchType_;
+    CTargetStack* targetStack_;
 public:
-    virtual int Execute(CAbilityEntity* entity, CAbility* ability);
+    virtual int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     virtual void Update(float dt);
     virtual COperate* Clone();
     virtual COperate* CreateCloneInstance();
@@ -47,6 +51,12 @@ public:
     void SetFlags(TARGET_FLAGS flags);
     TARGET_FLAGS GetFlags();
     
+    void SetMaxTargets(CAbilityValue* max);
+    CAbilityValue* GetMaxTargets();
+    
+    void SetParentTargets(CTargetStack* parent);
+    void SetSelfTargets(TARGET_LIST targets);
+    
     COperate();
     virtual ~COperate();
 };
@@ -57,7 +67,7 @@ public:
 class COpAddAbility : public COperate {
     
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpAddAbility();
     ~COpAddAbility();
@@ -70,7 +80,7 @@ private:
  */
 class COpActOnTargets : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpActOnTargets();
     ~COpActOnTargets();
@@ -83,7 +93,7 @@ private:
  */
 class COpApplyModifier : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpApplyModifier();
     COpApplyModifier(std::string modifierName);
@@ -97,7 +107,7 @@ private:
  */
 class COpAttachEffect : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpAttachEffect();
     ~COpAttachEffect();
@@ -110,7 +120,7 @@ private:
  */
 class COpBlink : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpBlink();
     ~COpBlink();
@@ -121,7 +131,7 @@ public:
  */
 class COpCreateThinker : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpCreateThinker();
     COpCreateThinker(float interval, float duration);
@@ -138,15 +148,20 @@ private:
  */
 class COpDamage : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpDamage();
     ~COpDamage();
+    
+    void SetDamageType(ABILITY_DAMAGE_TYPE type) { damageType_ = type; }
+    void SetDamage(CAbilityValue* value) { damage_ = value; }
+    void SetCurrentPercent(CAbilityValue* value) { currentHealthPercentBasedDamage_ = value; }
+    void SetMaxPercent(CAbilityValue* value) { maxHealthPercentBasedDamage_ = value; }
 private:
     ABILITY_DAMAGE_TYPE damageType_;
-    float damage_;      // 伤害
-    float currentHealthPercentBasedDamage_;  //  基于当前生命百分比伤害
-    float maxHealthPercentBasedDamage_;     // 基于最大生命百分比伤害
+    CAbilityValue* damage_;      // 伤害
+    CAbilityValue* currentHealthPercentBasedDamage_;  //  基于当前生命百分比伤害
+    CAbilityValue* maxHealthPercentBasedDamage_;     // 基于最大生命百分比伤害
 };
 
 /**
@@ -154,7 +169,7 @@ private:
  */
 class COpDelayedAction : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpDelayedAction();
     ~COpDelayedAction();
@@ -168,7 +183,7 @@ private:
  */
 class COpFireEffect : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpFireEffect();
     ~COpFireEffect();
@@ -183,7 +198,7 @@ private:
  */
 class COpFireSound : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpFireSound();
     ~COpFireSound();
@@ -196,7 +211,7 @@ private:
  */
 class COpHeal : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     void SetHealAmount(float amount) { healAmount_ = amount; }
     
     COpHeal();
@@ -213,7 +228,7 @@ private:
  */
 class COpKnockback : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpKnockback();
     ~COpKnockback();
@@ -228,7 +243,7 @@ private:
  */
 class COpLevelUpAbility : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpLevelUpAbility();
     ~COpLevelUpAbility();
@@ -241,7 +256,7 @@ private:
  */
 class COpLifesteal : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpLifesteal();
     ~COpLifesteal();
@@ -254,16 +269,28 @@ private:
  */
 class COpLinearProjectile : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpLinearProjectile();
     ~COpLinearProjectile();
+    
+    void SetEffectName(std::string name) { effectName_ = name; }
+    void SetMoveSpeed(CAbilityValue* value) { moveSpeed_ = value; }
+    void SetStartRadius(CAbilityValue* value) { startRadius_ = value; }
+    void SetEndRadius(CAbilityValue* value) { endRadius_ = value; }
+    void SetDistance(CAbilityValue* value) { distance_ = value; }
+    void SetAttachType(MODIFIER_EFFECT_ATTACH_TYPE value) { attachType_ = value; }
+    void SetIsProvidesVision(bool value) { isProvidesVision_ = value; }
+    void SetVisionRadius(CAbilityValue* value) { visionRadius_ = value; }
 private:
     std::string effectName_;
-    float moveSpeed_;
-    unsigned startPosition_;
+    CAbilityValue* moveSpeed_;
+    CAbilityValue* startRadius_;
+    CAbilityValue* endRadius_;
+    CAbilityValue* distance_;
+    MODIFIER_EFFECT_ATTACH_TYPE attachType_;
     bool isProvidesVision_;     // 是否提供视野
-    float visionRadius_;        // 视野范围
+    CAbilityValue* visionRadius_;        // 视野范围
 };
 
 /**
@@ -271,16 +298,17 @@ private:
  */
 class COpTrackingProjectile : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpTrackingProjectile();
     ~COpTrackingProjectile();
 private:
     std::string effectName_;
-    float moveSpeed_;
+    float moveSpeed_;           // 移动速度
     unsigned startPosition_;
     bool isProvidesVision_;     // 是否提供视野
     float visionRadius_;        // 视野范围
+    MODIFIER_EFFECT_ATTACH_TYPE SourceAttachment_;          // 附着点
 };
 
 /**
@@ -288,7 +316,7 @@ private:
  */
 class COpRandom : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpRandom();
     ~COpRandom();
@@ -303,7 +331,7 @@ private:
  */
 class COpRemoveAbility : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpRemoveAbility();
     ~COpRemoveAbility();
@@ -316,7 +344,7 @@ private:
  */
 class COpRemoveModifier : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpRemoveModifier();
     ~COpRemoveModifier();
@@ -329,7 +357,7 @@ private:
  */
 class COpRunScript : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpRunScript();
     ~COpRunScript();
@@ -343,7 +371,7 @@ private:
  */
 class COpSpawnUnit : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpSpawnUnit();
     ~COpSpawnUnit();
@@ -360,7 +388,7 @@ private:
  */
 class COpStun : public COperate {
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpStun();
     ~COpStun();
@@ -373,7 +401,7 @@ private:
  */
 class COpSpendMana : public COperate{
 public:
-    int Execute(CAbilityEntity* entity, CAbility* ability);
+    int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     
     COpSpendMana();
     ~COpSpendMana();
@@ -386,7 +414,7 @@ private:
  */
 class COpLog : public COperate {
 public:
-    virtual int Execute(CAbilityEntity* entity, CAbility* ability);
+    virtual int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
     std::string GetText() { return text_; }
     void SetText(std::string text) { text_ = text; }
     
