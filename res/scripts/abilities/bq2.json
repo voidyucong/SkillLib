@@ -50,8 +50,7 @@
 			"MoveSpeed": 10,
 			"StartRadius": 50,
 			"EndRadius": 50,
-			"AttachType": "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN",
-			"Distance": 1000
+			"AttachType": "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN"
 		}
 	},
 
@@ -62,7 +61,7 @@
 				"Types": "DOTA_UNIT_TARGET_HERO",
 			},
 			"DamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
-			"Damage": 100,
+			"Damage": "$damage",
 		},
 		"Heal": {
 			"Target": {

@@ -18,6 +18,8 @@
 #include "CTargetStack.hpp"
 #include "CTargetSearcher.hpp"
 #include "CAbilityValue.hpp"
+#include "CLinearProjectile.hpp"
+#include "CTrackingProjectile.hpp"
 
 // COperate
 COperate::COperate()
@@ -379,13 +381,7 @@ int COpLifesteal::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStac
 #pragma mark COpLinearProjectile
 // COpLinearProjectile
 COpLinearProjectile::COpLinearProjectile()
-: effectName_(0)
-, moveSpeed_(0)
-, startRadius_(0)
-, endRadius_(0)
-, distance_(0)
-, isProvidesVision_(false)
-, visionRadius_ (0)
+: data_(new CLinearProjectileData())
 {
     
 }

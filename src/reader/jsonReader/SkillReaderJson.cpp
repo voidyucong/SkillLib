@@ -14,6 +14,8 @@
 #include "CModifierData.hpp"
 #include "COperate.hpp"
 #include "SkillTypesMapping.h"
+#include "CLinearProjectile.hpp"
+#include "CTrackingProjectile.hpp"
 
 static SkillReaderJson* s_pInstance = NULL;
 
@@ -352,14 +354,14 @@ void SkillReaderJson::ParseOperate(const rapidjson::Value& json, CEvent* event, 
     if (CheckJsonIsKeyNotNull(json, "LinearProjectile")) {
         const rapidjson::Value& item = json["LinearProjectile"];
         COpLinearProjectile* operate = new COpLinearProjectile();
-        operate->SetEffectName(GetJsonStringValueFromDic(item, "EffectName", ""));
-        operate->SetMoveSpeed(CreateVariableList(item["MoveSpeed"], "float", ability));
-        operate->SetStartRadius(CreateVariableList(item["StartRadius"], "float", ability));
-        operate->SetEndRadius(CreateVariableList(item["EndRadius"], "float", ability));
-        operate->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
-        operate->SetDistance(CreateVariableList(item["Distance"], "float", ability));
-        operate->SetIsProvidesVision(GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
-        operate->SetVisionRadius(CreateVariableList(item["VisionRadius"], "float", ability));
+        operate->GetData()->SetEffectName(GetJsonStringValueFromDic(item, "EffectName", ""));
+        operate->GetData()->SetMoveSpeed(CreateVariableList(item["MoveSpeed"], "float", ability));
+        operate->GetData()->SetStartRadius(CreateVariableList(item["StartRadius"], "float", ability));
+        operate->GetData()->SetEndRadius(CreateVariableList(item["EndRadius"], "float", ability));
+        operate->GetData()->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
+        operate->GetData()->SetDistance(CreateVariableList(item["Distance"], "float", ability));
+        operate->GetData()->SetIsProvidesVision(GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
+        operate->GetData()->SetVisionRadius(CreateVariableList(item["VisionRadius"], "float", ability));
         ParseOperateTarget(item, operate, ability);
         if (operate) event->AddOperate(operate);
     }

@@ -21,6 +21,8 @@ class CAbilityEntity;
 class CAbilityValue;
 class CRunScprite;
 class CTargetStack;
+class CLinearProjectileData;
+class CTrackingProjectileData;
 
 class COperate : public CObject {
 protected:
@@ -274,23 +276,9 @@ public:
     COpLinearProjectile();
     ~COpLinearProjectile();
     
-    void SetEffectName(std::string name) { effectName_ = name; }
-    void SetMoveSpeed(CAbilityValue* value) { moveSpeed_ = value; }
-    void SetStartRadius(CAbilityValue* value) { startRadius_ = value; }
-    void SetEndRadius(CAbilityValue* value) { endRadius_ = value; }
-    void SetDistance(CAbilityValue* value) { distance_ = value; }
-    void SetAttachType(MODIFIER_EFFECT_ATTACH_TYPE value) { attachType_ = value; }
-    void SetIsProvidesVision(bool value) { isProvidesVision_ = value; }
-    void SetVisionRadius(CAbilityValue* value) { visionRadius_ = value; }
+    CLinearProjectileData* GetData() { return data_; }
 private:
-    std::string effectName_;
-    CAbilityValue* moveSpeed_;
-    CAbilityValue* startRadius_;
-    CAbilityValue* endRadius_;
-    CAbilityValue* distance_;
-    MODIFIER_EFFECT_ATTACH_TYPE attachType_;
-    bool isProvidesVision_;     // 是否提供视野
-    CAbilityValue* visionRadius_;        // 视野范围
+    CLinearProjectileData* data_;
 };
 
 /**
