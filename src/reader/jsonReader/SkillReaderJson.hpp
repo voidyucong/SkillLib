@@ -31,19 +31,19 @@ public:
     CAbility* CreateAbility(const rapidjson::Value& json);
     
     void ParseSpecialValue(const rapidjson::Value& json, CAbility* ability);
-    CAbilityValue* CreateVariableList(const rapidjson::Value& item, std::string type);
+    CAbilityValue* CreateVariableList(const rapidjson::Value& item, std::string type, CAbility* ability);
     
     void ParseAbilityEvent(const rapidjson::Value& json, CAbility* ability);
-    CEvent* CreateAbilityEvent(const rapidjson::Value& json, std::string eventName);
+    CEvent* CreateAbilityEvent(const rapidjson::Value& json, std::string eventName, CAbility* ability);
     
-    void ParseModifierEvent(const rapidjson::Value& json, CModifierData* modifier);
-    CModifierEvent* CreateModifierEvnt(const rapidjson::Value& json, std::string eventName);
+    void ParseModifierEvent(const rapidjson::Value& json, CModifierData* modifier, CAbility* ability);
+    CModifierEvent* CreateModifierEvnt(const rapidjson::Value& json, std::string eventName, CAbility* ability);
     
-    void ParseOperate(const rapidjson::Value& json, CEvent* event);
-    void ParseOperateTarget(const rapidjson::Value& json, COperate* operate);
+    void ParseOperate(const rapidjson::Value& json, CEvent* event, CAbility* ability);
+    void ParseOperateTarget(const rapidjson::Value& json, COperate* operate, CAbility* ability);
     
     void ParseModifiers(const rapidjson::Value& json, CAbility* ability);
-    CModifierData* CreateModifier(const rapidjson::Value& json, std::string name);
+    CModifierData* CreateModifier(const rapidjson::Value& json, std::string name, CAbility* ability);
 private:
     
 };

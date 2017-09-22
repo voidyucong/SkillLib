@@ -110,7 +110,3 @@ void CModifier::RemoveEntityProperty() {
     }
 }
 
-//const std::vector<CAbilityEntity*>& CModifier::FindTargets(CAbilityEntity* entity) {
-//    
-//}
-

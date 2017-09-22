@@ -20,7 +20,7 @@ public:
     typedef std::vector<CAbilityValue> Array;
     typedef std::string String;
 private:
-    union {
+    struct {
 //        int i;
         float f;
         String s;
@@ -40,13 +40,19 @@ public:
     CAbilityValue(Array&& value): a(std::move(value)), type_(ARRAY) {}
     CAbilityValue(const CAbilityValue& other) {
         if (this != &other) {
-//            if (other()) SetInt(other);
             if (other.IsFloat()) SetFloat(other.f);
             else if (other.IsString()) SetString(other.s);
             else if (other.IsArray()) SetArray(other.a);
         }
     }
     ~CAbilityValue() {}
+    CAbilityValue* Clone() {
+        CAbilityValue* ret = new CAbilityValue();
+        if (IsFloat()) ret->SetFloat(f);
+        else if (IsString()) ret->SetString(s);
+        else if (IsArray()) ret->SetArray(a);
+        return ret;
+    }
     
     CAbilityValue& operator= (const CAbilityValue& other);
     

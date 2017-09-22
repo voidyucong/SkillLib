@@ -131,6 +131,11 @@ bool GetJsonBooleanValueFromArray(const rapidjson::Value& json, int idx) {
     return json[idx].GetBool();
 }
 
+bool IsJsonReference(std::string name) {
+    if (name == "") return false;
+    return *(name.begin()) == '%';
+}
+
 
 CAbility* SkillReaderJson::CreateAbility(const rapidjson::Value& json) {
     if (json.IsNull()) return NULL;
@@ -160,9 +165,9 @@ CAbility* SkillReaderJson::CreateAbility(const rapidjson::Value& json) {
         // center
         ability->SetCenter(TARGET_CENTER_CASTER);
         // radius
-        ability->SetRadius(CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? CreateVariableList(json["AbilityCastRange"], "float") : NULL);
+        ability->SetRadius(CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? CreateVariableList(json["AbilityCastRange"], "float", ability) : NULL);
         // max targets
-        ability->SetRadius(CheckJsonIsKeyNotNull(json, "MaxTargets") ? CreateVariableList(json["MaxTargets"], "float") : NULL);
+        ability->SetRadius(CheckJsonIsKeyNotNull(json, "MaxTargets") ? CreateVariableList(json["MaxTargets"], "float", ability) : NULL);
     }
     // damage type
     ability->SetDamageType((ABILITY_DAMAGE_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(json, "AbilityUnitDamageType")));
@@ -177,17 +182,17 @@ CAbility* SkillReaderJson::CreateAbility(const rapidjson::Value& json) {
     // texture name
     ability->SetTextureIconName(GetJsonStringValueFromDic(json, "AbilityTextureName"));
     // cast width
-    ability->SetCastWidth(CreateVariableList(json["AbilityCastWidth"], "float"));
+    ability->SetCastWidth(CreateVariableList(json["AbilityCastWidth"], "float", ability));
     // cast range
-    ability->SetCastRange(CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? CreateVariableList(json["AbilityCastRange"], "float") : NULL);
+    ability->SetCastRange(CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? CreateVariableList(json["AbilityCastRange"], "float", ability) : NULL);
     // cast point
-    ability->SetCastPoint(CreateVariableList(json["AbilityCastPoint"], "float"));
+    ability->SetCastPoint(CreateVariableList(json["AbilityCastPoint"], "float", ability));
     // cooldown
-    ability->SetBaseCooldown(CreateVariableList(json["AbilityCooldown"], "float"));
+    ability->SetBaseCooldown(CreateVariableList(json["AbilityCooldown"], "float", ability));
     // mana cost
-    ability->SetManaCost(CreateVariableList(json["AbilityManaCost"], "float"));
+    ability->SetManaCost(CreateVariableList(json["AbilityManaCost"], "float", ability));
     // damage
-    ability->SetDamage(CreateVariableList(json["AbilityDamage"], "float"));
+    ability->SetDamage(CreateVariableList(json["AbilityDamage"], "float", ability));
     
     // Event
     ParseAbilityEvent(json, ability);
@@ -203,17 +208,16 @@ void SkillReaderJson::ParseSpecialValue(const rapidjson::Value& json, CAbility* 
     for (int i = 0; i < GetJsonArraySize(json); ++i) {
         const rapidjson::Value& item = json[i];
         if (item.IsNull()) continue;
-        CAbilityValue* value = CreateVariableList(item["value"], GetJsonStringValueFromDic(item, "type"));
+        CAbilityValue* value = CreateVariableList(item["value"], GetJsonStringValueFromDic(item, "type"), ability);
         ability->AddSpecialValue(value, GetJsonStringValueFromDic(item, "key"));
     }
 }
 
 // 创建参数列表，json可为float、string、list
-CAbilityValue* SkillReaderJson::CreateVariableList(const rapidjson::Value& item, std::string type) {
+CAbilityValue* SkillReaderJson::CreateVariableList(const rapidjson::Value& item, std::string type, CAbility* ability) {
     if (item.IsNull()) return NULL;
     if (item.IsArray()) {
         CAbilityValue::Array array;
-        
         for (int j = 0; j < GetJsonArraySize(item); ++j) {
             if (type == "float")        array.push_back(GetJsonFloatValueFromArray(item, j));
             else if (type == "string")  array.push_back(GetJsonStringValueFromArray(item, j));
@@ -221,8 +225,15 @@ CAbilityValue* SkillReaderJson::CreateVariableList(const rapidjson::Value& item,
         return new CAbilityValue(array);
     }
     else {
+        if (item.IsString()) {
+            std::string value = item.GetString();
+            if (IsJsonReference(value)) {
+                std::string newvalue = std::string(value.begin() + 1, value.end());
+                return ability->GetSpecialValue(newvalue)->Clone();
+            }
+        }
         if (type == "float")        return new CAbilityValue(item.GetFloat());
-        else if (type == "string")  return new CAbilityValue(item.GetString());
+        else if (type == "string")  return new CAbilityValue(item.IsString());
     }
     return NULL;
 }
@@ -242,22 +253,22 @@ void SkillReaderJson::ParseAbilityEvent(const rapidjson::Value& json, CAbility* 
     };
     
     for (auto iter = events.begin(); iter != events.end(); ++iter) {
-        CEvent* event = CreateAbilityEvent(json, iter->second);
+        CEvent* event = CreateAbilityEvent(json, iter->second, ability);
         if (event) {
             ability->SetEvent(iter->first, event);
         }
     }
 }
 
-CEvent* SkillReaderJson::CreateAbilityEvent(const rapidjson::Value& json, std::string eventName) {
+CEvent* SkillReaderJson::CreateAbilityEvent(const rapidjson::Value& json, std::string eventName, CAbility* ability) {
     if (json.IsNull() || !CheckJsonIsKeyNotNull(json, eventName.c_str())) return NULL;
     const rapidjson::Value& eventdata = json[eventName.c_str()];
     CEvent* event = new CEvent();
-    ParseOperate(eventdata, event);
+    ParseOperate(eventdata, event, ability);
     return event;
 }
 
-void SkillReaderJson::ParseModifierEvent(const rapidjson::Value& json, CModifierData* modifier) {
+void SkillReaderJson::ParseModifierEvent(const rapidjson::Value& json, CModifierData* modifier, CAbility* ability) {
     std::map<MODIFIER_EVENT_TYPE, std::string> events = {
         {MODIFIER_EVENT_ON_CREATED, "OnCreated"},                   // 创建时
         {MODIFIER_EVENT_ON_DESTROY, "OnDestroy"},                   // 销毁时
@@ -289,71 +300,72 @@ void SkillReaderJson::ParseModifierEvent(const rapidjson::Value& json, CModifier
 
     };
     for (auto iter = events.begin(); iter != events.end(); ++iter) {
-        CModifierEvent* event = CreateModifierEvnt(json, iter->second);
+        CModifierEvent* event = CreateModifierEvnt(json, iter->second, ability);
         if (event) {
             modifier->SetModifierEvent(iter->first, event);
         }
     }
 }
 
-CModifierEvent* SkillReaderJson::CreateModifierEvnt(const rapidjson::Value& json, std::string eventName) {
+CModifierEvent* SkillReaderJson::CreateModifierEvnt(const rapidjson::Value& json, std::string eventName, CAbility* ability) {
     if (json.IsNull() || !CheckJsonIsKeyNotNull(json, eventName.c_str())) return NULL;
     const rapidjson::Value& eventdata = json[eventName.c_str()];
     CModifierEvent* event = new CModifierEvent();
-    ParseOperate(eventdata, event);
+    ParseOperate(eventdata, event, ability);
     return event;
 }
 
-void SkillReaderJson::ParseOperate(const rapidjson::Value& json, CEvent* event) {
+void SkillReaderJson::ParseOperate(const rapidjson::Value& json, CEvent* event, CAbility* ability) {
     if (json.IsNull()) return;
     if (CheckJsonIsKeyNotNull(json, "ApplyModifier")) {
         const rapidjson::Value& item = json["ApplyModifier"];
         assert(CheckJsonIsKeyNotNull(item, "ModifierName"));
         COpApplyModifier* operate = new COpApplyModifier(GetJsonStringValueFromDic(item, "ModifierName"));
-        ParseOperateTarget(item, operate);
+        ParseOperateTarget(item, operate, ability);
         if (operate) event->AddOperate(operate);
     }
     if (CheckJsonIsKeyNotNull(json, "Heal")) {
         const rapidjson::Value& item = json["Heal"];
         assert(CheckJsonIsKeyNotNull(item, "HealAmount"));
-        COpHeal* operate = new COpHeal(GetJsonFloatValueFromDic(item, "HealAmount"));
-        ParseOperateTarget(item, operate);
+        COpHeal* operate = new COpHeal(CreateVariableList(item["HealAmount"], "float", ability));
+        ParseOperateTarget(item, operate, ability);
         if (operate) event->AddOperate(operate);
     }
     if (CheckJsonIsKeyNotNull(json, "Damage")) {
         const rapidjson::Value& item = json["Damage"];
-        assert(CheckJsonIsKeyNotNull(item, "HealAmount"));
+        assert(CheckJsonIsKeyNotNull(item, "Damage"));
+        assert(CheckJsonIsKeyNotNull(item, "DamageType"));
         COpDamage* operate = new COpDamage();
         operate->SetDamageType((ABILITY_DAMAGE_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(item, "DamageType", "ABILITY_DAMAGE_TYPE_MAGICAL")));
-        operate->SetDamage(CreateVariableList(item, "Damage"));
-        operate->SetCurrentPercent(CreateVariableList(item, "CurrentHealthPercentBasedDamage"));
-        operate->SetMaxPercent(CreateVariableList(item, "MaxHealthPercentBasedDamage"));
-        ParseOperateTarget(item, operate);
+        operate->SetDamage(CreateVariableList(item["Damage"], "float", ability));
+        operate->SetCurrentPercent(CreateVariableList(item["CurrentHealthPercentBasedDamage"], "float", ability));
+        operate->SetMaxPercent(CreateVariableList(item["MaxHealthPercentBasedDamage"], "float", ability));
+        ParseOperateTarget(item, operate, ability);
         if (operate) event->AddOperate(operate);
     }
     if (CheckJsonIsKeyNotNull(json, "Log")) {
         const rapidjson::Value& item = json["Log"];
         COpLog* operate = new COpLog(GetJsonStringValueFromDic(item, "text"));
-        ParseOperateTarget(item, operate);
+        ParseOperateTarget(item, operate, ability);
         if (operate) event->AddOperate(operate);
     }
     if (CheckJsonIsKeyNotNull(json, "LinearProjectile")) {
         const rapidjson::Value& item = json["LinearProjectile"];
         COpLinearProjectile* operate = new COpLinearProjectile();
         operate->SetEffectName(GetJsonStringValueFromDic(item, "EffectName", ""));
-        operate->SetMoveSpeed(CreateVariableList(item, "MoveSpeed"));
-        operate->SetStartRadius(CreateVariableList(item, "StartRadius"));
-        operate->SetEndRadius(CreateVariableList(item, "EndRadius"));
+        operate->SetMoveSpeed(CreateVariableList(item["MoveSpeed"], "float", ability));
+        operate->SetStartRadius(CreateVariableList(item["StartRadius"], "float", ability));
+        operate->SetEndRadius(CreateVariableList(item["EndRadius"], "float", ability));
         operate->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
-        operate->SetDistance(CreateVariableList(item, "Distance"));
+        operate->SetDistance(CreateVariableList(item["Distance"], "float", ability));
         operate->SetIsProvidesVision(GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
-        operate->SetVisionRadius(CreateVariableList(item, "VisionRadius"));
-        ParseOperateTarget(item, operate);
+        operate->SetVisionRadius(CreateVariableList(item["VisionRadius"], "float", ability));
+        ParseOperateTarget(item, operate, ability);
         if (operate) event->AddOperate(operate);
     }
 }
 
-void SkillReaderJson::ParseOperateTarget(const rapidjson::Value& json, COperate* operate) {
+void SkillReaderJson::ParseOperateTarget(const rapidjson::Value& json, COperate* operate, CAbility* ability) {
     if (json.IsNull() || !CheckJsonIsKeyNotNull(json, "Target")) return;
     // 范围搜索
     if (json["Target"].IsObject()) {
@@ -370,10 +382,10 @@ void SkillReaderJson::ParseOperateTarget(const rapidjson::Value& json, COperate*
         std::string type_str = GetJsonStringValueFromDic(json["Target"], "Types", "TARGET_TYPE_NONE");
         operate->SetTypes((TARGET_TYPES)SKB::GetEnumByString(type_str));
         
-        operate->SetRadius(CreateVariableList(json["Target"]["Radius"], "float"));
+        operate->SetRadius(CreateVariableList(json["Target"]["Radius"], "float", ability));
         
         // max targets
-        operate->SetMaxTargets(CheckJsonIsKeyNotNull(json, "MaxTargets") ? CreateVariableList(json["MaxTargets"], "float") : NULL);
+        operate->SetMaxTargets(CheckJsonIsKeyNotNull(json, "MaxTargets") ? CreateVariableList(json["MaxTargets"], "float", ability) : NULL);
     }
     // 已存在
     else {
@@ -390,12 +402,12 @@ void SkillReaderJson::ParseModifiers(const rapidjson::Value& json, CAbility* abi
     const rapidjson::Value& item = json["Modifiers"];
     for (auto iter = item.MemberBegin(); iter != item.MemberEnd(); ++iter) {
         std::string modifierName = iter->name.GetString();
-        CModifierData* modifier = CreateModifier(item, modifierName);
+        CModifierData* modifier = CreateModifier(item, modifierName, ability);
         ability->SetModifierData(modifierName, modifier);
     }
 }
 
-CModifierData* SkillReaderJson::CreateModifier(const rapidjson::Value& json, std::string name) {
+CModifierData* SkillReaderJson::CreateModifier(const rapidjson::Value& json, std::string name, CAbility* ability) {
     if (json.IsNull() || json[name.c_str()].IsNull()) return NULL;
     const rapidjson::Value& item = json[name.c_str()];
     CModifierData* modifier = new CModifierData();
@@ -413,7 +425,7 @@ CModifierData* SkillReaderJson::CreateModifier(const rapidjson::Value& json, std
     modifier->SetEffectName(GetJsonStringValueFromDic(item, "EffectName"));
     modifier->SetModelName(GetJsonStringValueFromDic(item, "ModelName"));
     // events
-    ParseModifierEvent(item, modifier);
+    ParseModifierEvent(item, modifier, ability);
     // properties
     if (CheckJsonIsKeyNotNull(item, "Properties")) {
         const rapidjson::Value& itemProperty = item["Properties"];

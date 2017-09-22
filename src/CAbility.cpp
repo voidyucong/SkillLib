@@ -185,6 +185,9 @@ CAbilityValue* CAbility::GetLevelSpecialValueFor(std::string key, int level) {
 //    }
 }
 
+bool CAbility::IsSpecialValueExist(std::string name) {
+    return base.specials_.find(name.c_str()) != base.specials_.end();
+}
 
 // attributes
 void CAbility::ModifyAttribute(MODIFIER_ATTRIBUTES attribute, float value) {

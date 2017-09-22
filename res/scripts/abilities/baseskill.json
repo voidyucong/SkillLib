@@ -13,14 +13,14 @@
 	"AbilityCastWidth": 50,
 	"AbilityCastRange": 100,
 	"AbilityCastPoint": [0.1, 0.1, 0.1],
-	"AbilityCooldown": [20.0, 20.0, 20.0],
-	"AbilityManaCost": [20, 15, 10],
+	"AbilityCooldown": "%cooldown",
+	"AbilityManaCost": "%manaCost",
 	"AbilityDamage": [100, 130, 160],
 
 	"AbilitySpecial": [
 		{
 			"type": "float",
-			"key": "damage",
+			"key": "heal",
 			"value": [100, 130, 160]
 		},
 		{
@@ -63,7 +63,7 @@
 					"text": "modifier_test OnIntervalThink"
 				},
 				"Heal": {
-					"HealAmount": 100
+					"HealAmount": "%heal"
 				}
 			},
 

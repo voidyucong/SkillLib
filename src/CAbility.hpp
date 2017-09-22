@@ -43,6 +43,7 @@ public:
     const SPECIAL_VALUE& GetSpecial() { return base.specials_; }
     CAbilityValue* GetSpecialValue(std::string name) { return base.specials_[name]; }
     CAbilityValue* GetLevelSpecialValueFor(std::string key, int level);
+    bool IsSpecialValueExist(std::string name);
     
     void ModifyAttribute(MODIFIER_ATTRIBUTES attribute, float value);
     float GetModifyAttribute(MODIFIER_ATTRIBUTES attribute);

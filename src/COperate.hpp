@@ -212,15 +212,15 @@ private:
 class COpHeal : public COperate {
 public:
     int Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack);
-    void SetHealAmount(float amount) { healAmount_ = amount; }
+    void SetHealAmount(CAbilityValue* amount) { healAmount_ = amount; }
     
     COpHeal();
-    COpHeal(float amount);
+    COpHeal(CAbilityValue* amount);
     ~COpHeal();
     virtual COperate* CreateCloneInstance();
     virtual void CloneProperties(COperate* operate);
 private:
-    float healAmount_;  // 治疗量
+    CAbilityValue* healAmount_;  // 治疗量
 };
 
 /**

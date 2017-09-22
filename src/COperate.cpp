@@ -295,7 +295,7 @@ COpHeal::COpHeal()
     
 }
 
-COpHeal::COpHeal(float amount)
+COpHeal::COpHeal(CAbilityValue* amount)
 : healAmount_(amount)
 {
     
@@ -309,7 +309,7 @@ int COpHeal::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* pa
     COperate::Execute(entity, ability, parentStack);
     auto targets = targetStack_->GetValid()->GetTargets();
     for (auto target : targets) {
-        std::cout << "Heal " << target << " " << healAmount_ << std::endl;
+        std::cout << "Heal " << target << " " << healAmount_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>() << std::endl;
     }
     
     return 1;
