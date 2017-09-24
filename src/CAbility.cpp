@@ -52,11 +52,28 @@ CAbility::~CAbility() {
         delete iter->second;
     }
     base.specials_.clear();
+    //
+    for (auto iter = modifierData_.begin(); iter != modifierData_.end(); ++iter) {
+        delete iter->second;
+    }
     
     if (targetStack_) {
         delete targetStack_;
         targetStack_ = 0;
     }
+    
+    if (base.castPoint_) { delete base.castPoint_; base.castPoint_ = 0; }
+    if (base.castWidth_) { delete base.castWidth_; base.castWidth_ = 0; }
+    if (base.castRange_) { delete base.castRange_; base.castRange_ = 0; }
+    if (base.castRangeBuffer_) { delete base.castRangeBuffer_; base.castRangeBuffer_ = 0; }
+    if (base.cooldown_) { delete base.cooldown_; base.cooldown_ = 0; }
+    if (base.damage_) { delete base.damage_; base.damage_ = 0; }
+    if (base.manaCost_) { delete base.manaCost_; base.manaCost_ = 0; }
+    if (base.crystalCost_) { delete base.crystalCost_; base.crystalCost_ = 0; }
+    if (base.hpCost_) { delete base.hpCost_; base.hpCost_ = 0; }
+    if (base.channelTime_) { delete base.channelTime_; base.channelTime_ = 0; }
+    if (base.channelledManaCostPerSecond_) { delete base.channelledManaCostPerSecond_; base.channelledManaCostPerSecond_ = 0; }
+    if (base.targetSearchType_) { delete base.targetSearchType_; base.targetSearchType_ = 0; }
 }
 
 void CAbility::Update(float dt) {
