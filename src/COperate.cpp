@@ -387,10 +387,15 @@ COpLinearProjectile::COpLinearProjectile()
 }
 
 COpLinearProjectile::~COpLinearProjectile() {
-    
+    if (data_) {
+        delete data_;
+        data_ = 0;
+    }
 }
 
 int COpLinearProjectile::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
+    COperate::Execute(entity, ability, parentStack);
+    
     return 1;
 }
 

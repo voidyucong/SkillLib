@@ -10,8 +10,10 @@
 #define CProjectileManager_hpp
 
 #include <iostream>
+#include <map>
 
 class CAbilibyEntity;
+class CProjectile;
 class CLinearProjectile;
 class CTrackingProjectile;
 class CLinearProjectileData;
@@ -21,6 +23,9 @@ class CProjectileManager {
 public:
     static CLinearProjectile* CreateLinearProjectile(CLinearProjectileData* data);
     static CTrackingProjectile* CreateTrackingProjectile(CTrackingProjectileData* data);
+    
+private:
+    std::map<int, CProjectile*> cache_;
 };
 
 #endif /* CProjectileManager_hpp */

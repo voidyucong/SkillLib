@@ -12,7 +12,7 @@
 
 CLinearProjectile* CProjectileManager::CreateLinearProjectile(CLinearProjectileData* data) {
     CLinearProjectile* projectile = new CLinearProjectile();
-    
+    projectile->Execute();
     return projectile;
 }
 

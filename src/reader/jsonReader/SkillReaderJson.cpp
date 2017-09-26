@@ -359,7 +359,7 @@ void SkillReaderJson::ParseOperate(const rapidjson::Value& json, CEvent* event, 
         operate->GetData()->SetStartRadius(CreateVariableList(item["StartRadius"], "float", ability));
         operate->GetData()->SetEndRadius(CreateVariableList(item["EndRadius"], "float", ability));
         operate->GetData()->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
-        operate->GetData()->SetDistance(CreateVariableList(item["Distance"], "float", ability));
+        operate->GetData()->SetLength(CreateVariableList(item["Distance"], "float", ability));
         operate->GetData()->SetIsProvidesVision(GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
         operate->GetData()->SetVisionRadius(CreateVariableList(item["VisionRadius"], "float", ability));
         ParseOperateTarget(item, operate, ability);

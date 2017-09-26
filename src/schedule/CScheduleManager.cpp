@@ -8,11 +8,8 @@
 
 #include "CScheduleManager.h"
 #include <vector>
-extern "C" {
 #include "TimeUtil.h"
-}
-
-#define MAX(x,y) (((x) < (y)) ? (y) : (x))
+#include "MathUtil.hpp"
 
 static CScheduleManager* s_pInstance = NULL;
 

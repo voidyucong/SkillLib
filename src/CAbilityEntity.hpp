@@ -88,6 +88,9 @@ public:
     void SetAttacker(CAbilityEntity* attacker) { attacker_ = attacker; }
     CAbilityEntity* GetAttacker() { return attacker_; }
     
+    void SetSize(float width, float height) { size_.width = width; size_.height = height; }
+    CSize GetSize() { return size_; }
+    
     void SetPosition(float x, float y) { position_.SetX(x); position_.SetY(y); }
     void SetPositionX(float x) { position_.SetX(x); }
     void SetPositionY(float y) { position_.SetY(y); }
@@ -108,6 +111,7 @@ private:
     float healthBarOffset_;                             // 血条高度，缺省值为 "-1"，意味着使用默认的模型高度
     std::string vscript_;                               // 这会在单位诞生后立即装载一个脚本文件,使用诞生函数 ( entityKeyValues ) 可以启动一个计时器来进行任何操作
     std::string projectileModelName_;                   // 抛射物模型
+    CSize size_;
     
     CAbilityContainer* abilityContainer_;               // 技能
     

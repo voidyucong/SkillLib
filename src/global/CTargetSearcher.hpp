@@ -54,8 +54,7 @@ public:
     // 搜索范围内符合条件的entity
     static bool FindEntitesInRadius(std::vector<CAbilityEntity*>& ret,
                                     CAbilityEntity* caster,
-                                    const CVector& center,
-                                    float radius,
+                                    const CCircle& circle,
                                     TARGET_TEAMS teams,
                                     TARGET_TYPES types,
                                     TARGET_FLAGS flags,
@@ -64,16 +63,42 @@ public:
     // 搜索线段内符合条件的entity
     static bool FindEntitesInLine(std::vector<CAbilityEntity*>& ret,
                                   CAbilityEntity* caster,
-                                  const CVector& starPosition,
+                                  const CVector& startPosition,
                                   const CVector& endPosition,
                                   float width,
+                                  float radian,
                                   TARGET_TEAMS teams,
                                   TARGET_TYPES types,
                                   TARGET_FLAGS flags);
     
-    // 点是否在圆内
-    static bool IsPointInCircle(const CVector& point, const CVector& center, float radius);
-    static bool IsPointInLine(const CVector& point, const CLine& rect);
+    // 查找复合条件的所有entity
+    static bool FindEntites(std::vector<CAbilityEntity*>& ret,
+                            CAbilityEntity* caster,
+                            TARGET_TEAMS teams,
+                            TARGET_TYPES types,
+                            TARGET_FLAGS flags);
+    
+    // 检测vec中的entity与指定线段是否存在碰撞
+    static bool CollisionLine(TARGET_LIST& vec,
+                              CAbilityEntity* caster,
+                              const CVector& startPosition,
+                              const CVector& endPosition,
+                              float width,
+                              float radian,
+                              int maxTargets);
+    
+    // 检测vec中的entity与指定范围是否存在碰撞
+    static bool CollisionCircle(TARGET_LIST& vec,
+                                CAbilityEntity* caster,
+                                const CCircle& circle,
+                                int maxTargets);
+    
+    static bool CollisionPoint(TARGET_LIST& vec,
+                               CAbilityEntity* caster,
+                               const CVector& point,
+                               int maxTargets);
+    
+    static bool IsPointInLine(const CVector& point, const CVector& lt, const CVector& lb, const CVector& rt, const CVector& rb);
 };
 
 #endif /* CTargetSearcher_hpp */

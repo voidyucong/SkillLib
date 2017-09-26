@@ -10,10 +10,12 @@
 #define CTrackingProjectile_hpp
 
 #include <iostream>
-#include "CObject.hpp"
-#include "SkillTypes.h"
+#include "CProjectile.hpp"
 
+class CAbility;
+class CAbilityEntity;
 class CAbilityValue;
+class CTargetSearchType;
 
 class CTrackingProjectileData {
 public:
@@ -24,8 +26,12 @@ private:
     std::string effectName_;
     CAbilityValue* moveSpeed_;
     MODIFIER_EFFECT_ATTACH_TYPE attachType_;
+    bool isDeleteOnHit_;        // 碰到目标后是否删除
     bool isProvidesVision_;     // 是否提供视野
     CAbilityValue* visionRadius_;        // 视野范围
+    CTargetSearchType* targetType_;
+    CAbilityEntity* caster_;
+    CAbility* ability_;
 };
 
 class CTrackingProjectile : public CObject {

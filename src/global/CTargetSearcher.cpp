@@ -11,7 +11,7 @@
 #include "CAbilityEntityManager.hpp"
 #include "CAbilityValue.hpp"
 #include "CTargetStack.hpp"
-
+#include "MathUtil.hpp"
 
 void Local_FilterType(TARGET_LIST& ret, CAbilityEntity* caster, TARGET_TYPES type) {
     if (type == TARGET_TYPE_ALL || type == TARGET_TYPE_NONE) return;
@@ -21,6 +21,17 @@ void Local_FilterType(TARGET_LIST& ret, CAbilityEntity* caster, TARGET_TYPES typ
             ret.erase(iter);
         else
             ++iter;
+    }
+}
+
+// 筛选距离目标点最近的xx个目标
+void Local_FilterMaxTargets(TARGET_LIST& ret, const CVector& pivot, float maxTargets) {
+    if (maxTargets > 0 && maxTargets < ret.size()) {
+        // 筛选距离最近的几个
+        std::sort(ret.begin(), ret.end(), [&](CAbilityEntity* entity1, CAbilityEntity* entity2) {
+            return entity1->GetPosition().GetDistance(pivot) < entity2->GetPosition().GetDistance(pivot);
+        });
+        ret.erase(ret.begin() + maxTargets, ret.end());
     }
 }
 
@@ -107,8 +118,7 @@ bool CTargetSearcher::FindAbilityTargets(std::vector<CAbilityEntity*>& ret,
         if (radius->GetValue<float>() > 0) {
             FindEntitesInRadius(ret,
                                 caster,
-                                caster->GetPosition(),
-                                radius->GetValue<float>(),
+                                CCircle(caster->GetPosition(), radius->GetValue<float>()),
                                 teams,
                                 types,
                                 flags,
@@ -119,8 +129,7 @@ bool CTargetSearcher::FindAbilityTargets(std::vector<CAbilityEntity*>& ret,
         if (radius && radius->GetValue<float>() > 0) {
             FindEntitesInRadius(ret,
                                 caster,
-                                caster->GetPosition(),
-                                radius->GetValue<float>(),
+                                CCircle(caster->GetPosition(), radius->GetValue<float>()),
                                 teams,
                                 types,
                                 flags,
@@ -149,8 +158,7 @@ bool CTargetSearcher::FindModifierTargets(std::vector<CAbilityEntity*>& ret,
     if (radius && radius->GetValue<float>() > 0) {
         FindEntitesInRadius(ret,
                             caster,
-                            caster->GetPosition(),
-                            radius->GetValue<float>(),
+                            CCircle(caster->GetPosition(), radius->GetValue<float>()),
                             teams,
                             types,
                             flags,
@@ -166,66 +174,71 @@ bool CTargetSearcher::IsUseParent(const CAbilityValue* radius) {
 
 bool CTargetSearcher::FindEntitesInRadius(std::vector<CAbilityEntity*>& ret,
                                           CAbilityEntity* caster,
-                                          const CVector& center,
-                                          float radius,
+                                          const CCircle& circle,
                                           TARGET_TEAMS teams,
                                           TARGET_TYPES types,
                                           TARGET_FLAGS flags,
                                           int maxTargets)
 {
-    // 选择队伍
-    switch (teams) {
-        case TARGET_TEAM_BOTH: ret = CAbilityEntityManager::getInstance()->GetAllEntity(); break;
-        case TARGET_TEAM_FRIENDLY: ret = CAbilityEntityManager::getInstance()->GetTeam(caster->GetTeamId()); break;
-        case TARGET_TEAM_ENEMY: ret = CAbilityEntityManager::getInstance()->GetOtherTeam(caster->GetTeamId()); break;
-        case TARGET_TEAM_NONE: return false;
-    }
-    // types
-    if (types != TARGET_TYPE_ALL && types != TARGET_TYPE_NONE) {
-        for (auto iter = ret.begin(); iter != ret.end();) {
-            auto target = *iter;
-            if ((int)types != (int)target->GetType())
-                ret.erase(iter);
-            else
-                ++iter;
-        }
-    }
-    
-    // flags
+    FindEntites(ret, caster, teams, types, flags);
     
     // radius == -1 代表全屏
-    if (radius <= -1) {
+    if (circle.GetRadius() <= -1) {
         return ret.size() > 0;
     }
     // 选择范围内的
     for (auto iter = ret.begin(); iter != ret.end();) {
         auto target = *iter;
-        if (!IsPointInCircle(target->GetPosition(), center, radius))
+        if (!circle.IntersectsPoint(target->GetPosition()))
             ret.erase(iter);
         else
             ++iter;
     }
     
-    if (maxTargets > 0 && ret.size() > maxTargets) {
-        int count = maxTargets;
-        for (auto iter = ret.begin(); iter != ret.end();) {
-            ret.erase(iter);
-            --count;
-            if (count == 0) break;
-        }
-    }
+    Local_FilterMaxTargets(ret, circle.GetCenter(), maxTargets);
     
     return ret.size() > 0;
 }
 
 bool CTargetSearcher::FindEntitesInLine(std::vector<CAbilityEntity*>& ret,
                                         CAbilityEntity* caster,
-                                        const CVector& starPosition,
+                                        const CVector& startPosition,
                                         const CVector& endPosition,
                                         float width,
+                                        float radian,
                                         TARGET_TEAMS teams,
                                         TARGET_TYPES types,
                                         TARGET_FLAGS flags)
+{
+    FindEntites(ret, caster, teams, types, flags);
+    
+    // 构建矩形线段
+    CVector lt(startPosition.GetX(), startPosition.GetY() + width / 2);
+    CVector lb(startPosition.GetX(), startPosition.GetY() - width / 2);
+    CVector rt(endPosition.GetX(), endPosition.GetY() + width / 2);
+    CVector rb(endPosition.GetX(), endPosition.GetY() - width / 2);
+    lt = lt.rotateByAngle(startPosition, radian);
+    lb = lb.rotateByAngle(startPosition, radian);
+    rt = rt.rotateByAngle(startPosition, radian);
+    rb = rb.rotateByAngle(startPosition, radian);
+    
+    // 选择范围内的
+    for (auto iter = ret.begin(); iter != ret.end();) {
+        auto target = *iter;
+        
+        if (!IsPointInLine(target->GetPosition(), lt, lb, rt, rb))
+            ret.erase(iter);
+        else
+            ++iter;
+    }
+    return ret.size() > 0;
+}
+
+bool CTargetSearcher::FindEntites(std::vector<CAbilityEntity*>& ret,
+                                  CAbilityEntity* caster,
+                                  TARGET_TEAMS teams,
+                                  TARGET_TYPES types,
+                                  TARGET_FLAGS flags)
 {
     // 选择队伍
     switch (teams) {
@@ -244,22 +257,71 @@ bool CTargetSearcher::FindEntitesInLine(std::vector<CAbilityEntity*>& ret,
     }
     // flags
     
-    // 选择范围内的
-    for (auto iter = ret.begin(); iter != ret.end();) {
-        auto target = *iter;
-        
-        if (!IsPointInLine(target->GetPosition(), CLine()))
-            ret.erase(iter);
-        else
-            ++iter;
-    }
     return ret.size() > 0;
 }
 
-bool CTargetSearcher::IsPointInCircle(const CVector& point, const CVector& center, float radius) {
-    return center.GetDistance(point) <= radius;
+bool CTargetSearcher::CollisionLine(TARGET_LIST& vec,
+                                     CAbilityEntity* caster,
+                                     const CVector& startPosition,
+                                     const CVector& endPosition,
+                                     float width,
+                                     float radian,
+                                     int maxTargets)
+{
+    CRect rect(endPosition.GetX() - startPosition.GetX(), width, startPosition.GetX(), startPosition.GetY() - width/2);
+    
+    for (auto iter = vec.begin(); iter != vec.end();) {
+        auto target = *iter;
+        CVector lt(target->GetPosition().GetX() - target->GetSize().width/2, target->GetPosition().GetY() + target->GetSize().height);
+        CVector lb(target->GetPosition().GetX() - target->GetSize().width/2, target->GetPosition().GetY());
+        CVector rt(target->GetPosition().GetX() + target->GetSize().width/2, target->GetPosition().GetY() + target->GetSize().height);
+        CVector rb(target->GetPosition().GetX() + target->GetSize().width/2, target->GetPosition().GetY());
+        if (rect.ContainsPoint(lt) || rect.ContainsPoint(lb) || rect.ContainsPoint(rt) || rect.ContainsPoint(rb))
+            ++iter;
+        else
+            vec.erase(iter);
+    }
+    CVector centerLine(CVector((endPosition.GetX()-startPosition.GetX()) / 2, (endPosition.GetY()-startPosition.GetY())).rotateByAngle(startPosition, radian));
+    Local_FilterMaxTargets(vec, centerLine, maxTargets);
+    
+    return vec.size() > 0;
 }
 
-bool CTargetSearcher::IsPointInLine(const CVector& point, const CLine& rect) {
-    return rect.containsPoint(point);
+// 判断矩形和圆形是否相交
+bool CTargetSearcher::CollisionCircle(TARGET_LIST& vec,
+                                       CAbilityEntity* caster,
+                                       const CCircle& circle,
+                                       int maxTargets)
+{
+    for (auto iter = vec.begin(); iter != vec.end();) {
+        auto target = *iter;
+        CRect rect(target->GetSize().width,
+                   target->GetSize().height,
+                   target->GetPosition().GetX() - target->GetSize().width/2,
+                   target->GetPosition().GetY());
+        if (circle.IntersectsRect(rect))
+            ++iter;
+        else
+            vec.erase(iter);
+    }
+    Local_FilterMaxTargets(vec, circle.GetCenter(), maxTargets);
+    
+    return vec.size() > 0;
+}
+
+bool CTargetSearcher::CollisionPoint(TARGET_LIST& vec,
+                                      CAbilityEntity* caster,
+                                      const CVector& point,
+                                      int maxTargets)
+{
+    return vec.size() > 0;
+}
+
+// 判断点与其他四个角的面积与矩形面积是否相等
+bool CTargetSearcher::IsPointInLine(const CVector& point, const CVector& lt, const CVector& lb, const CVector& rt, const CVector& rb) {
+    float area = fabsf(lt.GetY() - lb.GetY()) * fabsf(rt.GetX() - lt.GetX());
+    return area == (SKB::MathUtil::TriangleArea(lt, lb, point) +
+                    SKB::MathUtil::TriangleArea(lb, rb, point) +
+                    SKB::MathUtil::TriangleArea(rb, rt, point) +
+                    SKB::MathUtil::TriangleArea(lt, rt, point));
 }
