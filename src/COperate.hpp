@@ -56,6 +56,8 @@ public:
     void SetMaxTargets(CAbilityValue* max);
     CAbilityValue* GetMaxTargets();
     
+    void SetSearchType(CTargetSearchType* type) { targetSearchType_ = type; }
+    CTargetSearchType* GetSearchType() { return targetSearchType_; }
     void SetParentTargets(CTargetStack* parent);
     void SetSelfTargets(TARGET_LIST targets);
     
@@ -100,6 +102,9 @@ public:
     COpApplyModifier();
     COpApplyModifier(std::string modifierName);
     ~COpApplyModifier();
+    
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
 private:
     std::string modifierName_;
 };
@@ -159,6 +164,9 @@ public:
     void SetDamage(CAbilityValue* value) { damage_ = value; }
     void SetCurrentPercent(CAbilityValue* value) { currentHealthPercentBasedDamage_ = value; }
     void SetMaxPercent(CAbilityValue* value) { maxHealthPercentBasedDamage_ = value; }
+    
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
 private:
     ABILITY_DAMAGE_TYPE damageType_;
     CAbilityValue* damage_;      // 伤害
@@ -277,6 +285,9 @@ public:
     ~COpLinearProjectile();
     
     CLinearProjectileData* GetData() { return data_; }
+    
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
 private:
     CLinearProjectileData* data_;
 };
@@ -290,13 +301,13 @@ public:
     
     COpTrackingProjectile();
     ~COpTrackingProjectile();
+    
+    CTrackingProjectileData* GetData() { return data_; }
+    
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
 private:
-    std::string effectName_;
-    float moveSpeed_;           // 移动速度
-    unsigned startPosition_;
-    bool isProvidesVision_;     // 是否提供视野
-    float visionRadius_;        // 视野范围
-    MODIFIER_EFFECT_ATTACH_TYPE SourceAttachment_;          // 附着点
+    CTrackingProjectileData* data_;
 };
 
 /**

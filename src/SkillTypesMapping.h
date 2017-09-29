@@ -12,7 +12,7 @@
 #include <map>
 
 namespace SKB {
-    std::map<std::string, int> g_skillTypeMapping = {
+    static std::map<std::string, int> s_skillTypeMapping = {
         // 技能行为
         {"ABILITY_BEHAVIOR_HIDDEN",               1 << 0}, //这个技能是单位所拥有的技能，但是不会在HUD上显示。
         {"ABILITY_BEHAVIOR_PASSIVE",              1 << 1}, //这个技能是一个被动技能，不能被使用，但是会在HUD上显示。
@@ -133,26 +133,26 @@ namespace SKB {
         {"ENTITY_ATTRIBUTE_MANA", 10},
         {"ENTITY_ATTRIBUTE_MANA_GAIN", 11},
         {"ENTITY_ATTRIBUTE_MANA_REGEN", 12},
-        {"ENTITY_ATTRIBUTE_DAMAGE", 13},
-        {"ENTITY_ATTRIBUTE_DAMAGE_GAIN", 14},
-        {"ENTITY_ATTRIBUTE_ARMOR", 15},                // 护甲
-        {"ENTITY_ATTRIBUTE_ARMOR_GAIN", 16},
-        {"ENTITY_ATTRIBUTE_MAGIC_RESIST", 17},         // 魔抗
-        {"ENTITY_ATTRIBUTE_MAGIC_RESIST_GAIN", 18},
+        {"ENTITY_ATTRIBUTE_MANA_STARTING", 13},
+        {"ENTITY_ATTRIBUTE_DAMAGE", 14},
+        {"ENTITY_ATTRIBUTE_DAMAGE_GAIN", 15},
+        {"ENTITY_ATTRIBUTE_ARMOR", 16},                // 护甲
+        {"ENTITY_ATTRIBUTE_ARMOR_GAIN", 17},
+        {"ENTITY_ATTRIBUTE_MAGIC_RESIST", 18},         // 魔抗
+        {"ENTITY_ATTRIBUTE_MAGIC_RESIST_GAIN", 19},
+        {"ENTITY_ATTRIBUTE_MOVE_SPEED", 20},            // 移动速度
+        {"ENTITY_ATTRIBUTE_MOVE_SPEED_GAIN", 21},
+        {"ENTITY_ATTRIBUTE_XP_GAIN", 22},
+        {"ENTITY_ATTRIBUTE_DAMAGE_MIN", 23},
+        {"ENTITY_ATTRIBUTE_DAMAGE_MAX", 24},
+        {"ENTITY_ATTRIBUTE_ATTACK_RATE", 25},           //
+        {"ENTITY_ATTRIBUTE_ATTACK_POINT", 26},          //
+        {"ENTITY_ATTRIBUTE_ATTACK_RANGE", 27},          //
+        {"ENTITY_ATTRIBUTE_ATTACK_ACQUISITION_RANGE", 28},
+        {"ENTITY_ATTRIBUTE_ATTACK_RANGE_BUFFER", 29},   //
+        {"ENTITY_ATTRIBUTE_PROJECTILE_SPEED", 30},      // 投射物速度
+        {"ENTITY_ATTRIBUTE_VISION_RANGE", 31},          // 视野范围
         
-        {"ENTITY_ATTRIBUTE_MOVE_SPEED", 1},            // 移动速度
-        {"ENTITY_ATTRIBUTE_MOVE_SPEED_GAIN", 2},
-        
-        {"ENTITY_ATTRIBUTE_DAMAGE_MIN", 1},
-        {"ENTITY_ATTRIBUTE_DAMAGE_MAX", 2},
-        {"ENTITY_ATTRIBUTE_ATTACK_RATE", 3},           //
-        {"ENTITY_ATTRIBUTE_ATTACK_POINT", 4},          //
-        {"ENTITY_ATTRIBUTE_ATTACK_RANGE", 5},          //
-        {"ENTITY_ATTRIBUTE_ATTACK_RANGE_BUFFER", 6},   //
-        
-        {"ENTITY_ATTRIBUTE_PROJECTILE_SPEED", 1},      // 投射物速度
-        
-        {"ENTITY_ATTRIBUTE_VISION_RANGE", 1},          // 视野范围
         
         // 属性变化
         {"MODIFIER_ATTRIBUTE_COOLDOWN_GAIN_PERCENT", 1},       // 冷却加成百分比，例10s冷却，加成10%，冷却9s
@@ -186,8 +186,8 @@ namespace SKB {
         {"ENTITY_TYPE_CREEP", 6},          // 野怪
     };
  
-    int GetEnumByString(std::string name) {
-        return g_skillTypeMapping[name];
+    static int GetEnumByString(std::string name) {
+        return s_skillTypeMapping[name];
     }
 }
 #endif /* SkillTypesMapping_h */

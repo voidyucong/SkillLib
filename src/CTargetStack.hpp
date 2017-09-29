@@ -14,6 +14,7 @@
 #include <assert.h>
 #include "CObject.hpp"
 
+class CAbilityEntity;
 
 class CTargetStackItem {
 public:
@@ -48,6 +49,20 @@ public:
         if (self_) return self_;
         if (parent_) return parent_->GetValid();
         assert(false);
+    }
+    void ConstructSelf() {
+        if (!self_) self_ = new CTargetStackItem();
+    }
+    void PushSelf(CAbilityEntity* entity) {
+        ConstructSelf();
+        self_->GetTargets().push_back(entity);
+    }
+    void EraseSelf(TARGET_LIST::iterator iter) {
+        if (!self_) return;
+        self_->GetTargets().erase(iter);
+    }
+    void ClearSelf() {
+        if (self_) self_->ClearTargets();
     }
     void DestroyParent() {
         if (parent_) {

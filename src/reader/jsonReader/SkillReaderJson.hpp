@@ -9,10 +9,9 @@
 #ifndef SkillReaderJson_hpp
 #define SkillReaderJson_hpp
 
-#include <stdio.h>
+#include <iostream>
 #include <map>
-#include "rapidjson.h"
-#include "document.h"
+#include "ReaderJsonUtil.h"
 
 class CAbility;
 class CAbilityValue;
@@ -20,6 +19,7 @@ class CEvent;
 class CModifierEvent;
 class COperate;
 class CModifierData;
+class CTargetSearchType;
 
 class SkillReaderJson {
 public:
@@ -31,7 +31,6 @@ public:
     CAbility* CreateAbility(const rapidjson::Value& json);
     
     void ParseSpecialValue(const rapidjson::Value& json, CAbility* ability);
-    CAbilityValue* CreateVariableList(const rapidjson::Value& item, std::string type, CAbility* ability);
     
     void ParseAbilityEvent(const rapidjson::Value& json, CAbility* ability);
     CEvent* CreateAbilityEvent(const rapidjson::Value& json, std::string eventName, CAbility* ability);
@@ -40,7 +39,7 @@ public:
     CModifierEvent* CreateModifierEvnt(const rapidjson::Value& json, std::string eventName, CAbility* ability);
     
     void ParseOperate(const rapidjson::Value& json, CEvent* event, CAbility* ability);
-    void ParseOperateTarget(const rapidjson::Value& json, COperate* operate, CAbility* ability);
+    CTargetSearchType* ParseTarget(const rapidjson::Value& json, CAbility* ability);
     
     void ParseModifiers(const rapidjson::Value& json, CAbility* ability);
     CModifierData* CreateModifier(const rapidjson::Value& json, std::string name, CAbility* ability);

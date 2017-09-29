@@ -1,13 +1,13 @@
 //
-//  CRunScprite.hpp
+//  CRunScript.hpp
 //  SkillLib
 //
 //  Created by yucong on 2017/9/15.
 //  Copyright © 2017年 yucong. All rights reserved.
 //
 
-#ifndef CRunScprite_hpp
-#define CRunScprite_hpp
+#ifndef CRunScript_hpp
+#define CRunScript_hpp
 
 #include <iostream>
 #include <map>
@@ -18,10 +18,10 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-class CRunScprite : public CObject {
+class CRunScript : public CObject {
 public:
-    CRunScprite();
-    ~CRunScprite();
+    CRunScript();
+    ~CRunScript();
     
     void Execute();
     void SetLuaState(lua_State* L) { L_ = L; }

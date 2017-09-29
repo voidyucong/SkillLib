@@ -37,7 +37,7 @@ void CScheduleManager::Update() {
     double deltaTime = now - lastTime_;
     deltaTime = MAX(0, deltaTime);
     std::vector<CObject*> deletions;
-    for (auto iter = schedules_.begin(); iter != schedules_.end(); iter++) {
+    for (auto iter = schedules_.begin(); iter != schedules_.end(); ++iter) {
         if (!iter->second->markedDeletion)
             iter->second->schedule->Update(deltaTime);
         else

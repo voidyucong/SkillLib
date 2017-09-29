@@ -12,6 +12,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include "CObject.hpp"
 
 class CAbilityEntity;
 
@@ -26,7 +27,7 @@ public:
     void AddTeam(TEAM_ID teamId, CAbilityEntity* entity);
     const std::vector<CAbilityEntity*>& GetTeam(TEAM_ID teamId);
     const std::vector<CAbilityEntity*>& GetOtherTeam(TEAM_ID teamId);
-    const std::vector<CAbilityEntity*> GetAllEntity();
+    void GetAllEntity(TARGET_LIST& list);
 private:
     std::map<TEAM_ID, std::vector<CAbilityEntity*>> entities_;
 };

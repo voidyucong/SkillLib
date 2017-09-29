@@ -13,9 +13,9 @@
 #include <vector>
 #include "SkillTypes.h"
 #include "CObject.hpp"
+#include "CAbilityValue.hpp"
 
 class CAbilityEntity;
-class CAbilityValue;
 class CAbility;
 class COpRunScript;
 class CTargetSets;
@@ -33,7 +33,7 @@ class CTargetSearchType : public CObject {
 public:
     CTargetSearchType(): center_(TARGET_CENTER_CASTER), teams_(TARGET_TEAM_NONE), types_(TARGET_TYPE_NONE), flags_(TARGET_FLAG_NONE), radius_(0), maxTargets_(0)
     {}
-    ~CTargetSearchType() { targets_.clear(); }
+    ~CTargetSearchType() {}
     
     
     //------------------------------------
@@ -58,8 +58,18 @@ public:
     void SetMaxTargets(CAbilityValue* max) { maxTargets_ = max; }
     CAbilityValue* GetMaxTargets() { return maxTargets_; }
     
+    CTargetSearchType* Clone() {
+        CTargetSearchType* type = new CTargetSearchType();
+        type->single_ = single_;
+        type->center_ = center_;
+        type->radius_ = radius_;
+        type->teams_ = teams_;
+        type->types_ = types_;
+        type->flags_ = flags_;
+        if (maxTargets_) type->maxTargets_ = maxTargets_->Clone();
+        return type;
+    }
 private:
-    std::vector<CAbilityEntity*> targets_;
 };
 
 #endif /* CTargetSearchType_hpp */

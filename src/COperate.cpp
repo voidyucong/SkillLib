@@ -14,23 +14,27 @@
 #include "CModifier.h"
 #include "CModifierData.hpp"
 #include "CScheduleManager.h"
-#include "CRunScprite.hpp"
+#include "CRunScript.hpp"
 #include "CTargetStack.hpp"
 #include "CTargetSearcher.hpp"
 #include "CAbilityValue.hpp"
 #include "CLinearProjectile.hpp"
 #include "CTrackingProjectile.hpp"
+#include "CProjectileManager.hpp"
+#include "CSkillCastIndicator.hpp"
 
 // COperate
 COperate::COperate()
 {
-    targetSearchType_ = new CTargetSearchType();
+//    targetSearchType_ = new CTargetSearchType();
     targetStack_ = new CTargetStack();
 }
 
 COperate::~COperate() {
-    delete targetSearchType_;
+    if (targetSearchType_) delete targetSearchType_;
     targetSearchType_ = 0;
+    if (targetStack_) delete targetStack_;
+    targetStack_ = 0;
 }
 
 int COperate::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
@@ -45,6 +49,7 @@ void COperate::Update(float dt) {
 
 COperate* COperate::Clone() {
     COperate* operate = CreateCloneInstance();
+    operate->SetSearchType(new CTargetSearchType());
     operate->targetSearchType_->SetCenter(targetSearchType_->GetCenter());
     operate->targetSearchType_->SetTeams(targetSearchType_->GetTeams());
     operate->targetSearchType_->SetTypes(targetSearchType_->GetTypes());
@@ -124,7 +129,6 @@ int COpActOnTargets::Execute(CAbilityEntity* entity, CAbility* ability, CTargetS
 #pragma mark COpApplyModifier
 // COpApplyModifier
 COpApplyModifier::COpApplyModifier()
-: COpApplyModifier(0)
 {
     
 }
@@ -152,6 +156,15 @@ int COpApplyModifier::Execute(CAbilityEntity* entity, CAbility* ability, CTarget
     }
     
     return 1;
+}
+
+COperate* COpApplyModifier::CreateCloneInstance() {
+    return new COpApplyModifier();
+}
+
+void COpApplyModifier::CloneProperties(COperate* operate) {
+    COpApplyModifier* op = dynamic_cast<COpApplyModifier*>(operate);
+    op->modifierName_ = modifierName_;
 }
 
 #pragma mark -
@@ -231,7 +244,25 @@ COpDamage::~COpDamage() {
 }
 
 int COpDamage::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
+    COperate::Execute(entity, ability, parentStack);
+    auto targets = targetStack_->GetValid()->GetTargets();
+    for (auto target : targets) {
+        std::cout << "Damage Caster: " << entity << " Target:" << target << " Value:" << damage_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>() << std::endl;
+    }
     return 1;
+}
+
+COperate* COpDamage::CreateCloneInstance() {
+    return new COpDamage();
+}
+
+void COpDamage::CloneProperties(COperate* operate) {
+    COpDamage* op = dynamic_cast<COpDamage*>(operate);
+    op->damage_ = damage_->Clone();
+    if (currentHealthPercentBasedDamage_)
+        op->currentHealthPercentBasedDamage_ = currentHealthPercentBasedDamage_->Clone();
+    if (maxHealthPercentBasedDamage_)
+        op->maxHealthPercentBasedDamage_ = maxHealthPercentBasedDamage_->Clone();
 }
 
 #pragma mark -
@@ -311,7 +342,7 @@ int COpHeal::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* pa
     COperate::Execute(entity, ability, parentStack);
     auto targets = targetStack_->GetValid()->GetTargets();
     for (auto target : targets) {
-        std::cout << "Heal " << target << " " << healAmount_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>() << std::endl;
+        std::cout << "Heal Caster: " << entity << " Target:" << target << " Value:" << healAmount_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>() << std::endl;
     }
     
     return 1;
@@ -323,7 +354,7 @@ COperate* COpHeal::CreateCloneInstance() {
 
 void COpHeal::CloneProperties(COperate* operate) {
     COpHeal* op = dynamic_cast<COpHeal*>(operate);
-    op->SetHealAmount(healAmount_);
+    op->SetHealAmount(healAmount_->Clone());
 }
 
 #pragma mark -
@@ -395,29 +426,62 @@ COpLinearProjectile::~COpLinearProjectile() {
 
 int COpLinearProjectile::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     COperate::Execute(entity, ability, parentStack);
-    
+    // 凡是operate的成员变量用于其它位置都需要Clone，operate执行后会马上清空
+    CLinearProjectile* projectile = CProjectileManager::CreateLinearProjectile(data_->Clone(),
+                                                                               entity,
+                                                                               ability,
+                                                                               CSkillCastIndicator::getInstance()->GetDirection(),
+                                                                               entity->GetPosition(),
+                                                                               targetSearchType_->Clone());
+    projectile->Execute();
     return 1;
+}
+
+COperate* COpLinearProjectile::CreateCloneInstance() {
+    return new COpLinearProjectile();
+}
+
+void COpLinearProjectile::CloneProperties(COperate* operate) {
+    COpLinearProjectile* op = dynamic_cast<COpLinearProjectile*>(operate);
+    op->data_ = data_->Clone();
 }
 
 #pragma mark -
 #pragma mark COpTrackingProjectile
 // COpTrackingProjectile
 COpTrackingProjectile::COpTrackingProjectile()
-: effectName_(0)
-, moveSpeed_(0.f)
-, startPosition_(0)
-, isProvidesVision_(false)
-, visionRadius_ (0.f)
+: data_(new CTrackingProjectileData())
 {
     
 }
 
 COpTrackingProjectile::~COpTrackingProjectile() {
-    
+    if (data_) {
+        delete data_;
+        data_ = 0;
+    }
 }
 
 int COpTrackingProjectile::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
+    COperate::Execute(entity, ability, parentStack);
+    assert(targetStack_->GetValid()->Size() > 0);
+    // 凡是operate的成员变量用于其它位置都需要Clone，operate执行后会马上清空
+    CTrackingProjectile* projectile = CProjectileManager::CreateTrackingProjectile(data_->Clone(),
+                                                                                   entity,
+                                                                                   ability,
+                                                                                   targetStack_->GetValid()->GetTargets()[0],
+                                                                                   entity->GetPosition());
+    projectile->Execute();
     return 1;
+}
+
+COperate* COpTrackingProjectile::CreateCloneInstance() {
+    return new COpTrackingProjectile();
+}
+
+void COpTrackingProjectile::CloneProperties(COperate* operate) {
+    COpTrackingProjectile* op = dynamic_cast<COpTrackingProjectile*>(operate);
+    op->data_ = data_->Clone();
 }
 
 #pragma mark -

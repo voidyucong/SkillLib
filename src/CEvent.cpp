@@ -26,7 +26,10 @@ CEvent::~CEvent() {
 int CEvent::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     int ok = 1;
     for (COperate* op : operators_) {
-        ok &= op->Execute(entity, ability, parentStack);
+        COperate* cloneop = op->Clone();
+        ok &= cloneop->Execute(entity, ability, parentStack);
+        delete cloneop;
+        cloneop = 0;
     }
     return ok;
 }

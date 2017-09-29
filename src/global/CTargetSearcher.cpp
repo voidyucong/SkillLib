@@ -35,6 +35,10 @@ void Local_FilterMaxTargets(TARGET_LIST& ret, const CVector& pivot, float maxTar
     }
 }
 
+// 处理目标栈
+// 判断使用父节点的目标栈还是自己的
+// 如果使用父节点的需要判断目标栈是否存在，然后根据条件筛选
+// 如果使用自己的则直接查找
 void CTargetSearcher::HandleTargetStack(CAbilityEntity* caster,
                                         CAbility* ability,
                                         CTargetStack* stack,
@@ -46,28 +50,27 @@ void CTargetSearcher::HandleTargetStack(CAbilityEntity* caster,
         assert(stack->GetParent()->GetValid());
         auto list = stack->GetValid()->GetTargets();
         stack->DestroySelf();
-        auto item = new CTargetStackItem();
-        stack->SetSelf(item);
+        stack->ConstructSelf();
         // 筛选
         for (auto iter = list.begin(); iter != list.end(); ++iter) {
             auto target = *iter;
             if (type->GetTeams() == TARGET_TEAM_BOTH || type->GetTeams() == TARGET_TEAM_NONE) {
-                item->GetTargets().push_back(target);
+                stack->PushSelf(target);
             }
             else if (type->GetTeams() == TARGET_TEAM_FRIENDLY && target->GetTeamId() == caster->GetTeamId()) {
-                item->GetTargets().push_back(target);
+                stack->PushSelf(target);
             }
             else if (type->GetTeams() == TARGET_TEAM_ENEMY && target->GetTeamId() != caster->GetTeamId()) {
-                item->GetTargets().push_back(target);
+                stack->PushSelf(target);
             }
             
         }
         
         if (type->GetTypes() != TARGET_TYPE_ALL && type->GetTypes() != TARGET_TYPE_NONE) {
-            for (auto iter = item->GetTargets().begin(); iter != item->GetTargets().end();) {
+            for (auto iter = stack->GetSelf()->GetTargets().begin(); iter != stack->GetSelf()->GetTargets().end();) {
                 auto target = *iter;
-                if ((int)type->GetTypes() == (int)target->GetType())
-                    item->GetTargets().erase(iter);
+                if ((int)type->GetTypes() != (int)target->GetType())
+                    stack->EraseSelf(iter);
                 else
                     ++iter;
             }
@@ -208,7 +211,8 @@ bool CTargetSearcher::FindEntitesInLine(std::vector<CAbilityEntity*>& ret,
                                         float radian,
                                         TARGET_TEAMS teams,
                                         TARGET_TYPES types,
-                                        TARGET_FLAGS flags)
+                                        TARGET_FLAGS flags,
+                                        int maxTargets)
 {
     FindEntites(ret, caster, teams, types, flags);
     
@@ -217,20 +221,22 @@ bool CTargetSearcher::FindEntitesInLine(std::vector<CAbilityEntity*>& ret,
     CVector lb(startPosition.GetX(), startPosition.GetY() - width / 2);
     CVector rt(endPosition.GetX(), endPosition.GetY() + width / 2);
     CVector rb(endPosition.GetX(), endPosition.GetY() - width / 2);
-    lt = lt.rotateByAngle(startPosition, radian);
-    lb = lb.rotateByAngle(startPosition, radian);
-    rt = rt.rotateByAngle(startPosition, radian);
-    rb = rb.rotateByAngle(startPosition, radian);
+//    lt = lt.rotateByAngle(startPosition, radian);
+//    lb = lb.rotateByAngle(startPosition, radian);
+//    rt = rt.rotateByAngle(startPosition, radian);
+//    rb = rb.rotateByAngle(startPosition, radian);
     
     // 选择范围内的
     for (auto iter = ret.begin(); iter != ret.end();) {
         auto target = *iter;
-        
+        CVector pos = target->GetPosition().rotateByAngle(startPosition, -radian);
         if (!IsPointInLine(target->GetPosition(), lt, lb, rt, rb))
             ret.erase(iter);
         else
             ++iter;
     }
+    CVector centerLine(CVector((endPosition.GetX()-startPosition.GetX()) / 2, (endPosition.GetY()-startPosition.GetY())).rotateByAngle(startPosition, radian));
+    Local_FilterMaxTargets(ret, centerLine, maxTargets);
     return ret.size() > 0;
 }
 
@@ -242,7 +248,7 @@ bool CTargetSearcher::FindEntites(std::vector<CAbilityEntity*>& ret,
 {
     // 选择队伍
     switch (teams) {
-        case TARGET_TEAM_BOTH: ret = CAbilityEntityManager::getInstance()->GetAllEntity(); break;
+        case TARGET_TEAM_BOTH: CAbilityEntityManager::getInstance()->GetAllEntity(ret); break;
         case TARGET_TEAM_FRIENDLY: ret = CAbilityEntityManager::getInstance()->GetTeam(caster->GetTeamId()); break;
         case TARGET_TEAM_ENEMY: ret = CAbilityEntityManager::getInstance()->GetOtherTeam(caster->GetTeamId()); break;
         case TARGET_TEAM_NONE: return false;
@@ -319,9 +325,16 @@ bool CTargetSearcher::CollisionPoint(TARGET_LIST& vec,
 
 // 判断点与其他四个角的面积与矩形面积是否相等
 bool CTargetSearcher::IsPointInLine(const CVector& point, const CVector& lt, const CVector& lb, const CVector& rt, const CVector& rb) {
+//    printf("%f-%f %f-%f %f-%f %f-%f\n", lt.GetX(), lt.GetY(), lb.GetX(), lb.GetY(), rt.GetX(), rt.GetY(), rb.GetX(), rb.GetY());
+//    printf("%f-%f\n", point.GetX(), point.GetY());
     float area = fabsf(lt.GetY() - lb.GetY()) * fabsf(rt.GetX() - lt.GetX());
-    return area == (SKB::MathUtil::TriangleArea(lt, lb, point) +
+    float sumarea = SKB::MathUtil::TriangleArea(lt, lb, point) +
                     SKB::MathUtil::TriangleArea(lb, rb, point) +
                     SKB::MathUtil::TriangleArea(rb, rt, point) +
-                    SKB::MathUtil::TriangleArea(lt, rt, point));
+                    SKB::MathUtil::TriangleArea(lt, rt, point);
+//    printf("area:%f total:%f\n", area, SKB::MathUtil::TriangleArea(lt, lb, point) +
+//           SKB::MathUtil::TriangleArea(lb, rb, point) +
+//           SKB::MathUtil::TriangleArea(rb, rt, point) +
+//           SKB::MathUtil::TriangleArea(lt, rt, point));
+    return fabsf(area - sumarea) < 1;
 }

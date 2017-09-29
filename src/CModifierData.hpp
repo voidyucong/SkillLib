@@ -19,6 +19,7 @@ class COperate;
 class CAbility;
 class CAbilityEntity;
 class CModifier;
+class CAbilityValue;
 
 class CModifierData {
     friend class CModifier;
@@ -47,7 +48,7 @@ public:
     bool IsDebuff() { return isDebuff_; }
     bool IsPurgable() { return isPurgable_; }
     int GetMaxMulti() { return maxMulti_; }
-    float GetDuration() { return duration_; }
+    CAbilityValue* GetDuration() { return duration_; }
     float GetThinkInterval() { return thinkInterval_; }
     std::string GetTextureName() { return textureName_; }
     std::string GetEffectName() { return effectName_; }
@@ -61,7 +62,7 @@ public:
     void SetIsDebuff(bool value) { isDebuff_ = value; }
     void SetIsPurgable(bool value) { isPurgable_ = value; }
     void SetMaxMulti(int value) { maxMulti_ = value; }
-    void SetDuration(float value) { duration_ = value; }
+    void SetDuration(CAbilityValue* value) { duration_ = value; }
     void SetThinkInterval(float value) { thinkInterval_ = value; }
     void SetTextureName(std::string value) { textureName_ = value; }
     void SetEffectName(std::string value) { effectName_ = value; }
@@ -71,7 +72,7 @@ public:
 private:
     bool isMulti_;      // 是否可叠加
     int maxMulti_;    // 最高叠加层数
-    float duration_;    // 持续时间
+    CAbilityValue* duration_;    // 持续时间
     bool isPassive_;    // 是否被动
     bool isHidden_;     // 是否隐藏图标
     bool isBuff_;       // 是否正面buff

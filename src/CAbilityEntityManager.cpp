@@ -54,12 +54,10 @@ const std::vector<CAbilityEntity*>& CAbilityEntityManager::GetOtherTeam(TEAM_ID 
     return {};
 }
 
-const std::vector<CAbilityEntity*> CAbilityEntityManager::GetAllEntity() {
-    std::vector<CAbilityEntity*> ret;
+void CAbilityEntityManager::GetAllEntity(TARGET_LIST& list) {
     for (auto iter = entities_.begin(); iter != entities_.end(); ++iter) {
         for (auto entity : iter->second) {
-            ret.push_back(entity);
+            list.push_back(entity);
         }
     }
-    return ret;
 }

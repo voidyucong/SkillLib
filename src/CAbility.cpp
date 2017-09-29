@@ -178,11 +178,15 @@ void CAbility::SetEvent(EVENT_TYPE type, CEvent* event) {
 }
 
 int CAbility::ExecutEvent(EVENT_TYPE type) {
+    return ExecutEvent(type, targetStack_);
+}
+
+int CAbility::ExecutEvent(EVENT_TYPE type, CTargetStack* stack) {
     CEvent* event = base.events_[type];
     if (not event) {
         return 0;
     }
-    return event->Execute(caster_, this, targetStack_);
+    return event->Execute(caster_, this, stack);
 }
 
 

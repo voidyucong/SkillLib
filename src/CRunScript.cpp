@@ -6,11 +6,11 @@
 //  Copyright © 2017年 yucong. All rights reserved.
 //
 
-#include "CRunScprite.hpp"
+#include "CRunScript.hpp"
 
-lua_State* CRunScprite::L_ = 0;
+lua_State* CRunScript::L_ = 0;
 
-CRunScprite::CRunScprite()
+CRunScript::CRunScript()
 : scripteFile_("")
 , function_("")
 {
@@ -20,11 +20,11 @@ CRunScprite::CRunScprite()
     }
 }
 
-CRunScprite::~CRunScprite() {
+CRunScript::~CRunScript() {
 
 }
 
-void CRunScprite::Execute() {
+void CRunScript::Execute() {
     std::string s = "require \"" + scripteFile_ + "\"";
     if (luaL_dostring(L_, s.c_str()) != LUA_OK) {
         const char *msg = lua_tostring(L_,-1);
@@ -41,11 +41,11 @@ void CRunScprite::Execute() {
     lua_call(L_, 1, 0);
 }
 
-void CRunScprite::SetScript(std::string scriptFile, std::string function) {
+void CRunScript::SetScript(std::string scriptFile, std::string function) {
     scripteFile_ = scriptFile;
     function_ = function;
 }
 
-void CRunScprite::SetParam(std::string name, CObject* value) {
+void CRunScript::SetParam(std::string name, CObject* value) {
     params_[name] = value;
 }

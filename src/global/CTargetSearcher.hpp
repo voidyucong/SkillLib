@@ -69,7 +69,8 @@ public:
                                   float radian,
                                   TARGET_TEAMS teams,
                                   TARGET_TYPES types,
-                                  TARGET_FLAGS flags);
+                                  TARGET_FLAGS flags,
+                                  int maxTargets = 0);
     
     // 查找复合条件的所有entity
     static bool FindEntites(std::vector<CAbilityEntity*>& ret,

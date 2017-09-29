@@ -1,8 +1,8 @@
 {
-	"name": "扁鹊2 发射方向性抛射物，给敌方造成伤害并给友方回血",
-	"AbilityBehavior": ["ABILITY_BEHAVIOR_DIRECTIONAL", "ABILITY_BEHAVIOR_IGNORE_BACKSWING"],
+	"name": "妲己2 发射跟踪抛射物，对目标造成伤害并眩晕目标",
+	"AbilityBehavior": ["ABILITY_BEHAVIOR_UNIT_TARGET", "ABILITY_BEHAVIOR_IGNORE_BACKSWING"],
 	"AbilityUnitDamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
-	"AbilityUnitTargetTeam": "TARGET_TEAM_BOTH",
+	"AbilityUnitTargetTeam": "TARGET_TEAM_ENEMY",
 	"AbilityUnitTargetType": "TARGET_TYPE_HERO",
 	"IsIgnoreSpellImmunity": false,
 	"BeginLevel": 1,
@@ -16,6 +16,7 @@
 	"AbilityCooldown": [20.0, 20.0, 20.0],
 	"AbilityManaCost": [20, 15, 10],
 	"AbilityDamage": [100, 130, 160],
+	"AbilityMaxTargets": 1,
 
 	"AbilitySpecial": [
 		{
@@ -35,8 +36,8 @@
 		},
 		{
 			"type": "float",
-			"key": "heal",
-			"value": [100, 130, 150]
+			"key": "stuntime",
+			"value": [1, 2, 3]
 		},
 		{
 			"type": "float",
@@ -46,40 +47,55 @@
 	],
 
 	"OnSpellStart": {
-		"LinearProjectile": {
-			"Target": {
-				"Teams": "TARGET_TEAM_BOTH",
-				"Types": "TARGET_TYPE_HERO"
-			},
+		"TrackingProjectile": {
+			"Target": "TARGET",
 			"EffectName": "particles/units/heroes/hero_drow/drow_silence_wave.vpcf",
 			"MoveSpeed": 100,
-			"StartRadius": 100,
-			"EndRadius": 100,
-			"Length": 20,
+			"Width": 100,
+			"Height": 100,
 			"CastRadius": 200,
-			"IsDeleteOnHit": false,
 			"AttachType": "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN"
 		}
 	},
 
 	"OnProjectileHit": {
 		"Damage": {
-			"Target": {
-				"Teams": "TARGET_TEAM_ENEMY",
-				"Types": "TARGET_TYPE_HERO"
-			},
 			"DamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
 			"Damage": "%damage"
 		},
-		"Heal": {
-			"Target": {
-				"Teams": "TARGET_TEAM_FRIENDLY",
-				"Types": "TARGET_TYPE_HERO"
-			},
-			"HealAmount": 80
+		"ApplyModifier": {
+			"Target": "TARGET",
+			"ModifierName": "modifier_stun"
 		},
 		"Log": {
-			"text": "LinearProjectile OnHit"
+			"text": "TrackingProjectile OnHit"
+		}
+	},
+
+	"Modifiers": {
+		"modifier_stun": {
+			"IsBuff": false,
+			"IsHidden": false,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": "%stuntime",
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_stun OnCreated"
+				}
+			},
+
+			"OnDestroy": {
+				"Log": {
+					"text": "modifier_stun OnDestroy"
+				}
+			},
+
+			"States": {
+				"MODIFIER_STATE_STUN": true
+			}
 		}
 	}
 }

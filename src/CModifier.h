@@ -63,7 +63,7 @@ public:
     bool IsDebuff() { return modifierData_->isDebuff_; }
     bool IsPurgable() { return modifierData_->isPurgable_; }
     int GetMaxMulti() { return modifierData_->maxMulti_; }
-    float GetDuration() { return modifierData_->duration_; }
+    CAbilityValue* GetDuration() { return modifierData_->duration_; }
     float GetThinkInterval() { return modifierData_->thinkInterval_; }
     std::string GetTextureName() { return modifierData_->textureName_; }
     std::string GetEffectName() { return modifierData_->effectName_; }

@@ -41,28 +41,17 @@ public:
     
     inline float dot(const CVector& other) const { return x_*other.x_ + y_*other.y_; };
     inline float cross(const CVector& other) const { return x_*other.y_ - y_*other.x_; };
-    CVector normalize() const {
-        float length = GetLength();
-        if(length == 0.) return CVector(1.f, 0);
-        return *this / GetLength();
-    };
+    CVector normalize() const;
     inline float getRadian() const {
         return atan2f(y_, x_);
     };
-    float getRadian(const CVector& other) const
-    {
-        CVector a2 = normalize();
-        CVector b2 = other.normalize();
-        float angle = atan2f(a2.cross(b2), a2.dot(b2));
-        if( fabs(angle) < FLT_EPSILON ) return 0.f;
-        return angle;
-    }
+    float getRadian(const CVector& other) const;
     float GetLength() const { return sqrtf(x_ * x_ + y_ * y_); }
     float GetDistance(const CVector& other) const { return (*this - other).GetLength(); }
     inline CVector rotate(const CVector& other) const { return CVector(x_*other.x_ - y_*other.y_, x_*other.y_ + y_*other.x_); };
     // pivot 旋转基准点
     // angle 弧度
-    CVector rotateByAngle(const CVector& pivot, float angle) const { return pivot + (*this - pivot).rotate(CVector::forAngle(angle)); }
+    CVector rotateByAngle(const CVector& pivot, float angle) const;
     
     static inline CVector forAngle(const float a)
     {
@@ -127,26 +116,9 @@ public:
     float getMaxY() const { return origin_.GetY() + size_.height; }
     float getMidY() const { return (float)(origin_.GetY() + size_.height / 2.0); }
     float getMinY() const { return origin_.GetY(); }
-    bool ContainsPoint(const CVector& point) const
-    {
-        bool bRet = false;
-        
-        if (point.GetX() >= getMinX() && point.GetX() <= getMaxX()
-            && point.GetY() >= getMinY() && point.GetY() <= getMaxY())
-        {
-            bRet = true;
-        }
-        
-        return bRet;
-    }
+    bool ContainsPoint(const CVector& point) const;
+    bool IntersectsRect(const CRect& rect) const;
     
-    bool IntersectsRect(const CRect& rect) const
-    {
-        return !(     getMaxX() < rect.getMinX() ||
-                 rect.getMaxX() <      getMinX() ||
-                 getMaxY() < rect.getMinY() ||
-                 rect.getMaxY() <      getMinY());
-    }
 private:
     CSize size_;
     CVector origin_;
@@ -156,22 +128,17 @@ class CCircle {
 public:
     CCircle() {}
     CCircle(const CVector& center, float radius): center_(center), radius_(radius) {}
+    CCircle(CRect rect);
     ~CCircle() {}
+    void SetCenter(CVector center) { center_ = center; }
     const CVector& GetCenter() const { return center_; }
     float GetRadius() const { return radius_; }
     
     bool IntersectsCircel(const CCircle& other) const {
-        return center_.GetDistance(other.center_) > (radius_ + other.radius_);
+        return center_.GetDistance(other.center_) <= (radius_ + other.radius_);
     }
-    
     // 算法详见https://www.zhihu.com/question/24251545 Milp Yip的回答
-    bool IntersectsRect(const CRect& rect) const {
-        CVector rectCenter(rect.GetOrigin().GetX() + rect.GetSize().width/2, rect.GetOrigin().GetY() + rect.GetSize().height/2);
-        CVector quartile(fabsf(center_.GetX() - rectCenter.GetX()), fabsf(center_.GetY() - rectCenter.GetY()));  // 第一象限
-        CVector shortage(MAX(quartile.GetX() - rect.GetSize().width/2, 0), MAX(quartile.GetY() - rect.GetSize().height/2, 0));
-        return shortage.dot(shortage) <= radius_ * radius_;
-    }
-    
+    bool IntersectsRect(const CRect& rect) const;
     bool IntersectsPoint(const CVector& point) const {
         return center_.GetDistance(point) <= radius_;
     }

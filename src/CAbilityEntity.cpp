@@ -10,6 +10,7 @@
 #include <assert.h>
 #include "CModifier.h"
 #include "CScheduleManager.h"
+#include "SkillReaderJson.hpp"
 
 CAbilityEntity::CAbilityEntity()
 : abilityContainer_(new CAbilityContainer())
@@ -72,6 +73,18 @@ void CAbilityEntity::ExecuteAbility(unsigned index) {
     ability->Cast();
 }
 
+void CAbilityEntity::SetData(CAbilityEntityData* data) {
+    data_ = data;
+    SetEntityAbilityLayout(data_->GetAbilityLayout());
+    for (int i = 0; i < data_->GetAbilityLayout(); ++i) {
+        char path[200];
+        sprintf(path, "/Users/yucong/Documents/SkillLib/SkillLib/res/scripts/abilities/%s.json", data_->GetAbility(i).c_str());
+        CAbility* ability = SkillReaderJson::getInstance()->AbilityFromFile(path);
+        SetEntityAbility(ability, i);
+    }
+    SetCurrentLevel(data_->GetLevel());
+}
+
 
 #pragma mark -
 #pragma mark attributes
@@ -85,12 +98,10 @@ void CAbilityEntity::SetEntityAbilityLayout(unsigned layout) {
 }
 
 void CAbilityEntity::SetBaseAttribute(ENTITY_ATTRIBUTES attribute, float value) {
-    assert(value);
-    baseAttributes_[attribute] = value;
+    data_->SetBaseAttributes(attribute, value);
 }
 
 void CAbilityEntity::ModifyAttribute(ENTITY_ATTRIBUTES attribute, float value) {
-    assert(value);
     if (modifyAttributes_.find(attribute) != modifyAttributes_.end()) {
         modifyAttributes_[attribute] += value;
     } else {
@@ -99,10 +110,7 @@ void CAbilityEntity::ModifyAttribute(ENTITY_ATTRIBUTES attribute, float value) {
 }
 
 float CAbilityEntity::GetBaseAttribute(ENTITY_ATTRIBUTES attribute) {
-    if (baseAttributes_.find(attribute) != baseAttributes_.end()) {
-        return baseAttributes_[attribute];
-    }
-    return 0.f;
+    return data_->GetAttributes(attribute);
 }
 
 float CAbilityEntity::GetModifyAttribute(ENTITY_ATTRIBUTES attribute) {

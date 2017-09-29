@@ -16,9 +16,7 @@
 #include "CAbility.hpp"
 #include "CAbilityContainer.hpp"
 #include "COperate.hpp"
-
-//class CAbilityContainer;
-//class CAbility;
+#include "CAbilityEntityData.hpp"
 
 struct ModifierNode {
     std::vector<CModifier*> sameModifiers;
@@ -61,8 +59,7 @@ public:
     void ClearModifier(std::string name);
     
     // type
-    void SetType(ENTITY_TYPE type) { type_ = type; }
-    ENTITY_TYPE GetType() { return type_; }
+    ENTITY_TYPE GetType() { return data_->GetType(); }
     
     // 获取最大值
     float GetHPMax(int level) {
@@ -70,7 +67,7 @@ public:
     float GetManaMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_MANA) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_MANA_GAIN); }
     float GetDamageMax(int level) {
-        return this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_GAIN); }
+        return this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_MAX) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_GAIN); }
     float GetArmorMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_ARMOR) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_ARMOR_GAIN); }
     float GetMagicResistMax(int level) {
@@ -88,41 +85,24 @@ public:
     void SetAttacker(CAbilityEntity* attacker) { attacker_ = attacker; }
     CAbilityEntity* GetAttacker() { return attacker_; }
     
-    void SetSize(float width, float height) { size_.width = width; size_.height = height; }
-    CSize GetSize() { return size_; }
+    CSize GetSize() { return CSize(data_->GetSize()); }
+    CVector GetCollisionCenter() { return CVector(position_.GetX(), position_.GetY() + data_->GetSize().height/2); }
     
     void SetPosition(float x, float y) { position_.SetX(x); position_.SetY(y); }
     void SetPositionX(float x) { position_.SetX(x); }
     void SetPositionY(float y) { position_.SetY(y); }
     const CVector& GetPosition() { return position_; }
     
+    void SetData(CAbilityEntityData* data);
+    CAbilityEntityData* GetData() { return data_; }
+    
 private:
     // base data
     //----------------------------------------------------------------
     int level_;                         // 单位等级
-    std::string modelName_;             // 模型文件
-    float modelScale_;                  // 模型缩放大小，
-    std::string minimapIconName_;       // 小地图图标
-    float minimapIconSize_;             // 小地图图标尺寸
-    std::string tag_;                   // 单位标签，可以是任何名字字符，使用Lua代码GetUnitLabel()可以获取到这里的键值
-    bool isNeutralUnitType_;            // 是否是中立单位，相关Lua函数: IsNeutralUnitType()
-    bool isAutoAttacks_;                // 是否自动攻击，0为不自动攻击
-    
-    float healthBarOffset_;                             // 血条高度，缺省值为 "-1"，意味着使用默认的模型高度
-    std::string vscript_;                               // 这会在单位诞生后立即装载一个脚本文件,使用诞生函数 ( entityKeyValues ) 可以启动一个计时器来进行任何操作
-    std::string projectileModelName_;                   // 抛射物模型
-    CSize size_;
-    
     CAbilityContainer* abilityContainer_;               // 技能
-    
-    ENTITY_TYPE type_;                                  // 类型 英雄|建筑|野怪
-    ENTITY_ATTRIBUTE_PRIMARY primary_;                  // 主属性类型
-    ENTITY_MOVEMENT_CAPABILITY movementCapability_;     // 移动能力 不能移动|地面|飞行
-    ENTITY_ATTACK_CAPABILITY attackCapability_;         // 攻击能力 不能攻击|近战|远程
-    
-    std::map<ENTITY_ATTRIBUTES, float> baseAttributes_;     // 所有基础属性
-    
     CAbilityEntity* attacker_;          // 攻击者
+    CAbilityEntityData* data_;
 
     // 变化的数据
     //----------------------------------------------------------------

@@ -25,7 +25,7 @@ CAbilityContainer::~CAbilityContainer() {
 void CAbilityContainer::SetAbility(CAbility* ability, int index) {
     assert(index >= 0);
 //    abilities_[index] = ability;
-    abilities_.insert(abilities_.begin(), ability);
+    abilities_.insert(abilities_.begin() + index, ability);
 }
 
 CAbility* CAbilityContainer::GetAbility(int index) {

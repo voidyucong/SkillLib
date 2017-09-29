@@ -1,5 +1,5 @@
 {
-	"name": "治疗",
+	"name": "治疗 治疗自己并增加护甲",
 	"AbilityBehavior": ["ABILITY_BEHAVIOR_NO_TARGET"],
 	"AbilityUnitDamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
 	"AbilityUnitTargetTeam": "TARGET_TEAM_FRIENDLY",

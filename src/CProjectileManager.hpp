@@ -11,18 +11,30 @@
 
 #include <iostream>
 #include <map>
+#include "CObject.hpp"
 
-class CAbilibyEntity;
+class CAbility;
+class CAbilityEntity;
 class CProjectile;
 class CLinearProjectile;
 class CTrackingProjectile;
 class CLinearProjectileData;
 class CTrackingProjectileData;
+class CTargetSearchType;
 
 class CProjectileManager {
 public:
-    static CLinearProjectile* CreateLinearProjectile(CLinearProjectileData* data);
-    static CTrackingProjectile* CreateTrackingProjectile(CTrackingProjectileData* data);
+    static CLinearProjectile* CreateLinearProjectile(CLinearProjectileData* data,
+                                                     CAbilityEntity* caster,
+                                                     CAbility* ability,
+                                                     const CVector& direction,
+                                                     const CVector& castPosition,
+                                                     CTargetSearchType* targetType);
+    static CTrackingProjectile* CreateTrackingProjectile(CTrackingProjectileData* data,
+                                                         CAbilityEntity* caster,
+                                                         CAbility* ability,
+                                                         CAbilityEntity* target,
+                                                         const CVector& castPosition);
     
 private:
     std::map<int, CProjectile*> cache_;

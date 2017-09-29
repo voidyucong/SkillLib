@@ -34,9 +34,9 @@ public:
     
     
     // events
-    void SetEvent(EVENT_TYPE behavior, CEvent* event);
-    int ExecutEvent(EVENT_TYPE behavior);
-    
+    void SetEvent(EVENT_TYPE type, CEvent* event);
+    int ExecutEvent(EVENT_TYPE type);
+    int ExecutEvent(EVENT_TYPE type, CTargetStack* stack);
     
     // special value
     void AddSpecialValue(CAbilityValue* value, std::string name) { base.specials_[name] = value; }
@@ -113,6 +113,8 @@ public:
     
     void SetFlags(TARGET_FLAGS flags) { base.targetSearchType_->SetFlags(flags); }
     TARGET_FLAGS GetFlags() { return base.targetSearchType_->GetFlags(); }
+    
+    CTargetSearchType* getTargetType() { return base.targetSearchType_; }
     
     void SetLevel(int level) { level_ = level; }
     int GetLevel() { return level_; }

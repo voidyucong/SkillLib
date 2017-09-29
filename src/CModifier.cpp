@@ -76,7 +76,7 @@ void CModifier::Destroy() {
 void CModifier::Update(float dt) {
 //    std::cout << "CModifier Update" << std::endl;
     ExecuteEvent(MODIFIER_EVENT_ON_INTERVAL, caster_, ability_);
-    if (spawnTime_ + modifierData_->GetDuration() < SKB::TimeUtil::GetSeconds()) {
+    if (spawnTime_ + modifierData_->GetDuration()->GetArrayValueByIndex(ability_->GetLevel() - 1)->GetValue<float>() < SKB::TimeUtil::GetSeconds()) {
         isWaitDestroy_ = true;  // 标记可销毁，由拥有的entity删除
     }
 }
