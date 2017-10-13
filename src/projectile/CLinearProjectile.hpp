@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <map>
+#include <set>
 #include "CProjectile.hpp"
 
 class CAbility;
@@ -98,7 +99,7 @@ private:
     CVector direction_;         // 释放方向
     CVector castPosition_;      // 释放位置
     CTargetSearchType* targetType_;
-    std::map<CAbilityEntity*, int> hitTargets_;
+    std::set<CAbilityEntity*> hitTargets_;
     CTargetStack* stack_;
 };
 

@@ -144,8 +144,8 @@ void CAbility::Cast() {
     
     auto cooldown = this->GetLevelSpecialValueFor("cooldown", level_);
     cooldown_ = now + cooldown->GetValue<float>()
-                * (1 - this->GetModifyAttribute(MODIFIER_ATTRIBUTE_COOLDOWN_GAIN_PERCENT))
-                - this->GetModifyAttribute(MODIFIER_ATTRIBUTE_COOLDOWN_GAIN);
+                * (1 - this->GetModifyAttribute(ABILITY_ATTRIBUTE_COOLDOWN_GAIN_PERCENT))
+                - this->GetModifyAttribute(ABILITY_ATTRIBUTE_COOLDOWN_GAIN);
     
     CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbility::Update), 1/60);
     this->ExecutEvent(EVENT_TYPE_ON_SPELL_START);
@@ -196,14 +196,6 @@ CAbilityValue* CAbility::GetLevelSpecialValueFor(std::string key, int level) {
     CAbilityValue* value = base.specials_[key];
     assert(value);
     return value->GetArrayValueByIndex(level - 1);
-//    if (value->IsArray()) {
-//        assert(value->GetValue<CAbilityValue::Array>().size() > level - 1);
-//        return value->GetArrayValueByIndex(level - 1);
-//        
-//    }
-//    else {
-//        return value;
-//    }
 }
 
 bool CAbility::IsSpecialValueExist(std::string name) {
@@ -211,11 +203,11 @@ bool CAbility::IsSpecialValueExist(std::string name) {
 }
 
 // attributes
-void CAbility::ModifyAttribute(MODIFIER_ATTRIBUTES attribute, float value) {
+void CAbility::ModifyAttribute(ABILITY_ATTRIBUTE attribute, float value) {
     modifyAttributes_[attribute] = value;
 }
 
-float CAbility::GetModifyAttribute(MODIFIER_ATTRIBUTES attribute) {
+float CAbility::GetModifyAttribute(ABILITY_ATTRIBUTE attribute) {
     if (modifyAttributes_.find(attribute) == modifyAttributes_.end()) return 0.f;
     return modifyAttributes_[attribute];
 }

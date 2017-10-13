@@ -18,7 +18,7 @@ void Local_FilterType(TARGET_LIST& ret, CAbilityEntity* caster, TARGET_TYPES typ
     for (auto iter = ret.begin(); iter != ret.end();) {
         auto target = *iter;
         if ((int)type != (int)target->GetType())
-            ret.erase(iter);
+            iter = ret.erase(iter);
         else
             ++iter;
     }
@@ -51,28 +51,49 @@ void CTargetSearcher::HandleTargetStack(CAbilityEntity* caster,
         auto list = stack->GetValid()->GetTargets();
         stack->DestroySelf();
         stack->ConstructSelf();
-        // 筛选
-        for (auto iter = list.begin(); iter != list.end(); ++iter) {
-            auto target = *iter;
-            if (type->GetTeams() == TARGET_TEAM_BOTH || type->GetTeams() == TARGET_TEAM_NONE) {
-                stack->PushSelf(target);
+        // 单体
+        if (type->GetSingle() != TARGET_CENTER_NONE) {
+            // 释放者
+            if (type->GetSingle() == TARGET_CENTER_CASTER) {
+                stack->PushSelf(caster);
             }
-            else if (type->GetTeams() == TARGET_TEAM_FRIENDLY && target->GetTeamId() == caster->GetTeamId()) {
-                stack->PushSelf(target);
+            // 目标者
+            else if (type->GetSingle() == TARGET_CENTER_TARGET) {
+                assert(stack->GetParent()->GetValid()->GetTargets().size() <= 1);
+                if (stack->GetParent()->GetValid()->GetTargets().size() > 0) {
+                    stack->PushSelf(stack->GetParent()->GetValid()->GetTargets()[0]);
+                }
             }
-            else if (type->GetTeams() == TARGET_TEAM_ENEMY && target->GetTeamId() != caster->GetTeamId()) {
-                stack->PushSelf(target);
+            // 攻击者
+            else if (type->GetSingle() == TARGET_CENTER_ATTACKER) {
+                
+            }
+        }
+        else {
+            // 筛选
+            for (auto iter = list.begin(); iter != list.end(); ++iter) {
+                auto target = *iter;
+                if (type->GetTeams() == TARGET_TEAM_BOTH || type->GetTeams() == TARGET_TEAM_NONE) {
+                    stack->PushSelf(target);
+                }
+                else if (type->GetTeams() == TARGET_TEAM_FRIENDLY && target->GetTeamId() == caster->GetTeamId()) {
+                    stack->PushSelf(target);
+                }
+                else if (type->GetTeams() == TARGET_TEAM_ENEMY && target->GetTeamId() != caster->GetTeamId()) {
+                    stack->PushSelf(target);
+                }
+                
             }
             
-        }
-        
-        if (type->GetTypes() != TARGET_TYPE_ALL && type->GetTypes() != TARGET_TYPE_NONE) {
-            for (auto iter = stack->GetSelf()->GetTargets().begin(); iter != stack->GetSelf()->GetTargets().end();) {
-                auto target = *iter;
-                if ((int)type->GetTypes() != (int)target->GetType())
-                    stack->EraseSelf(iter);
-                else
-                    ++iter;
+            if (type->GetTypes() != TARGET_TYPE_ALL && type->GetTypes() != TARGET_TYPE_NONE) {
+                for (auto iter = stack->GetSelf()->GetTargets().begin(); iter != stack->GetSelf()->GetTargets().end();) {
+                    auto target = *iter;
+                    if ((int)type->GetTypes() != (int)target->GetType())
+                        // TODO!!!
+                        iter = stack->EraseSelf(iter);
+                    else
+                        ++iter;
+                }
             }
         }
     }
@@ -193,7 +214,7 @@ bool CTargetSearcher::FindEntitesInRadius(std::vector<CAbilityEntity*>& ret,
     for (auto iter = ret.begin(); iter != ret.end();) {
         auto target = *iter;
         if (!circle.IntersectsPoint(target->GetPosition()))
-            ret.erase(iter);
+            iter = ret.erase(iter);
         else
             ++iter;
     }
@@ -231,7 +252,7 @@ bool CTargetSearcher::FindEntitesInLine(std::vector<CAbilityEntity*>& ret,
         auto target = *iter;
         CVector pos = target->GetPosition().rotateByAngle(startPosition, -radian);
         if (!IsPointInLine(target->GetPosition(), lt, lb, rt, rb))
-            ret.erase(iter);
+            iter = ret.erase(iter);
         else
             ++iter;
     }
@@ -257,7 +278,7 @@ bool CTargetSearcher::FindEntites(std::vector<CAbilityEntity*>& ret,
     for (auto iter = ret.begin(); iter != ret.end();) {
         auto target = *iter;
         if ((int)types != (int)target->GetType())
-            ret.erase(iter);
+            iter = ret.erase(iter);
         else
             ++iter;
     }
@@ -285,7 +306,7 @@ bool CTargetSearcher::CollisionLine(TARGET_LIST& vec,
         if (rect.ContainsPoint(lt) || rect.ContainsPoint(lb) || rect.ContainsPoint(rt) || rect.ContainsPoint(rb))
             ++iter;
         else
-            vec.erase(iter);
+            iter = vec.erase(iter);
     }
     CVector centerLine(CVector((endPosition.GetX()-startPosition.GetX()) / 2, (endPosition.GetY()-startPosition.GetY())).rotateByAngle(startPosition, radian));
     Local_FilterMaxTargets(vec, centerLine, maxTargets);
@@ -308,7 +329,7 @@ bool CTargetSearcher::CollisionCircle(TARGET_LIST& vec,
         if (circle.IntersectsRect(rect))
             ++iter;
         else
-            vec.erase(iter);
+            iter = vec.erase(iter);
     }
     Local_FilterMaxTargets(vec, circle.GetCenter(), maxTargets);
     

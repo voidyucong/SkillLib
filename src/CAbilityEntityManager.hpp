@@ -28,8 +28,12 @@ public:
     const std::vector<CAbilityEntity*>& GetTeam(TEAM_ID teamId);
     const std::vector<CAbilityEntity*>& GetOtherTeam(TEAM_ID teamId);
     void GetAllEntity(TARGET_LIST& list);
+    
+    uint GetEntityId(CAbilityEntity* entity);
+    CAbilityEntity* GetEntityById(uint id);
 private:
     std::map<TEAM_ID, std::vector<CAbilityEntity*>> entities_;
+    std::map<uint, CAbilityEntity*> ids_;
 };
 
 #endif /* CAbilityEntityManager_hpp */

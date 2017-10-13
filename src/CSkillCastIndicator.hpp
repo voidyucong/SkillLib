@@ -33,7 +33,7 @@ public:
     void SetDirection(const CVector& direction) { type_ = INDICATOR_DIRECTION; direction_ = direction; }
     const CVector& GetDirection();
     void SetPoint(const CVector& point) { type_ = INDICATOR_POINT; point_ = point; }
-    const CVector& GetPoint() { return point_; }
+    const CVector& GetPoint();
     void SetTarget(CAbilityEntity* target) { type_ = INDICATOR_TARGET; target_ = target; }
     CAbilityEntity* GetTarget() { return target_; }
 private:

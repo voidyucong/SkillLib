@@ -45,8 +45,8 @@ public:
     CAbilityValue* GetLevelSpecialValueFor(std::string key, int level);
     bool IsSpecialValueExist(std::string name);
     
-    void ModifyAttribute(MODIFIER_ATTRIBUTES attribute, float value);
-    float GetModifyAttribute(MODIFIER_ATTRIBUTES attribute);
+    void ModifyAttribute(ABILITY_ATTRIBUTE attribute, float value);
+    float GetModifyAttribute(ABILITY_ATTRIBUTE attribute);
     
     // modifier
     void SetModifierData(std::string name, CModifierData* modifier);
@@ -69,6 +69,7 @@ public:
     void SetCastWidth(CAbilityValue* castWidth) { base.castWidth_ = castWidth; }
     void SetCastRange(CAbilityValue* castRange) { base.castRange_ = castRange; }
     void SetCastRangeBuffer(CAbilityValue* castRangeBuffer) { base.castRangeBuffer_ = castRangeBuffer; }
+    void SetAoeRange(CAbilityValue* range) { base.aoeRange_ = range; }
     void SetDamage(CAbilityValue* damage) { base.damage_ = damage; }
     void SetManaCost(CAbilityValue* manaCost) { base.manaCost_ = manaCost; }
     void SetCrystalCost(CAbilityValue* crystalCost) { base.crystalCost_ = crystalCost; }
@@ -90,6 +91,7 @@ public:
     CAbilityValue* GetCastWidth() { return base.castWidth_; }
     CAbilityValue* GetCastRange() { return base.castRange_; }
     CAbilityValue* GetCastRangeBuffer() { return base.castRangeBuffer_; }
+    CAbilityValue* GetAoeRange() { return base.aoeRange_; }
     CAbilityValue* GetDamage() { return base.damage_; }
     CAbilityValue* GetManaCost() { return base.manaCost_; }
     CAbilityValue* GetCrystalCost() { return base.crystalCost_; }
@@ -138,6 +140,7 @@ private:
         CAbilityValue* castWidth_;  // 技能宽度
         CAbilityValue* castRange_;  // 技能释放范围
         CAbilityValue* castRangeBuffer_;    // 释放范围缓冲，当 castRange_ < 目标 < castRangeBuffer_也会自己攻击
+        CAbilityValue* aoeRange_;   // 配合ABILITY_BEHAVIOR_AOE使用，显示技能范围
         CAbilityValue* cooldown_;
         CAbilityValue* damage_;     // 伤害
         CAbilityValue* manaCost_;   // 法术消耗
@@ -158,7 +161,7 @@ private:
     float elapsed_;
     bool isValid_;
     CAbilityEntity* caster_;
-    std::map<MODIFIER_ATTRIBUTES, float> modifyAttributes_;
+    std::map<ABILITY_ATTRIBUTE, float> modifyAttributes_;
     std::map<std::string, CModifierData*> modifierData_;
     // 包括选中的、击中的
     CTargetStack* targetStack_;

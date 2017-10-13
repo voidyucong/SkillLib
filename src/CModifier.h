@@ -21,32 +21,38 @@ class COperate;
 class CAbility;
 class CAbilityEntity;
 class CTargetStack;
+class CAura;
 
 class CModifier : public CObject {
-    typedef std::vector<CAbilityEntity*> COLLISION_TYPE;
 public:
     CModifier();
     virtual ~CModifier();
     // 开始执行
     void Activate();
-    void Activate(CAbilityEntity* caster, CAbility* ability);
+    void Activate(CAbilityEntity* entity, CAbility* ability);
     void Destroy();
     void Update(float dt);
+    void OnThinkInterval(float dt);
+    void SetCaster(CAbilityEntity* caster) { caster_ = caster; }
     
     // properties处理
     void AddEntityProperty();
     void RemoveEntityProperty();
     
-    int ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *caster, CAbility *ability);
-    void ExecuteOperate(CAbilityEntity* caster, CAbility* ability);
+    // states
+    void AddEntityState();
+    void RemoveEntityState();
+    
+    int ExecuteEvent(MODIFIER_EVENT_TYPE type);
+    void ExecuteOperate();
     
     // 所属的entity和ability
-    void SetEntity(CAbilityEntity* caster) { caster_ = caster; }
+    void SetEntity(CAbilityEntity* entity) { entity_ = entity; }
     void SetAbility(CAbility* ability) { ability_ = ability; }
     
     // collision
     void AddCollision(CAbilityEntity* caster) { collisions_.push_back(caster); }
-    COLLISION_TYPE GetAllCollisions() { return collisions_; }
+    TARGET_LIST GetAllCollisions() { return collisions_; }
 
     void SetModifierData(CModifierData* data) { modifierData_ = data; }
     CModifierData* GetModifierData() { return modifierData_; }
@@ -70,12 +76,16 @@ public:
     std::string GetModelName() { return modifierData_->modelName_; }
     std::string GetName() { return modifierData_->name_; }
     
+    void SetAura(CAura* aura) { aura_ = aura; }
+    CAura* GetAura() { return aura_; }
+    
 private:
-    // 所属的entity和ability
     CAbilityEntity* caster_;
+    // 所属的entity和ability
+    CAbilityEntity* entity_;
     CAbility* ability_;
     // 碰到的目标
-    COLLISION_TYPE collisions_;
+    TARGET_LIST collisions_;
     // 原型数据
     CModifierData* modifierData_;
     // 存在的时间
@@ -84,6 +94,8 @@ private:
     bool isWaitDestroy_;
     //
     CTargetStack* targetStack_;
+    
+    CAura* aura_;
 };
 
 #endif /* CModifier_hpp */

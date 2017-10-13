@@ -34,3 +34,13 @@ const CVector& CSkillCastIndicator::GetDirection() {
     }
     assert(false);
 }
+
+const CVector& CSkillCastIndicator::GetPoint() {
+    if (type_ == INDICATOR_POINT) {
+        return point_;
+    }
+    else if (type_ == INDICATOR_TARGET) {
+        return target_->GetPosition();
+    }
+    assert(false);
+}

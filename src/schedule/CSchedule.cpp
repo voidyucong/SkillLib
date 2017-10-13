@@ -28,10 +28,10 @@ CSchedule::~CSchedule() {
     
 }
 
-void CSchedule::AddCallback(CObject* target, CObject::CALLBACK callback) {
-    target_ = target;
-    callback_ = callback;
-}
+//void CSchedule::AddCallback(CObject* target, CObject::CALLBACK callback) {
+//    target_ = target;
+//    callback_ = callback;
+//}
 
 void CSchedule::Update(float dt) {
     elapsed_ += dt;

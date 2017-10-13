@@ -26,10 +26,10 @@ CEvent::~CEvent() {
 int CEvent::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     int ok = 1;
     for (COperate* op : operators_) {
-        COperate* cloneop = op->Clone();
-        ok &= cloneop->Execute(entity, ability, parentStack);
-        delete cloneop;
-        cloneop = 0;
+//        COperate* cloneop = op->Clone();
+        ok &= op->Execute(entity, ability, parentStack);
+//        delete cloneop;
+//        cloneop = 0;
     }
     return ok;
 }
@@ -38,10 +38,10 @@ void CEvent::AddOperate(COperate* op) {
     operators_.push_back(op);
 }
 
-CEvent* CEvent::Clone() {
-    CEvent* event = new CEvent();
-    for (COperate* op : operators_) {
-        event->AddOperate(op->Clone());
-    }
-    return event;
-}
+//CEvent* CEvent::Clone() {
+//    CEvent* event = new CEvent();
+//    for (COperate* op : operators_) {
+//        event->AddOperate(op->Clone());
+//    }
+//    return event;
+//}

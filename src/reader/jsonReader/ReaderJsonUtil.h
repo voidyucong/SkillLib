@@ -96,8 +96,10 @@ namespace SKB {
         }
         
         // 创建参数列表，json可为float、string、list
-        static CAbilityValue* CreateVariableList(const rapidjson::Value& item, std::string type, CAbility* ability) {
-            if (item.IsNull()) return NULL;
+        static CAbilityValue* CreateVariableList(const rapidjson::Value& json, std::string key, std::string type, CAbility* ability) {
+            if (json.IsNull()) return NULL;
+            if (!CheckJsonIsKeyNotNull(json, key.c_str())) return NULL;
+            const rapidjson::Value& item = json[key.c_str()];
             if (item.IsArray()) {
                 CAbilityValue::Array array;
                 for (int j = 0; j < GetJsonArraySize(item); ++j) {

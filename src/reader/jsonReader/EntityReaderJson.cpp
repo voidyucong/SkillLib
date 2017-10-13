@@ -121,6 +121,12 @@ CAbilityEntity* EntityReaderJson::CreateEntity(const rapidjson::Value& json) {
     data->SetMagicResistGain(RUTL::GetJsonFloatValueFromDic(json, "MagicResistGain", 0));
     data->SetMovementSpeed(RUTL::GetJsonFloatValueFromDic(json, "MovementSpeed", 0));
     data->SetMoveSpeedGain(RUTL::GetJsonFloatValueFromDic(json, "MoveSpeedGain", 0));
+    data->SetPhysicalLifesteal(RUTL::GetJsonFloatValueFromDic(json, "PhysicalLifesteal", 0));
+    data->SetMagicalLifesteal(RUTL::GetJsonFloatValueFromDic(json, "MagicalLifesteal", 0));
+    data->SetBasePhysicalPenetrate(RUTL::GetJsonFloatValueFromDic(json, "BasePhysicalPenetrate", 0));
+    data->SetMagicalPenetrateGain(RUTL::GetJsonFloatValueFromDic(json, "PhysicalPenetrateGain", 0));
+    data->SetBaseMagicalPenetrate(RUTL::GetJsonFloatValueFromDic(json, "BaseMagicalPenetrate", 0));
+    data->SetMagicalPenetrateGain(RUTL::GetJsonFloatValueFromDic(json, "MagicalPenetrateGain", 0));
     data->SetXPGain(RUTL::GetJsonFloatValueFromDic(json, "XPGain", 0));
     data->SetVisionRange(RUTL::GetJsonFloatValueFromDic(json, "VisionRange", 0));
     data->SetAttackDamageMin(RUTL::GetJsonFloatValueFromDic(json, "AttackDamageMin", 0));

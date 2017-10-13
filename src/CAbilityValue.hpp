@@ -74,6 +74,8 @@ public:
     T& GetValue();
     template<typename T>
     const T& GetValue() const;
+    template<typename T>
+    const T& GetValue(unsigned level);
     
 private:
     unsigned int type_;
@@ -135,5 +137,14 @@ inline const CAbilityValue::String& CAbilityValue::GetValue<std::string>() const
 
 template<>
 inline const CAbilityValue::Array& CAbilityValue::GetValue<CAbilityValue::Array>() const { assert(IsType<CAbilityValue::Array>()); return a; }
+
+template<>
+inline const float& CAbilityValue::GetValue<float>(unsigned level) { return GetArrayValueByIndex(level)->GetValue<float>(); }
+
+template<>
+inline const CAbilityValue::String& CAbilityValue::GetValue<std::string>(unsigned level) { return GetArrayValueByIndex(level)->GetValue<std::string>(); }
+
+template<>
+inline const CAbilityValue::Array& CAbilityValue::GetValue<CAbilityValue::Array>(unsigned level) { return GetArrayValueByIndex(level)->GetValue<CAbilityValue::Array>(); }
 
 #endif /* CAbilityValue_hpp */

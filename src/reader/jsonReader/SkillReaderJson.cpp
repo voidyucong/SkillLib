@@ -93,9 +93,9 @@ CAbility* SkillReaderJson::CreateAbility(const rapidjson::Value& json) {
         // center
         ability->getTargetType()->SetCenter(TARGET_CENTER_CASTER);
         // radius
-        ability->getTargetType()->SetRadius(RUTL::CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? RUTL::CreateVariableList(json["AbilityCastRange"], "float", ability) : NULL);
+        ability->getTargetType()->SetRadius(RUTL::CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? RUTL::CreateVariableList(json, "AbilityCastRange", "float", ability) : NULL);
         // max targets
-        ability->getTargetType()->SetMaxTargets(RUTL::CheckJsonIsKeyNotNull(json, "AbilityMaxTargets") ? RUTL::CreateVariableList(json["AbilityMaxTargets"], "float", ability) : NULL);
+        ability->getTargetType()->SetMaxTargets(RUTL::CheckJsonIsKeyNotNull(json, "AbilityMaxTargets") ? RUTL::CreateVariableList(json, "AbilityMaxTargets", "float", ability) : NULL);
     }
     // damage type
     ability->SetDamageType((ABILITY_DAMAGE_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(json, "AbilityUnitDamageType")));
@@ -110,17 +110,21 @@ CAbility* SkillReaderJson::CreateAbility(const rapidjson::Value& json) {
     // texture name
     ability->SetTextureIconName(RUTL::GetJsonStringValueFromDic(json, "AbilityTextureName"));
     // cast width
-    ability->SetCastWidth(RUTL::CreateVariableList(json["AbilityCastWidth"], "float", ability));
+    ability->SetCastWidth(RUTL::CreateVariableList(json, "AbilityCastWidth", "float", ability));
     // cast range
-    ability->SetCastRange(RUTL::CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? RUTL::CreateVariableList(json["AbilityCastRange"], "float", ability) : NULL);
+    ability->SetCastRange(RUTL::CheckJsonIsKeyNotNull(json, "AbilityCastRange") ? RUTL::CreateVariableList(json, "AbilityCastRange", "float", ability) : NULL);
     // cast point
-    ability->SetCastPoint(RUTL::CreateVariableList(json["AbilityCastPoint"], "float", ability));
+    ability->SetCastPoint(RUTL::CreateVariableList(json, "AbilityCastPoint", "float", ability));
+    if (behavior & ABILITY_BEHAVIOR_AOE) {
+        // aoe range
+        ability->SetAoeRange(RUTL::CreateVariableList(json, "AoeRadius", "float", ability));
+    }
     // cooldown
-    ability->SetBaseCooldown(RUTL::CreateVariableList(json["AbilityCooldown"], "float", ability));
+    ability->SetBaseCooldown(RUTL::CreateVariableList(json, "AbilityCooldown", "float", ability));
     // mana cost
-    ability->SetManaCost(RUTL::CreateVariableList(json["AbilityManaCost"], "float", ability));
+    ability->SetManaCost(RUTL::CreateVariableList(json, "AbilityManaCost", "float", ability));
     // damage
-    ability->SetDamage(RUTL::CreateVariableList(json["AbilityDamage"], "float", ability));
+    ability->SetDamage(RUTL::CreateVariableList(json, "AbilityDamage", "float", ability));
     
     // Event
     ParseAbilityEvent(json, ability);
@@ -136,7 +140,7 @@ void SkillReaderJson::ParseSpecialValue(const rapidjson::Value& json, CAbility* 
     for (int i = 0; i < RUTL::GetJsonArraySize(json); ++i) {
         const rapidjson::Value& item = json[i];
         if (item.IsNull()) continue;
-        CAbilityValue* value = RUTL::CreateVariableList(item["value"], RUTL::GetJsonStringValueFromDic(item, "type"), ability);
+        CAbilityValue* value = RUTL::CreateVariableList(item, "value", RUTL::GetJsonStringValueFromDic(item, "type"), ability);
         ability->AddSpecialValue(value, RUTL::GetJsonStringValueFromDic(item, "key"));
     }
 }
@@ -220,72 +224,78 @@ CModifierEvent* SkillReaderJson::CreateModifierEvnt(const rapidjson::Value& json
 
 void SkillReaderJson::ParseOperate(const rapidjson::Value& json, CEvent* event, CAbility* ability) {
     if (json.IsNull()) return;
-    if (RUTL::CheckJsonIsKeyNotNull(json, "ApplyModifier")) {
-        const rapidjson::Value& item = json["ApplyModifier"];
-        assert(RUTL::CheckJsonIsKeyNotNull(item, "ModifierName"));
-        COpApplyModifier* operate = new COpApplyModifier(RUTL::GetJsonStringValueFromDic(item, "ModifierName"));
-        operate->SetSearchType(ParseTarget(item, ability));
-        if (operate) event->AddOperate(operate);
+    for (auto iter = json.MemberBegin(); iter != json.MemberEnd(); ++iter) {
+        if (iter->name == "ApplyModifier") {
+            const rapidjson::Value& item = iter->value;
+            assert(RUTL::CheckJsonIsKeyNotNull(item, "ModifierName"));
+            COpApplyModifier* operate = new COpApplyModifier(RUTL::GetJsonStringValueFromDic(item, "ModifierName"));
+            operate->SetSearchType(ParseTarget(item, ability));
+            if (operate) event->AddOperate(operate);
+        }
+        else if (iter->name == "Heal") {
+            const rapidjson::Value& item = iter->value;
+            assert(RUTL::CheckJsonIsKeyNotNull(item, "HealAmount"));
+            COpHeal* operate = new COpHeal(RUTL::CreateVariableList(item, "HealAmount", "float", ability));
+            operate->SetSearchType(ParseTarget(item, ability));
+            if (operate) event->AddOperate(operate);
+        }
+        else if (iter->name == "Damage") {
+            const rapidjson::Value& item = iter->value;
+            assert(RUTL::CheckJsonIsKeyNotNull(item, "Damage"));
+            assert(RUTL::CheckJsonIsKeyNotNull(item, "DamageType"));
+            COpDamage* operate = new COpDamage();
+            operate->SetDamageType((ABILITY_DAMAGE_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(item, "DamageType", "ABILITY_DAMAGE_TYPE_MAGICAL")));
+            operate->SetDamage(RUTL::CreateVariableList(item, "Damage", "float", ability));
+            if (RUTL::CheckJsonIsKeyNotNull(item, "CurrentHealthPercentBasedDamage"))
+                operate->SetCurrentPercent(RUTL::CreateVariableList(item, "CurrentHealthPercentBasedDamage", "float", ability));
+            if (RUTL::CheckJsonIsKeyNotNull(item, "MaxHealthPercentBasedDamage"))
+                operate->SetMaxPercent(RUTL::CreateVariableList(item, "MaxHealthPercentBasedDamage", "float", ability));
+            operate->SetSearchType(ParseTarget(item, ability));
+            if (operate) event->AddOperate(operate);
+        }
+        else if (iter->name == "Log") {
+            const rapidjson::Value& item = iter->value;
+            COpLog* operate = new COpLog(RUTL::GetJsonStringValueFromDic(item, "text"));
+            operate->SetSearchType(ParseTarget(item, ability));
+            if (operate) event->AddOperate(operate);
+        }
+        else if (iter->name == "LinearProjectile") {
+            const rapidjson::Value& item = iter->value;
+            COpLinearProjectile* operate = new COpLinearProjectile();
+            operate->GetData()->SetEffectName(RUTL::GetJsonStringValueFromDic(item, "EffectName", ""));
+            operate->GetData()->SetMoveSpeed(RUTL::CreateVariableList(item, "MoveSpeed", "float", ability));
+            operate->GetData()->SetStartRadius(RUTL::CreateVariableList(item, "StartRadius", "float", ability));
+            operate->GetData()->SetEndRadius(RUTL::CreateVariableList(item, "EndRadius", "float", ability));
+            operate->GetData()->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
+            operate->GetData()->SetIsDeleteOnHit(RUTL::GetJsonBooleanValueFromDic(item, "IsDeleteOnHit", true));
+            operate->GetData()->SetLength(RUTL::CreateVariableList(item, "Length", "float", ability));
+            operate->GetData()->SetCastRadius(RUTL::CreateVariableList(item, "CastRadius", "float", ability));
+            operate->GetData()->SetIsProvidesVision(RUTL::GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
+            if (operate->GetData()->GetIsProvidesVision())
+                operate->GetData()->SetVisionRadius(RUTL::CreateVariableList(item, "VisionRadius", "float", ability));
+            operate->SetSearchType(ParseTarget(item, ability));
+            if (operate) event->AddOperate(operate);
+        }
+        else if (iter->name == "TrackingProjectile") {
+            const rapidjson::Value& item = iter->value;
+            COpTrackingProjectile* operate = new COpTrackingProjectile();
+            operate->GetData()->SetEffectName(RUTL::GetJsonStringValueFromDic(item, "EffectName", ""));
+            operate->GetData()->SetMoveSpeed(RUTL::CreateVariableList(item, "MoveSpeed", "float", ability));
+            operate->GetData()->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
+            operate->GetData()->SetCastRadius(RUTL::CreateVariableList(item, "CastRadius", "float", ability));
+            operate->GetData()->SetIsProvidesVision(RUTL::GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
+            operate->GetData()->SetCollisionSize(CSize(RUTL::GetJsonFloatValueFromDic(item, "Width", 0.f),
+                                                       RUTL::GetJsonFloatValueFromDic(item, "Height", 0.f)));
+            if (operate->GetData()->GetIsProvidesVision())
+                operate->GetData()->SetVisionRadius(RUTL::CreateVariableList(item, "VisionRadius", "float", ability));
+            operate->SetSearchType(ParseTarget(item, ability));
+            if (operate) event->AddOperate(operate);
+        }
+        else {
+            std::cout << "Unknow operate name:[" << &iter->name << "]" << std::endl;
+        }
     }
-    if (RUTL::CheckJsonIsKeyNotNull(json, "Heal")) {
-        const rapidjson::Value& item = json["Heal"];
-        assert(RUTL::CheckJsonIsKeyNotNull(item, "HealAmount"));
-        COpHeal* operate = new COpHeal(RUTL::CreateVariableList(item["HealAmount"], "float", ability));
-        operate->SetSearchType(ParseTarget(item, ability));
-        if (operate) event->AddOperate(operate);
-    }
-    if (RUTL::CheckJsonIsKeyNotNull(json, "Damage")) {
-        const rapidjson::Value& item = json["Damage"];
-        assert(RUTL::CheckJsonIsKeyNotNull(item, "Damage"));
-        assert(RUTL::CheckJsonIsKeyNotNull(item, "DamageType"));
-        COpDamage* operate = new COpDamage();
-        operate->SetDamageType((ABILITY_DAMAGE_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(item, "DamageType", "ABILITY_DAMAGE_TYPE_MAGICAL")));
-        operate->SetDamage(RUTL::CreateVariableList(item["Damage"], "float", ability));
-        if (RUTL::CheckJsonIsKeyNotNull(item, "CurrentHealthPercentBasedDamage"))
-            operate->SetCurrentPercent(RUTL::CreateVariableList(item["CurrentHealthPercentBasedDamage"], "float", ability));
-        if (RUTL::CheckJsonIsKeyNotNull(item, "MaxHealthPercentBasedDamage"))
-            operate->SetMaxPercent(RUTL::CreateVariableList(item["MaxHealthPercentBasedDamage"], "float", ability));
-        operate->SetSearchType(ParseTarget(item, ability));
-        if (operate) event->AddOperate(operate);
-    }
-    if (RUTL::CheckJsonIsKeyNotNull(json, "Log")) {
-        const rapidjson::Value& item = json["Log"];
-        COpLog* operate = new COpLog(RUTL::GetJsonStringValueFromDic(item, "text"));
-        operate->SetSearchType(ParseTarget(item, ability));
-        if (operate) event->AddOperate(operate);
-    }
-    if (RUTL::CheckJsonIsKeyNotNull(json, "LinearProjectile")) {
-        const rapidjson::Value& item = json["LinearProjectile"];
-        COpLinearProjectile* operate = new COpLinearProjectile();
-        operate->GetData()->SetEffectName(RUTL::GetJsonStringValueFromDic(item, "EffectName", ""));
-        operate->GetData()->SetMoveSpeed(RUTL::CreateVariableList(item["MoveSpeed"], "float", ability));
-        operate->GetData()->SetStartRadius(RUTL::CreateVariableList(item["StartRadius"], "float", ability));
-        operate->GetData()->SetEndRadius(RUTL::CreateVariableList(item["EndRadius"], "float", ability));
-        operate->GetData()->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
-        operate->GetData()->SetIsDeleteOnHit(RUTL::GetJsonBooleanValueFromDic(item, "IsDeleteOnHit", true));
-        operate->GetData()->SetLength(RUTL::CreateVariableList(item["Length"], "float", ability));
-        operate->GetData()->SetCastRadius(RUTL::CreateVariableList(item["CastRadius"], "float", ability));
-        operate->GetData()->SetIsProvidesVision(RUTL::GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
-        if (operate->GetData()->GetIsProvidesVision())
-            operate->GetData()->SetVisionRadius(RUTL::CreateVariableList(item["VisionRadius"], "float", ability));
-        operate->SetSearchType(ParseTarget(item, ability));
-        if (operate) event->AddOperate(operate);
-    }
-    if (RUTL::CheckJsonIsKeyNotNull(json, "TrackingProjectile")) {
-        const rapidjson::Value& item = json["TrackingProjectile"];
-        COpTrackingProjectile* operate = new COpTrackingProjectile();
-        operate->GetData()->SetEffectName(RUTL::GetJsonStringValueFromDic(item, "EffectName", ""));
-        operate->GetData()->SetMoveSpeed(RUTL::CreateVariableList(item["MoveSpeed"], "float", ability));
-        operate->GetData()->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
-        operate->GetData()->SetCastRadius(RUTL::CreateVariableList(item["CastRadius"], "float", ability));
-        operate->GetData()->SetIsProvidesVision(RUTL::GetJsonBooleanValueFromDic(item, "IsProvidesVision", false));
-        operate->GetData()->SetCollisionSize(CSize(RUTL::GetJsonFloatValueFromDic(item, "Width", 0.f),
-                                                   RUTL::GetJsonFloatValueFromDic(item, "Height", 0.f)));
-        if (operate->GetData()->GetIsProvidesVision())
-            operate->GetData()->SetVisionRadius(RUTL::CreateVariableList(item["VisionRadius"], "float", ability));
-        operate->SetSearchType(ParseTarget(item, ability));
-        if (operate) event->AddOperate(operate);
-    }
+    
 }
 
 CTargetSearchType* SkillReaderJson::ParseTarget(const rapidjson::Value& json, CAbility* ability) {
@@ -307,10 +317,10 @@ CTargetSearchType* SkillReaderJson::ParseTarget(const rapidjson::Value& json, CA
         type->SetTypes((TARGET_TYPES)SKB::GetEnumByString(type_str));
         
         if (RUTL::CheckJsonIsKeyNotNull(json["Target"], "Radius"))
-            type->SetRadius(RUTL::CreateVariableList(json["Target"]["Radius"], "float", ability));
+            type->SetRadius(RUTL::CreateVariableList(json["Target"], "Radius", "float", ability));
         
         // max targets
-        type->SetMaxTargets(RUTL::CheckJsonIsKeyNotNull(json, "MaxTargets") ? RUTL::CreateVariableList(json["MaxTargets"], "float", ability) : NULL);
+        type->SetMaxTargets(RUTL::CheckJsonIsKeyNotNull(json, "MaxTargets") ? RUTL::CreateVariableList(json, "MaxTargets", "float", ability) : NULL);
     }
     // 已存在
     else {
@@ -343,13 +353,18 @@ CModifierData* SkillReaderJson::CreateModifier(const rapidjson::Value& json, std
     modifier->SetIsPurgable(RUTL::GetJsonBooleanValueFromDic(item, "IsPurgable"));
     modifier->SetIsPassive(RUTL::GetJsonBooleanValueFromDic(item, "IsPassive"));
     modifier->SetIsHidden(RUTL::GetJsonBooleanValueFromDic(item, "IsHidden"));
-    modifier->SetDuration(RUTL::CreateVariableList(item["Duration"], "float", ability));
+    modifier->SetDuration(RUTL::CreateVariableList(item, "Duration", "float", ability));
     modifier->SetThinkInterval(RUTL::GetJsonFloatValueFromDic(item, "ThinkInterval"));
     modifier->SetIsMulti(RUTL::GetJsonBooleanValueFromDic(item, "IsMulti"));
     modifier->SetMaxMulti(RUTL::GetJsonIntValueFromDic(item, "MaxMulti", 1));
     modifier->SetTextureName(RUTL::GetJsonStringValueFromDic(item, "TextureName"));
     modifier->SetEffectName(RUTL::GetJsonStringValueFromDic(item, "EffectName"));
     modifier->SetModelName(RUTL::GetJsonStringValueFromDic(item, "ModelName"));
+    modifier->SetAttachType((MODIFIER_EFFECT_ATTACH_TYPE)SKB::GetEnumByString(RUTL::GetJsonStringValueFromDic(item, "AttachType", "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN")));
+    // aura
+    modifier->SetAura(RUTL::GetJsonStringValueFromDic(item, "Aura"));
+    modifier->SetAuraRadius(RUTL::CreateVariableList(item, "AuraRadius", "float", ability));
+    modifier->SetAuraTargetType(ParseTarget(item, ability));
     // events
     ParseModifierEvent(item, modifier, ability);
     // properties
@@ -357,9 +372,21 @@ CModifierData* SkillReaderJson::CreateModifier(const rapidjson::Value& json, std
         const rapidjson::Value& itemProperty = item["Properties"];
         for (auto iter = itemProperty.MemberBegin(); iter != itemProperty.MemberEnd(); ++iter) {
             std::string name = iter->name.GetString();
-            MODIFIER_ATTRIBUTES property = (MODIFIER_ATTRIBUTES)SKB::GetEnumByString(name);
-            float value = iter->value.GetFloat();
-            modifier->SetProperty(property, value);
+            MODIFIER_PROPERTY property = (MODIFIER_PROPERTY)SKB::GetEnumByString(name);
+            
+            float value = RUTL::GetJsonFloatValueFromDic(iter->value, "Value");
+            bool unique = RUTL::GetJsonBooleanValueFromDic(iter->value, "Unique");
+            modifier->SetProperty(property, value, unique);
+        }
+    }
+    // states
+    if (RUTL::CheckJsonIsKeyNotNull(item, "States")) {
+        const rapidjson::Value& itemStates = item["States"];
+        for (auto iter = itemStates.MemberBegin(); iter != itemStates.MemberEnd(); ++iter) {
+            std::string name = iter->name.GetString();
+            MODIFIER_STATE state = (MODIFIER_STATE)SKB::GetEnumByString(name);
+            bool value = iter->value.GetBool();
+            modifier->SetStates(state, value);
         }
     }
     return modifier;

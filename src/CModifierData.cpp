@@ -9,6 +9,8 @@
 #include "CModifierData.hpp"
 #include "CModifierEvent.hpp"
 #include "COperate.hpp"
+#include "CAbilityValue.hpp"
+#include "CTargetSearchType.hpp"
 
 CModifierData* CModifierData::Clone() {
     CModifierData* modifier = new CModifierData();
@@ -25,6 +27,11 @@ CModifierData* CModifierData::Clone() {
     modifier->effectName_ = effectName_;    // 特效名
     modifier->modelName_ = modelName_;     // 模型名，默认空
     modifier->name_ = name_;
+    if (aura_ != "") {
+        modifier->aura_ = aura_;
+        modifier->auraRadius_ = auraRadius_->Clone();
+        modifier->auraTargetType_ = auraTargetType_->Clone();
+    }
     
     // 事件集合
     for (auto iter = events_.begin(); iter != events_.end(); ++iter) {
@@ -36,6 +43,7 @@ CModifierData* CModifierData::Clone() {
     }
     
     modifier->properties_ = properties_;
+    modifier->states_ = states_;
     
     return modifier;
 }

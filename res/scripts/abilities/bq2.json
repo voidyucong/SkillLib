@@ -26,7 +26,7 @@
 		{
 			"type": "float",
 			"key": "damage",
-			"value": [100, 130, 160]
+			"value": [10000, 130, 160]
 		},
 		{
 			"type": "float",
@@ -62,7 +62,27 @@
 		}
 	},
 
+	"OnDeath": {
+		"Log": {
+			"text": "OnDeath"
+		}
+	},
+
 	"OnProjectileHit": {
+		"ApplyModifier": {
+			"Target": {
+				"Teams": "TARGET_TEAM_ENEMY",
+				"Types": "TARGET_TYPE_HERO"
+			},
+			"ModifierName": "modifier_victim"
+		},
+		"ApplyModifier": {
+			"Target": {
+				"Teams": "TARGET_TEAM_FRIENDLY",
+				"Types": "TARGET_TYPE_HERO"
+			},
+			"ModifierName": "modifier_attacker"
+		},
 		"Damage": {
 			"Target": {
 				"Teams": "TARGET_TEAM_ENEMY",
@@ -80,6 +100,81 @@
 		},
 		"Log": {
 			"text": "LinearProjectile OnHit"
+		}
+	},
+	"Modifiers": {
+		"modifier_attacker": {
+			"IsBuff": false,
+			"IsHidden": true,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": 1,
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_attacker OnCreated"
+				}
+			},
+
+			"OnDestroy": {
+				"Log": {
+					"text": "modifier_attacker OnDestroy"
+				}
+			},
+
+			"OnAttackLanded": {
+				"Log": {
+					"text": "modifier_attacker OnAttackLanded"
+				}
+			},
+
+			"OnHeroKilled": {
+				"Log": {
+					"text": "modifier_attacker OnHeroKilled"
+				}
+			},
+
+			"Properties": {
+				"MODIFIER_PROPERTY_INCOMING_SPELL_DAMAGE_CONSTANT": {
+					"Value": 0.5,
+					"Unique": false
+				}
+			}
+		},
+
+		"modifier_victim": {
+			"IsBuff": false,
+			"IsHidden": true,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": 1,
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_victim OnCreated"
+				}
+			},
+
+			"OnDestroy": {
+				"Log": {
+					"text": "modifier_victim OnDestroy"
+				}
+			},
+
+			"OnAttacked": {
+				"Log": {
+					"text": "modifier_victim OnAttacked"
+				}
+			},
+
+			"Properties": {
+				"MODIFIER_PROPERTY_INCOMING_SPELL_DAMAGE_CONSTANT":  {
+					"Value": 0.5,
+					"Unique": false
+				}
+			}
 		}
 	}
 }

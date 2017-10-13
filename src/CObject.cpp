@@ -69,7 +69,7 @@ CCircle::CCircle(CRect rect)
 {
 }
 
-// 算法详见https://www.zhihu.com/question/24251545 Milp Yip的回答
+// 算法详见https://www.zhihu.com/question/24251545 Milo Yip的回答
 bool CCircle::IntersectsRect(const CRect& rect) const {
     CVector rectCenter(rect.GetOrigin().GetX() + rect.GetSize().width/2, rect.GetOrigin().GetY() + rect.GetSize().height/2);
     CVector quartile(fabsf(center_.GetX() - rectCenter.GetX()), fabsf(center_.GetY() - rectCenter.GetY()));  // 第一象限

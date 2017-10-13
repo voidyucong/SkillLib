@@ -117,6 +117,18 @@ public:
     float GetMovementSpeed() { return baseAttributes_[ENTITY_ATTRIBUTE_MOVE_SPEED]; }
     void SetMoveSpeedGain(float value) { baseAttributes_[ENTITY_ATTRIBUTE_MOVE_SPEED_GAIN] = value; }
     float GetMoveSpeedGain() { return baseAttributes_[ENTITY_ATTRIBUTE_MOVE_SPEED_GAIN]; }
+    void SetPhysicalLifesteal(float value) { baseAttributes_[ENTITY_ATTRIBUTE_PHYSICAL_LIFESTEAL] = value; }
+    float GetPhysicalLifesteal() { return baseAttributes_[ENTITY_ATTRIBUTE_PHYSICAL_LIFESTEAL]; }
+    void SetMagicalLifesteal(float value) { baseAttributes_[ENTITY_ATTRIBUTE_MAGICAL_LIFESTEAL] = value; }
+    float GetMagicalLifeteal() { return baseAttributes_[ENTITY_ATTRIBUTE_MAGICAL_LIFESTEAL]; }
+    void SetBasePhysicalPenetrate(float value) { baseAttributes_[ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE] = value; }
+    float GetBasePhysicalPenetrate() { return baseAttributes_[ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE]; }
+    void SetPhysicalPenetrateGain(float value) { baseAttributes_[ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE_GAIN] = value; }
+    float GetPhysicalPenetrateGain() { return baseAttributes_[ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE_GAIN]; }
+    void SetBaseMagicalPenetrate(float value) { baseAttributes_[ENTITY_ATTRIBUTE_MAGICAL_PENETRATE] = value; }
+    float GetBaseMagicalPenetrate() { return baseAttributes_[ENTITY_ATTRIBUTE_MAGICAL_PENETRATE]; }
+    void SetMagicalPenetrateGain(float value) { baseAttributes_[ENTITY_ATTRIBUTE_MAGICAL_PENETRATE_GAIN] = value; }
+    float GetMagicalPenetrateGain() { return baseAttributes_[ENTITY_ATTRIBUTE_MAGICAL_PENETRATE_GAIN]; }
     void SetXPGain(float value) { baseAttributes_[ENTITY_ATTRIBUTE_XP_GAIN] = value; }
     float GetXPGain() { return baseAttributes_[ENTITY_ATTRIBUTE_XP_GAIN]; }
     void SetVisionRange(float value) { baseAttributes_[ENTITY_ATTRIBUTE_VISION_RANGE] = value; }

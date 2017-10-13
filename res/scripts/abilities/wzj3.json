@@ -1,0 +1,145 @@
+{
+	"name": "王昭君3 已自己为中心释放范围伤害，对敌方每0.5s造成伤害并减速50%持续5s，增加自己护盾100",
+	"AbilityBehavior": ["ABILITY_BEHAVIOR_NO_TARGET", "ABILITY_BEHAVIOR_CHANNELLED"],
+	"AbilityUnitDamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
+	"AbilityUnitTargetTeam": "TARGET_TEAM_ENEMY",
+	"AbilityUnitTargetType": "TARGET_TYPE_HERO",
+	"IsIgnoreSpellImmunity": false,
+	"BeginLevel": 1,
+	"StepLevel": 1,
+	"MaxLevel": 3,
+	"AbilityTextureName": "puck_dream_coil",
+
+	"AbilityCastWidth": 0,
+	"AbilityCastRange": [800, 800, 800],
+	"AbilityCastPoint": [0.2, 0.2, 0.2],
+	"AbilityCooldown": [20.0, 20.0, 20.0],
+	"AbilityManaCost": [20, 15, 10],
+	"AbilityDamage": [100, 130, 160],
+
+	"AbilitySpecial": [
+		{
+			"type": "float",
+			"key": "aoeradius",
+			"value": [800, 800, 800]
+		},
+		{
+			"type": "float",
+			"key": "damage",
+			"value": [10, 13, 16]
+		},
+		{
+			"type": "float",
+			"key": "manaCost",
+			"value": [20, 15, 10]
+		},
+		{
+			"type": "float",
+			"key": "shield",
+			"value": [100, 100, 100]
+		},
+		{
+			"type": "float",
+			"key": "cooldown",
+			"value": [20.0, 20.0, 20.0]
+		}
+	],
+
+	"OnSpellStart": {
+		"ApplyModifier": {
+			"Target": "CASTER",
+			"ModifierName": "modifier_snow"
+		}
+	},
+
+	"Modifiers": {
+		"modifier_snow": {
+			"IsBuff": false,
+			"IsHidden": true,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": 5,
+
+			"Aura": "modifier_damage",
+			"AuraRadius": "%aoeradius",
+			"Target": {
+				"Center": "CASTER",
+				"Teams": "TARGET_TEAM_ENEMY",
+				"Types": "TARGET_TYPE_HERO",
+				"Radius": "%aoeradius"
+			},
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_snow OnCreated"
+				},
+				"FireEffect": {
+					"EffectName": "particles/units/heroes/hero_lycan/lycan_shapeshift_revert.vpcf",
+					"AttachType": "MODIFIER_EFFECT_ATTACH_TYPE_ORIGIN",
+					"Target": "CASTER"
+				},
+				"ApplyModifier": {
+					"Target": "CASTER",
+					"ModifierName": "modifier_shield"
+				}
+			},
+
+			"OnDestroy": {
+				"Log": {
+					"text": "modifier_snow OnDestroy"
+				}
+			}
+		},
+
+		"modifier_shield": {
+			"IsBuff": true,
+			"IsHidden": false,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": 5,
+
+			"Properties": {
+				"MODIFIER_PROPERTY_PHYSICAL_ARMOR_SHIELD_BONUS": {
+					"Value": 100,
+					"Unique": false
+				}
+			}
+		},
+
+		"modifier_damage": {
+			"IsBuff": false,
+			"IsHidden": true,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": -1,
+
+			"ThinkInterval": 0.5,
+			"OnIntervalThink": {
+				"Log": {
+					"text": "modifier_damage OnIntervalThink"
+				},
+				"Damage": {
+					"Target": "TARGET",
+					"DamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
+					"Damage": "%damage"
+				}
+			},
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_damage OnCreated"
+				}
+			},
+
+			"Properties": {
+				"MODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE": {
+					"Value": 0.5,
+					"Unique": true
+				}
+			}
+		}
+	}
+}

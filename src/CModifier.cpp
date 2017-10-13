@@ -14,14 +14,17 @@
 #include "CScheduleManager.h"
 #include "TimeUtil.h"
 #include "CTargetStack.hpp"
+#include "CAura.hpp"
 
 CModifier::CModifier()
 : caster_(0)
+, entity_(0)
 , ability_(0)
 , modifierData_(0)
 , spawnTime_(0.f)
 , isWaitDestroy_(false)
 , targetStack_(new CTargetStack())
+, aura_(0)
 {
     
 }
@@ -47,14 +50,16 @@ CModifier::~CModifier() {
 void CModifier::Activate() {
     spawnTime_ = SKB::TimeUtil::GetSeconds();
     isWaitDestroy_ = false;
-    if (caster_ && ability_) {
-        ExecuteEvent(MODIFIER_EVENT_ON_CREATED, caster_, ability_);
+    if (entity_ && ability_) {
+        ExecuteEvent(MODIFIER_EVENT_ON_CREATED);
         
-        // 处理properties
+        // 处理properties states
         AddEntityProperty();
+        AddEntityState();
         
         if (modifierData_->GetThinkInterval() > 0)
-            CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CModifier::Update), modifierData_->GetThinkInterval());
+            CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CModifier::OnThinkInterval), modifierData_->GetThinkInterval());
+        CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CModifier::Update), 1 / 60.f);
     }
 }
 
@@ -62,51 +67,76 @@ void CModifier::Activate(CAbilityEntity* entity, CAbility* ability) {
     SetEntity(entity);
     SetAbility(ability);
     Activate();
+    if (aura_) aura_->Activate();
 }
 
 void CModifier::Destroy() {
-    ExecuteEvent(MODIFIER_EVENT_ON_DESTROY, caster_, ability_);
+    if (aura_) aura_->Destroy();
+    ExecuteEvent(MODIFIER_EVENT_ON_DESTROY);
     spawnTime_ = 0.f;
     isWaitDestroy_ = false;
     RemoveEntityProperty();
+    RemoveEntityState();
     CScheduleManager::getInstance()->RemoveSchedule(this);
     delete this;
 }
 
 void CModifier::Update(float dt) {
 //    std::cout << "CModifier Update" << std::endl;
-    ExecuteEvent(MODIFIER_EVENT_ON_INTERVAL, caster_, ability_);
-    if (spawnTime_ + modifierData_->GetDuration()->GetArrayValueByIndex(ability_->GetLevel() - 1)->GetValue<float>() < SKB::TimeUtil::GetSeconds()) {
+    float duration = modifierData_->GetDuration()->GetValue<float>(ability_->GetLevel());
+    // duration == -1 代表一直存在
+    if (duration >= 0.f && spawnTime_ + duration < SKB::TimeUtil::GetSeconds()) {
         isWaitDestroy_ = true;  // 标记可销毁，由拥有的entity删除
     }
 }
 
+void CModifier::OnThinkInterval(float dt) {
+    ExecuteEvent(MODIFIER_EVENT_ON_INTERVAL);
+}
 
-int CModifier::ExecuteEvent(MODIFIER_EVENT_TYPE type, CAbilityEntity *caster, CAbility *ability) {
+int CModifier::ExecuteEvent(MODIFIER_EVENT_TYPE type) {
     CModifierEvent* event = modifierData_->GetModifierEvent(type);
     if (event) {
-        return event->Execute(caster, ability, targetStack_);
+        return event->Execute(caster_, ability_, targetStack_);
     }
     return 0;
 }
 
-void CModifier::ExecuteOperate(CAbilityEntity* caster, CAbility* ability) {
+void CModifier::ExecuteOperate() {
     for (COperate* operate : modifierData_->operators_) {
-        operate->Execute(caster, ability, targetStack_);
+        operate->Execute(caster_, ability_, targetStack_);
     }
 }
 
 void CModifier::AddEntityProperty() {
     for (auto iter = modifierData_->properties_.begin(); iter != modifierData_->properties_.end(); ++iter) {
-        caster_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, iter->second);
-        std::cout << "AddEntityProperty " << iter->first << " to " << caster_ << "," << " add value: " << iter->second << std::endl;
+        // 如果是唯一，则替换，否则累加
+        if (modifierData_->IsPropertyUnique(iter->first))
+            entity_->SetProperties(iter->first, iter->second);
+        else
+            entity_->ModifyProperties(iter->first, iter->second);
+        std::cout << "AddEntityProperty " << iter->first << " to " << entity_ << "," << " add value: " << iter->second << std::endl;
     }
 }
 
 void CModifier::RemoveEntityProperty() {
     for (auto iter = modifierData_->properties_.begin(); iter != modifierData_->properties_.end(); ++iter) {
-        caster_->ModifyAttribute((ENTITY_ATTRIBUTES)iter->first, -iter->second);
-        std::cout << "RemoveEntityProperty " << iter->first << " from " << caster_ << "," << " remove value: " << iter->second << std::endl;
+        entity_->ModifyProperties(iter->first, -iter->second);
+        std::cout << "RemoveEntityProperty " << iter->first << " from " << entity_ << "," << " remove value: " << iter->second << std::endl;
+    }
+}
+
+void CModifier::AddEntityState() {
+    for (auto iter = modifierData_->states_.begin(); iter != modifierData_->states_.end(); ++iter) {
+        entity_->SetState(iter->first, iter->second);
+        std::cout << "AddEntityState " << iter->first << " to " << entity_ << "," << " add value: " << iter->second << std::endl;
+    }
+}
+
+void CModifier::RemoveEntityState() {
+    for (auto iter = modifierData_->states_.begin(); iter != modifierData_->states_.end(); ++iter) {
+        entity_->SetState(iter->first, !iter->second);
+        std::cout << "RemoveEntityState " << iter->first << " to " << entity_ << "," << " remove value: " << !iter->second << std::endl;
     }
 }
 

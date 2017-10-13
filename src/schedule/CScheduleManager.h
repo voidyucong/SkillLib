@@ -11,13 +11,27 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include "CSchedule.h"
 
 struct ScheduleNode {
-    ScheduleNode(): schedule(0), markedDeletion(false) {}
-    ~ScheduleNode() { delete schedule; }
-    CSchedule* schedule;
+    ScheduleNode(): markedDeletion(false), interval(0.f), elapsed(0.f), target(0) {}
+    ~ScheduleNode() {  }
+    
+    void Update(float dt) {
+        elapsed += dt;
+        if (elapsed >= interval) {
+            if (target && callback) {
+                (target->*callback)(dt);
+            }
+            elapsed = 0.f;
+        }
+    }
     bool markedDeletion;    // 标记移除
+    float interval;
+    float elapsed;
+    CObject* target;
+    CObject::CALLBACK callback;
 };
 
 class CScheduleManager {
@@ -32,7 +46,7 @@ public:
     void AddSchedule(CObject* target, CObject::CALLBACK callback, float interval);
     void RemoveSchedule(CObject* target);
 private:
-    std::map<CObject*, ScheduleNode*> schedules_;
+    std::map<unsigned, std::vector<ScheduleNode*>> schedules_;
     double lastTime_;
 };
 

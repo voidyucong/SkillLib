@@ -93,7 +93,7 @@ bool CLinearProjectile::CollisionDetection() {
     stack_->ClearSelf();
     for (auto target : ret) {
         if (hitTargets_.find(target) == hitTargets_.end()) {
-            hitTargets_[target] = 1;
+            hitTargets_.insert(target);
             stack_->PushSelf(target);
             isHaveNew = true;
         }

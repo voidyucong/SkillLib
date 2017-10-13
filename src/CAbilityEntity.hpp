@@ -10,6 +10,7 @@
 #define CAbilityEntity_hpp
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <map>
 #include "SkillTypes.h"
 #include "CObject.hpp"
@@ -22,6 +23,8 @@ struct ModifierNode {
     std::vector<CModifier*> sameModifiers;
 };
 
+class CTargetStack;
+
 class CAbilityEntity : public CObject {
 public:
     CAbilityEntity();
@@ -32,6 +35,10 @@ public:
     
     // 执行指定的技能
     void ExecuteAbility(unsigned index);
+    // 执行ability事件
+    void ExecuteAbilityEvent(EVENT_TYPE type);
+    // 执行modifier事件
+    void ExecuteModifierEvent(MODIFIER_EVENT_TYPE type);
     
     void SetTeamId(int teamId) { teamId_ = teamId; }
     int GetTeamId() { return teamId_; }
@@ -54,20 +61,39 @@ public:
     int GetCurrentLevel() { return level_; }
     
     // buff
-    void AddModifer(CModifier* modifer);
+    void AddModifier(CModifier* modifer);
+    void AddModifier(CAbilityEntity* caster, CAbility* ability, std::string modifierName, CTargetStack* stack = NULL);
+    const std::map<std::string, ModifierNode*>& GetModifiers();
     void RemoveModifier(CModifier* modifier);
+    void RemoveModifier(std::string name);
     void ClearModifier(std::string name);
+    bool HasModifier(std::string name);
     
     // type
     ENTITY_TYPE GetType() { return data_->GetType(); }
+    
+    // properties
+    void SetProperties(MODIFIER_PROPERTY property, float value) { properties_[property] = value; }
+    void ModifyProperties(MODIFIER_PROPERTY property, float add) {
+        if (properties_.find(property) == properties_.end()) properties_[property] = 0.f;
+        properties_[property] += add;
+    }
+    float GetProperties(MODIFIER_PROPERTY property) { return properties_[property]; }
+    
+    // state
+    void SetState(MODIFIER_STATE state, bool b) { states_[state] = b; }
+    bool GetState(MODIFIER_STATE state) { return states_[state]; }
     
     // 获取最大值
     float GetHPMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_HP) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_HP_GAIN); }
     float GetManaMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_MANA) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_MANA_GAIN); }
-    float GetDamageMax(int level) {
-        return this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_MAX) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_GAIN); }
+    float GetAttackDamage(int level) {
+        float min = this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_MIN);
+        float max = this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_MAX);
+        return (rand() % int(max - min + 1)) + min + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_DAMAGE_GAIN);
+    }
     float GetArmorMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_ARMOR) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_ARMOR_GAIN); }
     float GetMagicResistMax(int level) {
@@ -80,6 +106,22 @@ public:
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_INTELLIGENCE) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_INTELLIGENCE_GAIN); }
     float GetAgilityMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_AGILITY) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_AGILITY_GAIN); }
+    float GetPhysicalPenetrateMax(int level) {
+        return this->GetBaseAttribute(ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE_GAIN); }
+    float GetMagicalPenetrateMax(int level) {
+        return this->GetBaseAttribute(ENTITY_ATTRIBUTE_MAGICAL_PENETRATE) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_MAGICAL_PENETRATE_GAIN); }
+    
+    float GetCurHp() { return GetHPMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_CUR_HP); }
+    float GetCurMana() { return GetManaMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_CUR_MANA); }
+    
+    float GetCurArmor() {
+        return GetArmorMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_ARMOR); }
+    float GetCurMagicResist() {
+        return GetMagicResistMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_MAGIC_RESIST); }
+    float GetCurPhysicalPenetrate() {
+        return GetPhysicalPenetrateMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE); }
+    float GetCurMagicalPenetrate() {
+        return GetMagicalPenetrateMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_MAGICAL_PENETRATE); }
     
     //
     void SetAttacker(CAbilityEntity* attacker) { attacker_ = attacker; }
@@ -109,8 +151,9 @@ private:
     int teamId_;                                        // 队伍id
     CVector position_;                                   // 位置
     std::map<ENTITY_ATTRIBUTES, float> modifyAttributes_;   // 变动属性
-    std::map<std::string, ModifierNode*> buffs_;
-    std::map<std::string, ModifierNode*> debuffs_;
+    std::map<MODIFIER_PROPERTY, float> properties_;
+    std::map<MODIFIER_STATE, bool> states_;
+    std::map<std::string, ModifierNode*> modifiers_;
     
     // 边界设置
     //----------------------------------------------------------------

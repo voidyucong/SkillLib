@@ -61,3 +61,16 @@ void CAbilityEntityManager::GetAllEntity(TARGET_LIST& list) {
         }
     }
 }
+
+static uint s_id = 1;
+uint CAbilityEntityManager::GetEntityId(CAbilityEntity* entity) {
+    for (auto iter = ids_.begin(); iter != ids_.end(); ++iter) {
+        if (entity == iter->second) return iter->first;
+    }
+    ids_[s_id] = entity;
+    return s_id++;
+}
+
+CAbilityEntity* CAbilityEntityManager::GetEntityById(uint id) {
+    return ids_[id];
+}

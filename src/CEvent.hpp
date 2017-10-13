@@ -26,7 +26,7 @@ public:
     CEvent();
     CEvent(EVENT_TYPE type);
     virtual ~CEvent();
-    CEvent* Clone();
+//    CEvent* Clone();
     
     void AddOperate(COperate* op);
 protected:

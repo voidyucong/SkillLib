@@ -17,7 +17,7 @@ public:
     CSchedule(CObject* target, CObject::CALLBACK callback, float interval);
     ~CSchedule();
     
-    void AddCallback(CObject* target, CObject::CALLBACK callback);
+//    void AddCallback(CObject* target, CObject::CALLBACK callback);
     
     void Update(float dt);
 private:

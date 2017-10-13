@@ -94,7 +94,7 @@
 			},
 
 			"States": {
-				"MODIFIER_STATE_STUN": true
+				"MODIFIER_STATE_STUNNED": true
 			}
 		}
 	}

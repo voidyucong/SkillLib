@@ -31,7 +31,7 @@ class CTargetSearchType : public CObject {
         CAbilityValue* maxTargets_; // 最大目标数
     };
 public:
-    CTargetSearchType(): center_(TARGET_CENTER_CASTER), teams_(TARGET_TEAM_NONE), types_(TARGET_TYPE_NONE), flags_(TARGET_FLAG_NONE), radius_(0), maxTargets_(0)
+    CTargetSearchType(): single_(TARGET_CENTER_NONE), center_(TARGET_CENTER_CASTER), teams_(TARGET_TEAM_NONE), types_(TARGET_TYPE_NONE), flags_(TARGET_FLAG_NONE), radius_(0), maxTargets_(0)
     {}
     ~CTargetSearchType() {}
     

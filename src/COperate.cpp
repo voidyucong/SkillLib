@@ -22,6 +22,7 @@
 #include "CTrackingProjectile.hpp"
 #include "CProjectileManager.hpp"
 #include "CSkillCastIndicator.hpp"
+#include "CMaster.hpp"
 
 // COperate
 COperate::COperate()
@@ -50,6 +51,7 @@ void COperate::Update(float dt) {
 COperate* COperate::Clone() {
     COperate* operate = CreateCloneInstance();
     operate->SetSearchType(new CTargetSearchType());
+    operate->targetSearchType_->SetSingle(targetSearchType_->GetSingle());
     operate->targetSearchType_->SetCenter(targetSearchType_->GetCenter());
     operate->targetSearchType_->SetTeams(targetSearchType_->GetTeams());
     operate->targetSearchType_->SetTypes(targetSearchType_->GetTypes());
@@ -145,14 +147,17 @@ COpApplyModifier::~COpApplyModifier() {
 
 int COpApplyModifier::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
     COperate::Execute(entity, ability, parentStack);
-    auto modifierData = ability->GetModifierData(modifierName_);
-    assert(modifierData);
+//    auto modifierData = ability->GetModifierData(modifierName_);
+//    assert(modifierData);
     for (auto target : targetStack_->GetValid()->GetTargets()) {
-        CModifier* modifier = new CModifier();
-        modifier->SetModifierData(modifierData->Clone());
-        modifier->GetTargetStack()->SetParent(parentStack);
-        target->AddModifer(modifier);
-        modifier->Activate(entity, ability);
+//        CModifier* modifier = new CModifier();
+//        modifier->SetModifierData(modifierData->Clone());
+//        modifier->GetTargetStack()->SetParent(targetStack_);
+//        modifier->SetCaster(entity);
+//        target->AddModifier(modifier);
+//        modifier->Activate(target, ability);
+        
+        target->AddModifier(entity, ability, modifierName_, targetStack_);
     }
     
     return 1;
@@ -247,7 +252,7 @@ int COpDamage::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* 
     COperate::Execute(entity, ability, parentStack);
     auto targets = targetStack_->GetValid()->GetTargets();
     for (auto target : targets) {
-        std::cout << "Damage Caster: " << entity << " Target:" << target << " Value:" << damage_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>() << std::endl;
+        CMaster::ApplyDamage(target, entity, damage_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>(), damageType_, ability);
     }
     return 1;
 }
@@ -259,6 +264,7 @@ COperate* COpDamage::CreateCloneInstance() {
 void COpDamage::CloneProperties(COperate* operate) {
     COpDamage* op = dynamic_cast<COpDamage*>(operate);
     op->damage_ = damage_->Clone();
+    op->damageType_ = damageType_;
     if (currentHealthPercentBasedDamage_)
         op->currentHealthPercentBasedDamage_ = currentHealthPercentBasedDamage_->Clone();
     if (maxHealthPercentBasedDamage_)
@@ -342,7 +348,7 @@ int COpHeal::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* pa
     COperate::Execute(entity, ability, parentStack);
     auto targets = targetStack_->GetValid()->GetTargets();
     for (auto target : targets) {
-        std::cout << "Heal Caster: " << entity << " Target:" << target << " Value:" << healAmount_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>() << std::endl;
+        CMaster::ApplyHealth(target, entity, healAmount_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>());
     }
     
     return 1;

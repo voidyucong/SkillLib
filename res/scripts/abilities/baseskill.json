@@ -1,5 +1,5 @@
 {
-	"name": "治疗 治疗自己并增加护甲",
+	"name": "治疗 治疗自己并增加护甲。每0.5s回复血量持续1s，有3s的cd",
 	"AbilityBehavior": ["ABILITY_BEHAVIOR_NO_TARGET"],
 	"AbilityUnitDamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
 	"AbilityUnitTargetTeam": "TARGET_TEAM_FRIENDLY",
@@ -50,20 +50,20 @@
 	"Modifiers": {
 		"modifier_test": {
 			"IsBuff": true,
-			"IsHidden": false,
+			"IsHidden": true,
 			"IsPurgable": false,
 			"IsPassive": false,
-			"IsMulti": true,
-			"MaxMulti": 5,
-			"Duration": 1,
+			"IsMulti": false,
+			"Duration": -1,
 
-			"ThinkInterval": 0.5,
+			"ThinkInterval": 3,
 			"OnIntervalThink": {
 				"Log": {
 					"text": "modifier_test OnIntervalThink"
 				},
-				"Heal": {
-					"HealAmount": "%heal"
+				"ApplyModifier": {
+					"Target": "TARGET",
+					"ModifierName": "modifier_heal"
 				}
 			},
 
@@ -77,10 +77,50 @@
 				"Log": {
 					"text": "modifier_test OnDestroy"
 				}
+			}
+		},
+
+		"modifier_heal": {
+			"IsBuff": true,
+			"IsHidden": false,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": 1,
+			"EffectName": "particles/units/heroes/hero_silencer/silencer_curse.vpcf",
+
+			"ThinkInterval": 0.5,
+			"OnIntervalThink": {
+				"Log": {
+					"text": "modifier_heal OnIntervalThink"
+				},
+				"Heal": {
+					"Target": "TARGET",
+					"HealAmount": "%heal"
+				}
+			},
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_heal OnCreated"
+				}
+			},
+
+			"OnDestroy": {
+				"Log": {
+					"text": "modifier_heal OnDestroy"
+				}
 			},
 
 			"Properties": {
-				"MODIFIER_ATTRIBUTE_ARMOR_BONUS": 50
+				"MODIFIER_PROPERTY_PHYSICAL_ARMOR_SHIELD_BONUS": {
+					"Value": 50,
+					"Unique": false
+				}
+			},
+
+			"States": {
+				"MODIFIER_STATE_STUNNED": true
 			}
 		}
 	}

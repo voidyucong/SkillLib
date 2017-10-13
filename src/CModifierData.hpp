@@ -20,6 +20,7 @@ class CAbility;
 class CAbilityEntity;
 class CModifier;
 class CAbilityValue;
+class CTargetSearchType;
 
 class CModifierData {
     friend class CModifier;
@@ -30,11 +31,20 @@ public:
     void SetModifierEvent(MODIFIER_EVENT_TYPE type, CModifierEvent* event) { events_[type] = event; }
     CModifierEvent* GetModifierEvent(MODIFIER_EVENT_TYPE type) { return events_[type]; }
     std::map<MODIFIER_EVENT_TYPE, CModifierEvent*> GetAllEvent() { return events_; }
+    bool IsPropertyUnique(MODIFIER_PROPERTY property) { return propertyUnique_[property]; }
 
     // property
-    void SetProperty(MODIFIER_ATTRIBUTES attribute, float value) { properties_[attribute] = value; }
-    float GetProperty(MODIFIER_ATTRIBUTES attribute) { return properties_[attribute]; }
-    std::map<MODIFIER_ATTRIBUTES, float> GetAllProperty() { return properties_; }
+    void SetProperty(MODIFIER_PROPERTY attribute, float value, bool isUnique = true) {
+        properties_[attribute] = value;
+        propertyUnique_[attribute] = isUnique;
+    }
+    float GetProperty(MODIFIER_PROPERTY attribute) { return properties_[attribute]; }
+    std::map<MODIFIER_PROPERTY, float> GetAllProperty() { return properties_; }
+    
+    // state
+    void SetStates(MODIFIER_STATE state, bool value) { states_[state] = value; }
+    float GetStates(MODIFIER_STATE state) { return states_[state]; }
+    std::map<MODIFIER_STATE, bool> GetAllStates() { return states_; }
 
     // opertate
     void AddOperate(COperate* operate) { operators_.push_back(operate); }
@@ -54,6 +64,10 @@ public:
     std::string GetEffectName() { return effectName_; }
     std::string GetModelName() { return modelName_; }
     std::string GetName() { return name_; }
+    MODIFIER_EFFECT_ATTACH_TYPE GetAttachType() { return attachType_; }
+    std::string GetAura() { return aura_; }
+    CAbilityValue* GetAuraRadius() { return auraRadius_; }
+    CTargetSearchType* GetAuraTargetType() { return auraTargetType_; }
     
     void SetIsMulti(bool value) { isMulti_ = value; }
     void SetIsPassive(bool value) { isPassive_ = value; }
@@ -68,6 +82,10 @@ public:
     void SetEffectName(std::string value) { effectName_ = value; }
     void SetModelName(std::string value) { modelName_ = value; }
     void SetName(std::string value) { name_ = value; }
+    void SetAttachType(MODIFIER_EFFECT_ATTACH_TYPE type) { attachType_ = type; }
+    void SetAura(std::string aura) { aura_ = aura; }
+    void SetAuraRadius(CAbilityValue* radius) { auraRadius_ = radius; }
+    void SetAuraTargetType(CTargetSearchType* type) { auraTargetType_ = type; }
     
 private:
     bool isMulti_;      // 是否可叠加
@@ -83,10 +101,18 @@ private:
     std::string effectName_;    // 特效名
     std::string modelName_;     // 模型名，默认空
     std::string name_;
+    MODIFIER_EFFECT_ATTACH_TYPE attachType_;
+    
+    // aura
+    std::string aura_;
+    CAbilityValue* auraRadius_;
+    CTargetSearchType* auraTargetType_;
     
     std::map<MODIFIER_EVENT_TYPE, CModifierEvent*> events_;  // 事件集合
     std::vector<COperate*> operators_;
-    std::map<MODIFIER_ATTRIBUTES, float> properties_;
+    std::map<MODIFIER_PROPERTY, float> properties_;
+    std::map<MODIFIER_PROPERTY, bool> propertyUnique_;
+    std::map<MODIFIER_STATE, bool> states_;
 };
 
 #endif /* CModifierData_hpp */
