@@ -72,9 +72,15 @@ void CMaster::ApplyDamage(CAbilityEntity* victim, CAbilityEntity* attacker, floa
     }
     
     realDamage = MAX(realDamage, 0.f);
-    victim->ModifyAttribute(ENTITY_ATTRIBUTE_CUR_HP, -realDamage);
+    // 受害者保存攻击者信息，方便报仇
+    victim->SetAttacker(attacker);
+    // 减血
+    victim->ModifyAttribute(ENTITY_ATTRIBUTE_CUR_HP, -int(realDamage));
+    
+    std::cout << "Damage Caster: " << attacker << " Target:" << victim << " Damage:" << damage << " Real:" << realDamage << std::endl;
+    
     // 记录log
-    CAbilityEntityLogManager::getInstance()->AddFightLog(attacker, victim, realDamage, ability);
+    CAbilityEntityLogManager::getInstance()->AddFightLog(attacker, victim, int(realDamage), ability);
     
     float curHP = victim->GetCurHp();
     if (curHP <= 0) {
@@ -88,31 +94,26 @@ void CMaster::ApplyDamage(CAbilityEntity* victim, CAbilityEntity* attacker, floa
     
     // 事件
     attacker->ExecuteModifierEvent(MODIFIER_EVENT_ON_ATTACK_LANDED);  // 攻击到时
-    attacker->ExecuteModifierEvent(MODIFIER_EVENT_ON_TAKE_DAMAGE);  // 施加伤害时
+    attacker->ExecuteModifierEvent(MODIFIER_EVENT_ON_DEAL_DAMAGE);  // 施加伤害时
     
     victim->ExecuteModifierEvent(MODIFIER_EVENT_ON_ATTACKED);  // 被攻击时
-    victim->ExecuteModifierEvent(MODIFIER_EVENT_ON_DEAL_DAMAGE);   // 受到伤害时
+    victim->ExecuteModifierEvent(MODIFIER_EVENT_ON_TAKE_DAMAGE);   // 受到伤害时
     
-    std::cout << "Damage Caster: " << attacker << " Target:" << victim << " Damage:" << damage << " Real:" << realDamage << std::endl;
         
     // 吸血
     float lifesteal = 0.f;
     if (type == ABILITY_DAMAGE_TYPE_PHYSICAL) {
-        lifesteal = attacker->GetBaseAttribute(ENTITY_ATTRIBUTE_PHYSICAL_LIFESTEAL) +
-                    attacker->GetProperties(MODIFIER_PROPERTY_PHYSICAL_ATTACK_LIFESTEAL_PERCENT_BONUS);
+        lifesteal = attacker->GetBaseAttribute(ENTITY_ATTRIBUTE_PHYSICAL_LIFESTEAL) *
+                    (1 + attacker->GetProperties(MODIFIER_PROPERTY_PHYSICAL_ATTACK_LIFESTEAL_PERCENT_BONUS));
     }
     if (type == ABILITY_DAMAGE_TYPE_MAGICAL) {
-        lifesteal = attacker->GetBaseAttribute(ENTITY_ATTRIBUTE_MAGICAL_LIFESTEAL) +
-                    attacker->GetProperties(MODIFIER_PROPERTY_MAGICAL_ATTACK_RELIEF_PERCENT_BONUS);
+        lifesteal = attacker->GetBaseAttribute(ENTITY_ATTRIBUTE_MAGICAL_LIFESTEAL) *
+                    (1 + attacker->GetProperties(MODIFIER_PROPERTY_MAGICAL_ATTACK_LIFESTEAL_PERCENT_BONUS));
     }
     ApplyHealth(attacker, NULL, realDamage * lifesteal);
     
-    
-    // 攻击方被动
-    
-    
-    // 受害者被动
-    
+    // 清空攻击者信息
+    victim->SetAttacker(NULL);
 }
 
 void CMaster::ApplyHealth(CAbilityEntity* target, CAbilityEntity* source, float value) {

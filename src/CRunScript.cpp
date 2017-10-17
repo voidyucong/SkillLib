@@ -7,6 +7,7 @@
 //
 
 #include "CRunScript.hpp"
+#include "CAbilityValue.hpp"
 
 lua_State* CRunScript::L_ = 0;
 
@@ -35,9 +36,16 @@ void CRunScript::Execute() {
     }
     lua_getglobal(L_, function_.c_str());
     lua_newtable(L_);
-    lua_pushstring(L_, "key");
-    lua_pushstring(L_, "v");
-    lua_settable(L_, -3);
+    for (auto iter = params_.begin(); iter != params_.end(); ++iter) {
+        lua_pushstring(L_, iter->first.c_str());
+        if (iter->second->IsFloat()) {
+            lua_pushnumber(L_, iter->second->GetValue<float>());
+        }
+        else if (iter->second->IsString()) {
+            lua_pushstring(L_, iter->second->GetValue<std::string>().c_str());
+        }
+        lua_settable(L_, -3);
+    }
     lua_call(L_, 1, 0);
 }
 
@@ -46,6 +54,6 @@ void CRunScript::SetScript(std::string scriptFile, std::string function) {
     function_ = function;
 }
 
-void CRunScript::SetParam(std::string name, CObject* value) {
+void CRunScript::SetParam(std::string name, CAbilityValue* value) {
     params_[name] = value;
 }

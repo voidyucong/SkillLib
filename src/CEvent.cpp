@@ -27,6 +27,7 @@ int CEvent::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* par
     int ok = 1;
     for (COperate* op : operators_) {
 //        COperate* cloneop = op->Clone();
+        op->Initialize();
         ok &= op->Execute(entity, ability, parentStack);
 //        delete cloneop;
 //        cloneop = 0;

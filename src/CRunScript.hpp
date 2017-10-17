@@ -18,6 +18,10 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+class CAbilityValue;
+class CAbility;
+class CAbilityEntity;
+
 class CRunScript : public CObject {
 public:
     CRunScript();
@@ -26,13 +30,19 @@ public:
     void Execute();
     void SetLuaState(lua_State* L) { L_ = L; }
     void SetScript(std::string scriptFile, std::string function);
-    void SetParam(std::string name, CObject* value);
+    void SetParam(std::string name, CAbilityValue* value);
+    void SetCaster(CAbilityEntity* caster) { caster_ = caster; }
+    void SetTarget(CAbilityEntity* target) { target_ = target; }
+    void SetAbility(CAbility* ability) { ability_ = ability; }
     
     std::string GetScript() { return scripteFile_; }
 private:
     std::string scripteFile_;
     std::string function_;
-    std::map<std::string, CObject*> params_;
+    std::map<std::string, CAbilityValue*> params_;
+    CAbilityEntity* caster_;
+    CAbilityEntity* target_;
+    CAbility* ability_;
     
     static lua_State* L_;
 };

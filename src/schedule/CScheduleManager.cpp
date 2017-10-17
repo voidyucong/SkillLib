@@ -50,15 +50,18 @@ void CScheduleManager::Update() {
     std::vector<CObject*> deletions;
     for (auto iter = schedules_.begin(); iter != schedules_.end(); ++iter) {
         for (auto iter2 = iter->second.begin(); iter2 != iter->second.end();) {
+//            std::cout << 1 << std::endl;
             auto node = *iter2;
             if (!node) continue;
             if (!node->markedDeletion) {
                 node->Update(deltaTime);
                 ++iter2;
+//                std::cout << 2 << std::endl;
             }
             else {
                 iter2 = iter->second.erase(iter2);
                 node = 0;
+//                std::cout << 3 << std::endl;
             }
         }
     }
@@ -69,10 +72,10 @@ void CScheduleManager::Update() {
 
 void CScheduleManager::AddSchedule(CObject* target, CObject::CALLBACK callback, float interval) {
     unsigned hash = HASH_TARGET(target);
-    if (schedules_.find(hash) == schedules_.end()) {
-        schedules_[hash] = {};
+    if (schedules_.find(target) == schedules_.end()) {
+        schedules_[target] = {};
     }
-    for (auto node : schedules_[hash]) {
+    for (auto node : schedules_[target]) {
         if (node->callback == callback) {
             node->interval = interval;
             return;
@@ -84,13 +87,13 @@ void CScheduleManager::AddSchedule(CObject* target, CObject::CALLBACK callback, 
     node->callback = callback;
     node->interval = interval;
     node->markedDeletion = false;
-    schedules_[hash].push_back(node);
+    schedules_[target].push_back(node);
 }
 
 void CScheduleManager::RemoveSchedule(CObject* target) {
     unsigned hash = HASH_TARGET(target);
-    if (schedules_.find(hash) != schedules_.end()) {
-        auto nodes = schedules_[hash];
+    if (schedules_.find(target) != schedules_.end()) {
+        auto nodes = schedules_[target];
         for (auto node : nodes) {
             if (node->target == target)
                 node->markedDeletion = true;

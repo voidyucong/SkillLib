@@ -101,6 +101,10 @@ public:
     CAbilityValue* GetBaseCooldown() { return base.cooldown_; }
     double GetCooldown() { return cooldown_; }
     
+    // 获取实际的数值（有buff加成）
+    float GetCurCastRange();
+    float GetCurCastRangeBuffer();
+    
     void SetCenter(TARGET_CENTER center) { base.targetSearchType_->SetCenter(center); }
     TARGET_CENTER GetCenter() { return base.targetSearchType_->GetCenter(); }
     

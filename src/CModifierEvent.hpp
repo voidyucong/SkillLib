@@ -18,7 +18,7 @@ class CTargetStack;
 class CModifierEvent : public CEvent {
 public:
     virtual int Execute(CAbilityEntity *entity, CAbility *ability, CTargetStack* parentStack);
-    CModifierEvent* Clone();
+//    CModifierEvent* Clone();
     
     CModifierEvent();
     virtual ~CModifierEvent();

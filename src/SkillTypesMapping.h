@@ -85,10 +85,12 @@ namespace SKB {
         {"MODIFIER_EFFECT_ATTACH_TYPE_HEAD", 2},       //  头顶
         
         // 伤害类型
-        {"ABILITY_DAMAGE_TYPE_NONE", 1},
-        {"ABILITY_DAMAGE_TYPE_PHYSICAL", 2},           // 物理伤害
-        {"ABILITY_DAMAGE_TYPE_MAGICAL", 3},            // 法术伤害
-        {"ABILITY_DAMAGE_TYPE_PURE", 4},               // 纯粹伤害
+        {"ABILITY_DAMAGE_TYPE_NONE", 1 << 0},
+        {"ABILITY_DAMAGE_TYPE_PHYSICAL", 1 << 1},           // 物理伤害
+        {"ABILITY_DAMAGE_TYPE_MAGICAL", 1 << 2},            // 法术伤害
+        {"ABILITY_DAMAGE_TYPE_PURE", 1 << 3},               // 纯粹伤害
+        {"ABILITY_DAMAGE_TYPE_TRIGGER_ITEM", 1 << 4},       // 触发装备效果
+        {"ABILITY_DAMAGE_TYPE_TRIGGER_PASSIVE", 1 << 5},    // 触发被动效果
         
         //
         //
@@ -326,6 +328,19 @@ namespace SKB {
         {"MODIFIER_PROPERTY_TRANSLATE_ACTIVITY_MODIFIERS", 100},		//动作修改？
         {"MODIFIER_PROPERTY_TRANSLATE_ATTACK_SOUND", 101},		//攻击音效修改？
         {"MODIFIER_PROPERTY_TURN_RATE_PERCENTAGE", 102},		//百分比修改转向速度
+        
+        {"ITEM_TYPE_ATTACK", 0},   // 攻击
+        {"ITEM_TYPE_MAGICAL", 1},  // 法术
+        {"ITEM_TYPE_DEFENSE", 2},  // 防御
+        {"ITEM_TYPE_FIELD", 3},    // 打野
+        {"ITEM_TYPE_ASSIST", 4},   // 辅助
+        
+        {"ITEM_QUALITY_GREEN", 0},
+        {"ITEM_QUALITY_BLUE", 1},
+        {"ITEM_QUALITY_PURPLE", 2},
+        {"ITEM_QUALITY_ORANGE", 3},
+        {"ITEM_QUALITY_RED", 4},
+
     };
  
     static int GetEnumByString(std::string name) {

@@ -92,6 +92,10 @@ void COperate::SetSelfTargets(TARGET_LIST targets) {
     targetStack_->SetSelf(new CTargetStackItem(targets));
 }
 
+void COperate::Initialize() {
+    targetStack_->DestroySelf();
+    targetStack_->SetParent(NULL);
+}
 
 #pragma mark -
 #pragma mark COpAddAbility
@@ -547,8 +551,7 @@ int COpRemoveModifier::Execute(CAbilityEntity* entity, CAbility* ability, CTarge
 #pragma mark COpRunScript
 // COpRunScript
 COpRunScript::COpRunScript()
-: scriptFile_(0)
-, function_(0)
+: script_(0)
 {
     
 }
@@ -558,7 +561,22 @@ COpRunScript::~COpRunScript() {
 }
 
 int COpRunScript::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* parentStack) {
+    COperate::Execute(entity, ability, parentStack);
+    if (script_) {
+        script_->SetCaster(entity);
+        script_->SetAbility(ability);
+        script_->Execute();
+    }
     return 1;
+}
+
+COperate* COpRunScript::CreateCloneInstance() {
+    return new COpRunScript();
+}
+
+void COpRunScript::CloneProperties(COperate* operate) {
+    COpRunScript* op = dynamic_cast<COpRunScript*>(operate);
+    
 }
 
 #pragma mark -

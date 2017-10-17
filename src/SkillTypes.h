@@ -371,5 +371,22 @@ enum MODIFIER_STATE {
     MODIFIER_STATE_UNSELECTABLE,	//无法选取状态
 };
 
+// 装备类型
+enum ITEM_TYPE {
+    ITEM_TYPE_ATTACK,   // 攻击
+    ITEM_TYPE_MAGICAL,  // 法术
+    ITEM_TYPE_DEFENSE,  // 防御
+    ITEM_TYPE_FIELD,    // 打野
+    ITEM_TYPE_ASSIST,   // 辅助
+};
+
+// 装备品质
+enum ITEM_QUALITY {
+    ITEM_QUALITY_GREEN,
+    ITEM_QUALITY_BLUE,
+    ITEM_QUALITY_PURPLE,
+    ITEM_QUALITY_ORANGE,
+    ITEM_QUALITY_RED,
+};
 
 #endif /* SkillTypes_h */

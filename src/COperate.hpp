@@ -19,7 +19,7 @@ class CTargetSearchType;
 class CAbility;
 class CAbilityEntity;
 class CAbilityValue;
-class CRunScprite;
+class CRunScript;
 class CTargetStack;
 class CLinearProjectileData;
 class CTrackingProjectileData;
@@ -34,6 +34,7 @@ public:
     virtual COperate* Clone();
     virtual COperate* CreateCloneInstance();
     virtual void CloneProperties(COperate* operate);
+    virtual void Initialize();
     
     void SetSingle(TARGET_CENTER single);
     TARGET_CENTER GetSingle();
@@ -360,9 +361,15 @@ public:
     
     COpRunScript();
     ~COpRunScript();
+    void SetScript(CRunScript* script) { script_ = script; }
+    
+    virtual COperate* CreateCloneInstance();
+    virtual void CloneProperties(COperate* operate);
 private:
-    std::string scriptFile_;
-    std::string function_;
+    CRunScript* script_;
+//    std::string scriptFile_;
+//    std::string function_;
+    
 };
 
 /**

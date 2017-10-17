@@ -46,7 +46,8 @@ public:
     void AddSchedule(CObject* target, CObject::CALLBACK callback, float interval);
     void RemoveSchedule(CObject* target);
 private:
-    std::map<unsigned, std::vector<ScheduleNode*>> schedules_;
+//    std::map<unsigned, std::vector<ScheduleNode*>> schedules_;
+    std::map<CObject*, std::vector<ScheduleNode*>> schedules_;
     double lastTime_;
 };
 

@@ -15,6 +15,7 @@
 #include "TimeUtil.h"
 #include "CTargetStack.hpp"
 #include "CAura.hpp"
+#include "CSkillCastIndicator.hpp"
 
 CModifier::CModifier()
 : caster_(0)
@@ -30,21 +31,11 @@ CModifier::CModifier()
 }
 
 CModifier::~CModifier() {
-    for (auto iter = modifierData_->events_.begin(); iter != modifierData_->events_.end(); iter++) {
-        delete iter->second;
-    }
-    modifierData_->events_.clear();
-    for (auto operate : modifierData_->operators_) {
-        delete operate;
-        operate = NULL;
-    }
-    modifierData_->operators_.clear();
     if (targetStack_) {
         delete targetStack_;
         targetStack_ = 0;
     }
-    delete modifierData_;
-    modifierData_ = 0;
+    
 }
 
 void CModifier::Activate() {
@@ -82,7 +73,6 @@ void CModifier::Destroy() {
 }
 
 void CModifier::Update(float dt) {
-//    std::cout << "CModifier Update" << std::endl;
     float duration = modifierData_->GetDuration()->GetValue<float>(ability_->GetLevel());
     // duration == -1 代表一直存在
     if (duration >= 0.f && spawnTime_ + duration < SKB::TimeUtil::GetSeconds()) {
@@ -140,3 +130,17 @@ void CModifier::RemoveEntityState() {
     }
 }
 
+CAura* CModifier::CreateAura() {
+    // aura
+    if (modifierData_->GetAura() != "") {
+        CAura* aura = new CAura(modifierData_->GetAura(),
+                                modifierData_->GetDuration()->GetValue<float>(ability_->GetLevel()),
+                                CSkillCastIndicator::getInstance()->GetPoint(),
+                                modifierData_->GetAuraRadius()->GetValue<float>(ability_->GetLevel()),
+                                modifierData_->GetAuraTargetType());
+        aura->SetCaster(caster_);
+        aura->SetAbility(ability_);
+        SetAura(aura);
+    }
+    return aura_;
+}

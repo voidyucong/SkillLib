@@ -17,6 +17,7 @@
 #include "TimeUtil.h"
 #include "CTargetSearcher.hpp"
 #include "CTargetStack.hpp"
+#include "CSkillCastIndicator.hpp"
 
 CAbility::CAbility()
 : level_(1)
@@ -148,6 +149,10 @@ void CAbility::Cast() {
                 - this->GetModifyAttribute(ABILITY_ATTRIBUTE_COOLDOWN_GAIN);
     
     CScheduleManager::getInstance()->AddSchedule(this, CObject::CALLBACK(&CAbility::Update), 1/60);
+    
+    if (getTargetType()->GetCenter() == TARGET_CENTER_CASTER) {
+        CSkillCastIndicator::getInstance()->SetTarget(caster_);
+    }
     this->ExecutEvent(EVENT_TYPE_ON_SPELL_START);
 }
 
@@ -224,3 +229,11 @@ CModifierData* CAbility::GetModifierData(std::string name) {
 
 
 //-------------------------------------------------------
+
+float CAbility::GetCurCastRange() {
+    return GetCastRange()->GetValue<float>(level_ - 1) + caster_->GetBaseAttribute(ENTITY_ATTRIBUTE_ATTACK_RANGE);
+}
+
+float CAbility::GetCurCastRangeBuffer() {
+    return GetCastRangeBuffer()->GetValue<float>(level_ - 1) + caster_->GetBaseAttribute(ENTITY_ATTRIBUTE_ATTACK_RANGE_BUFFER);
+}

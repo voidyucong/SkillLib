@@ -14,6 +14,7 @@
 #include "CTargetStack.hpp"
 #include "CAura.hpp"
 #include "CSkillCastIndicator.hpp"
+#include "CItem.hpp"
 
 CAbilityEntity::CAbilityEntity()
 : abilityContainer_(new CAbilityContainer())
@@ -158,27 +159,22 @@ void CAbilityEntity::AddModifier(CModifier* modifier) {
             modifiers_[modifier->GetName()] = node;
         }
     }
+//    std::cout << "Entity's Modifiers " << this << std::endl;
+//    for (auto iter = modifiers_.begin(); iter != modifiers_.end(); ++iter) {
+//        std::cout << "===========" << iter->first << std::endl;
+//    }
 }
 
 void CAbilityEntity::AddModifier(CAbilityEntity* caster, CAbility* ability, std::string modifierName, CTargetStack* stack) {
     auto modifierData = ability->GetModifierData(modifierName);
     assert(modifierData);
     CModifier* modifier = new CModifier();
-    modifier->SetModifierData(modifierData->Clone());
+    modifier->SetModifierData(modifierData);
     modifier->GetTargetStack()->SetParent(stack);   // 保存父目标栈
     modifier->GetTargetStack()->PushSelf(this);     // 将当前目标添加到自己目标栈
     modifier->SetCaster(caster);
-    // aura
-    if (modifierData->GetAura() != "") {
-        CAura* aura = new CAura(modifierData->GetAura(),
-                                modifierData->GetDuration()->GetValue<float>(ability->GetLevel()),
-                                CSkillCastIndicator::getInstance()->GetPoint(),
-                                modifierData->GetAuraRadius()->GetValue<float>(ability->GetLevel()),
-                                modifierData->GetAuraTargetType());
-        aura->SetCaster(caster);
-        aura->SetAbility(ability);
-        modifier->SetAura(aura);
-    }
+    modifier->SetAbility(ability);
+    modifier->CreateAura();
     AddModifier(modifier);
     modifier->Activate(this, ability);
 }
@@ -192,6 +188,7 @@ void CAbilityEntity::RemoveModifier(CModifier* modifier) {
         ModifierNode* node = modifiers_[modifier->GetName()];
         for (auto iter = node->sameModifiers.begin(); iter != node->sameModifiers.end(); iter++) {
             if (*iter == modifier) {
+                std::cout << "2 RemoveModifier Target:" << this << " Modifier:" << modifier->GetName() << modifier << std::endl;
                 node->sameModifiers.erase(iter);
                 modifier->Destroy();
                 if (node->sameModifiers.empty()) {
@@ -207,6 +204,7 @@ void CAbilityEntity::RemoveModifier(std::string name) {
     if (HasModifier(name)) {
         ModifierNode* node = modifiers_[name];
         for (auto iter = node->sameModifiers.begin(); iter != node->sameModifiers.end(); iter++) {
+            std::cout << "3 RemoveModifier Target:" << this << " Modifier:" << (*iter)->GetName() << (*iter) << std::endl;
             (*iter)->Destroy();
         }
         modifiers_.erase(name);
@@ -226,4 +224,28 @@ void CAbilityEntity::ClearModifier(std::string name) {
 
 bool CAbilityEntity::HasModifier(std::string name) {
     return modifiers_.find(name) != modifiers_.end();
+}
+
+void CAbilityEntity::AddItem(CItem* item) {
+    if (item) {
+        items_.push_back(item);
+        // 添加modifier
+        for (auto name : item->GetItemData()->GetDefaultModifiers()) {
+            AddModifier(this, item, name);
+        }
+    }
+}
+
+void CAbilityEntity::RemoveItem(CItem* item) {
+    for (auto iter = items_.begin(); iter != items_.end();) {
+        if (item == *iter) iter = items_.erase(iter);
+        else ++iter;
+    }
+}
+
+bool CAbilityEntity::HasItem(int64_t id) {
+    for (auto iter = items_.begin(); iter != items_.end();) {
+        if (id == (*iter)->GetItemData()->GetId()) return true;
+    }
+    return false;
 }

@@ -174,7 +174,6 @@ private:
     bool isAutoAttacksByDefault_;                 // 是否自动攻击，0为不自动攻击
     
     // 声音 SoundSet 加上正确的 GameSoundsFile 可以提供攻击和脚步声等音效
-    // SoundSet 字符串是每个英雄声音的第一部分，可以在Dota2声音编辑器中查找到
     std::string soundFile_;
     std::string gameSoundsFile_;
     

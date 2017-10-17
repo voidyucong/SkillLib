@@ -96,15 +96,42 @@ namespace SKB {
         }
         
         // 创建参数列表，json可为float、string、list
-        static CAbilityValue* CreateVariableList(const rapidjson::Value& json, std::string key, std::string type, CAbility* ability) {
+//        static CAbilityValue* CreateVariableList(const rapidjson::Value& json, std::string key, std::string type, CAbility* ability) {
+//            if (json.IsNull()) return NULL;
+//            if (!CheckJsonIsKeyNotNull(json, key.c_str())) return NULL;
+//            const rapidjson::Value& item = json[key.c_str()];
+//            if (item.IsArray()) {
+//                CAbilityValue::Array array;
+//                for (int j = 0; j < GetJsonArraySize(item); ++j) {
+//                    if (type == "float")        array.push_back(GetJsonFloatValueFromArray(item, j));
+//                    else if (type == "string")  array.push_back(GetJsonStringValueFromArray(item, j));
+//                }
+//                return new CAbilityValue(array);
+//            }
+//            else {
+//                if (item.IsString()) {
+//                    std::string value = item.GetString();
+//                    if (IsJsonReference(value)) {
+//                        std::string newvalue = std::string(value.begin() + 1, value.end());
+//                        return ability->GetSpecialValue(newvalue)->Clone();
+//                    }
+//                }
+//                if (type == "float")        return new CAbilityValue(item.GetFloat());
+//                else if (type == "string")  return new CAbilityValue(item.IsString());
+//            }
+//            return NULL;
+//        }
+        
+        template<typename T>
+        static CAbilityValue* CreateVariableList(const rapidjson::Value& json, std::string key, CAbility* ability) {
             if (json.IsNull()) return NULL;
             if (!CheckJsonIsKeyNotNull(json, key.c_str())) return NULL;
             const rapidjson::Value& item = json[key.c_str()];
             if (item.IsArray()) {
                 CAbilityValue::Array array;
                 for (int j = 0; j < GetJsonArraySize(item); ++j) {
-                    if (type == "float")        array.push_back(GetJsonFloatValueFromArray(item, j));
-                    else if (type == "string")  array.push_back(GetJsonStringValueFromArray(item, j));
+                    if (std::is_same<T, float>::value)        array.push_back(GetJsonFloatValueFromArray(item, j));
+                    else if (std::is_same<T, std::string>::value)  array.push_back(GetJsonStringValueFromArray(item, j));
                 }
                 return new CAbilityValue(array);
             }
@@ -116,9 +143,17 @@ namespace SKB {
                         return ability->GetSpecialValue(newvalue)->Clone();
                     }
                 }
-                if (type == "float")        return new CAbilityValue(item.GetFloat());
-                else if (type == "string")  return new CAbilityValue(item.IsString());
+                if (std::is_same<T, float>::value)        return new CAbilityValue(item.GetFloat());
+                else if (std::is_same<T, std::string>::value)  return new CAbilityValue(item.GetString());
             }
+            return NULL;
+        }
+        
+        static CAbilityValue* CreateVariableList2(const rapidjson::Value& json, std::string key, std::string type, CAbility* ability) {
+            if (type == "string")
+                return CreateVariableList<std::string>(json, key, ability);
+            else if (type == "float")
+                return CreateVariableList<float>(json, key, ability);
             return NULL;
         }
     };

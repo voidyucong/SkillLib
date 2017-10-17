@@ -1,0 +1,73 @@
+{
+	"name": "反伤刺甲 【价格】 1840\n【属性】+ 40物理攻击，+420物理防御\n【被动】 唯一被动—荆棘：受到物理伤害时会将伤害量的15%以法术伤害的形式回敬给对方(按照计算伤害减免之前的初始伤害值计算)",
+	"ID": 1112,
+	"AbilityBehavior": ["DOTA_ABILITY_BEHAVIOR_PASSIVE"],
+	"Model": "models/props_gameplay/red_box.vmdl" ,
+	"Effect": "particles/generic_gameplay/dropped_item.vpcf",
+	"AbilityTextureName": "item_assault",
+	
+	"ItemCost": 1800,
+	"ItemShopTags": "ITEM_TYPE_DEFENSE",
+	"ItemQuality": "ITEM_QUALITY_ORANGE",
+	"ItemRequirements": [110, 111, 112],
+
+	"DefaultModifiers": ["modifier_attribute", "modifier_thorns"],
+
+	"Modifiers": {
+		"modifier_attribute": {
+			"IsBuff": false,
+			"IsHidden": true,
+			"IsPurgable": false,
+			"IsPassive": false,
+			"IsMulti": false,
+			"Duration": -1,
+			"Properties": {
+				"MODIFIER_PROPERTY_POST_ATTACK": {
+					"Value": 40,
+					"Unique": false
+				},
+				"MODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS": {
+					"Value": 420,
+					"Unique": false
+				}
+			}
+		},
+		"modifier_thorns": {
+			"IsBuff": false,
+			"IsHidden": true,
+			"IsPurgable": false,
+			"IsPassive": true,
+			"IsMulti": false,
+			"Duration": -1,
+
+			"OnCreated": {
+				"Log": {
+					"text": "modifier_thorns OnCreated"
+				}
+			},
+
+			"OnDestroy": {
+				"Log": {
+					"text": "modifier_thorns OnDestroy"
+				}
+			},
+
+			"OnTakeDamage": {
+				"Log": {
+					"text": "反伤刺甲效果"
+				},
+				"RunScript": {
+					"ScriptFile": "test",
+					"Function": "fnTest",
+					"Param1": 1.2,
+					"Param2": "4"
+				},
+				"Damage": {
+					"Target": "ATTACKER",
+					"DamageType": "ABILITY_DAMAGE_TYPE_MAGICAL",
+					"Damage": 111
+				}
+			}
+		}
+	}
+}

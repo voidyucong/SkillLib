@@ -66,7 +66,7 @@ void CTargetSearcher::HandleTargetStack(CAbilityEntity* caster,
             }
             // 攻击者
             else if (type->GetSingle() == TARGET_CENTER_ATTACKER) {
-                
+                stack->PushSelf(caster->GetAttacker());
             }
         }
         else {
@@ -89,7 +89,6 @@ void CTargetSearcher::HandleTargetStack(CAbilityEntity* caster,
                 for (auto iter = stack->GetSelf()->GetTargets().begin(); iter != stack->GetSelf()->GetTargets().end();) {
                     auto target = *iter;
                     if ((int)type->GetTypes() != (int)target->GetType())
-                        // TODO!!!
                         iter = stack->EraseSelf(iter);
                     else
                         ++iter;

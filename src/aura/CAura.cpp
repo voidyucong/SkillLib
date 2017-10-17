@@ -75,12 +75,12 @@ void CAura::Activate() {
 }
 
 void CAura::Destroy() {
-    std::cout << "Remove Aura " << modifierName_ << this << std::endl;
     // 清除所有目标的 modifier
     CCircle circle(position_, radius_);
     for (auto iter = targets_.begin(); iter != targets_.end(); ++iter) {
         CAbilityEntity* target = *iter;
         target->RemoveModifier(modifierName_);
+        std::cout << "Remove Aura " << modifierName_ << " From " << target << std::endl;
     }
     targets_.clear();
     

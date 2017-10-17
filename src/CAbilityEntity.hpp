@@ -23,6 +23,7 @@ struct ModifierNode {
     std::vector<CModifier*> sameModifiers;
 };
 
+class CItem;
 class CTargetStack;
 
 class CAbilityEntity : public CObject {
@@ -68,6 +69,11 @@ public:
     void RemoveModifier(std::string name);
     void ClearModifier(std::string name);
     bool HasModifier(std::string name);
+    
+    // item
+    void AddItem(CItem* item);
+    void RemoveItem(CItem* item);
+    bool HasItem(int64_t id);
     
     // type
     ENTITY_TYPE GetType() { return data_->GetType(); }
@@ -115,9 +121,9 @@ public:
     float GetCurMana() { return GetManaMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_CUR_MANA); }
     
     float GetCurArmor() {
-        return GetArmorMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_ARMOR); }
+        return GetArmorMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_ARMOR) + GetProperties(MODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS); }
     float GetCurMagicResist() {
-        return GetMagicResistMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_MAGIC_RESIST); }
+        return GetMagicResistMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_MAGIC_RESIST) + GetProperties(MODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS); }
     float GetCurPhysicalPenetrate() {
         return GetPhysicalPenetrateMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_PHYSICAL_PENETRATE); }
     float GetCurMagicalPenetrate() {
@@ -154,6 +160,7 @@ private:
     std::map<MODIFIER_PROPERTY, float> properties_;
     std::map<MODIFIER_STATE, bool> states_;
     std::map<std::string, ModifierNode*> modifiers_;
+    std::vector<CItem*> items_;
     
     // 边界设置
     //----------------------------------------------------------------

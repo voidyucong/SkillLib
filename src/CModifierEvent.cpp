@@ -22,10 +22,10 @@ int CModifierEvent::Execute(CAbilityEntity *entity, CAbility *ability, CTargetSt
     return CEvent::Execute(entity, ability, parentStack);
 }
 
-CModifierEvent* CModifierEvent::Clone() {
-    CModifierEvent* event = new CModifierEvent();
-    for (COperate* op : operators_) {
-        event->AddOperate(op->Clone());
-    }
-    return event;
-}
+//CModifierEvent* CModifierEvent::Clone() {
+//    CModifierEvent* event = new CModifierEvent();
+//    for (COperate* op : operators_) {
+//        event->AddOperate(op->Clone());
+//    }
+//    return event;
+//}

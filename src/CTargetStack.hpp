@@ -38,9 +38,10 @@ public:
         DestroySelf();
     }
     void SetParent(CTargetStack* item) {
-        if (!parent_) parent_ = item;
+        parent_ = item;
+//        if (!parent_) parent_ = item;
         // 设置的父节点每次必须是一样的
-        assert(parent_ == item);
+//        assert(parent_ == item);
     }
     void SetSelf(CTargetStackItem* item) { self_ = item; }
     CTargetStack* GetParent() { return parent_; }
@@ -57,12 +58,13 @@ public:
         ConstructSelf();
         self_->GetTargets().push_back(entity);
     }
-    void EraseSelf(TARGET_LIST::iterator iter) {
-        if (!self_) return;
-        self_->GetTargets().erase(iter);
+    TARGET_LIST::iterator EraseSelf(TARGET_LIST::iterator iter) {
+        if (self_) return self_->GetTargets().erase(iter);
+        return {};
     }
     void ClearSelf() {
         if (self_) self_->ClearTargets();
+        DestroySelf();
     }
     void DestroyParent() {
         if (parent_) {

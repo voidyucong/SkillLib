@@ -70,6 +70,14 @@
 			"OnCreated": {
 				"Log": {
 					"text": "modifier_test OnCreated"
+				},
+				"RunScript": {
+					"ScriptFile": "test",
+					"Function": "fnTest",
+					"Param1": 1.2,
+					"Param2": "4",
+					"Param3": 10,
+					"Param4": "xxxxxxxxxxxxxx"
 				}
 			},
 

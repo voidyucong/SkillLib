@@ -43,8 +43,8 @@ public:
     
     void ParseModifiers(const rapidjson::Value& json, CAbility* ability);
     CModifierData* CreateModifier(const rapidjson::Value& json, std::string name, CAbility* ability);
-private:
     
+    long GetDamageType(const rapidjson::Value& item, CAbility* ability, long def = 0);
 };
 
 #endif /* SkillReaderJson_hpp */

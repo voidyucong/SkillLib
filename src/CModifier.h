@@ -57,6 +57,9 @@ public:
     void SetModifierData(CModifierData* data) { modifierData_ = data; }
     CModifierData* GetModifierData() { return modifierData_; }
     
+    // aura
+    CAura* CreateAura();
+    
     // 是否可销毁了
     bool IsWaitDestroy() { return isWaitDestroy_; }
     

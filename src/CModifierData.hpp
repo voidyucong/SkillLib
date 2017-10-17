@@ -25,7 +25,9 @@ class CTargetSearchType;
 class CModifierData {
     friend class CModifier;
 public:
-    CModifierData* Clone();
+    CModifierData();
+    ~CModifierData();
+//    CModifierData* Clone();
 
     // event
     void SetModifierEvent(MODIFIER_EVENT_TYPE type, CModifierEvent* event) { events_[type] = event; }

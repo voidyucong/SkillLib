@@ -71,7 +71,7 @@ bool CLinearProjectile::CollisionDetection() {
     CAbility* ability = GetAbility();
     int level = ability->GetLevel();
     double passTime = SKB::TimeUtil::GetSeconds() - castTimestamp_;
-    CVector currentPosition = GetCastPosition() + GetDirection() * passTime * data_->GetMoveSpeed()->GetArrayValueByIndex(level - 1)->GetValue<float>();
+    CVector currentPosition = GetCastPosition() + GetDirection() * passTime * (data_->GetMoveSpeed()->GetValue<float>(level - 1) + caster_->GetBaseAttribute(ENTITY_ATTRIBUTE_PROJECTILE_SPEED));
     int maxTargets = 0;
     if (GetTargetType()->GetMaxTargets()) {
         maxTargets = GetTargetType()->GetMaxTargets()->GetArrayValueByIndex(level - 1)->GetValue<float>();
