@@ -14,7 +14,13 @@
 #include "CModifier.h"
 #include "CAbilityEntityLogManager.hpp"
 
-void CMaster::ApplyDamage(CAbilityEntity* victim, CAbilityEntity* attacker, float damage, ABILITY_DAMAGE_TYPE type, CAbility* ability) {
+void CMaster::ApplyDamage(CAbilityEntity* victim,
+                          CAbilityEntity* attacker,
+                          float damage,
+                          ABILITY_DAMAGE_TYPE type,
+                          long damgeFlags,
+                          CAbility* ability
+                          ) {
     float realDamage = damage;
     // 目标是否物理免疫状态
     if (type == ABILITY_DAMAGE_TYPE_PHYSICAL && victim->GetState(MODIFIER_STATE_ATTACK_IMMUNE)) {
@@ -101,12 +107,13 @@ void CMaster::ApplyDamage(CAbilityEntity* victim, CAbilityEntity* attacker, floa
     
         
     // 吸血
+    // 目前定义只有普通攻击可吸血，技能需要自定义操作COpLifesteal进行处理
     float lifesteal = 0.f;
-    if (type == ABILITY_DAMAGE_TYPE_PHYSICAL) {
+    if (type == ABILITY_DAMAGE_TYPE_PHYSICAL && !ability) {
         lifesteal = attacker->GetBaseAttribute(ENTITY_ATTRIBUTE_PHYSICAL_LIFESTEAL) *
                     (1 + attacker->GetProperties(MODIFIER_PROPERTY_PHYSICAL_ATTACK_LIFESTEAL_PERCENT_BONUS));
     }
-    if (type == ABILITY_DAMAGE_TYPE_MAGICAL) {
+    if (type == ABILITY_DAMAGE_TYPE_MAGICAL && !ability) {
         lifesteal = attacker->GetBaseAttribute(ENTITY_ATTRIBUTE_MAGICAL_LIFESTEAL) *
                     (1 + attacker->GetProperties(MODIFIER_PROPERTY_MAGICAL_ATTACK_LIFESTEAL_PERCENT_BONUS));
     }

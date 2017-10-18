@@ -12,11 +12,7 @@
 #include <iostream>
 #include <map>
 #include "CObject.hpp"
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
+#include "CLuaStack.hpp"
 
 class CAbilityValue;
 class CAbility;

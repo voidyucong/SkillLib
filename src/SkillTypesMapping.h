@@ -85,12 +85,12 @@ namespace SKB {
         {"MODIFIER_EFFECT_ATTACH_TYPE_HEAD", 2},       //  头顶
         
         // 伤害类型
-        {"ABILITY_DAMAGE_TYPE_NONE", 1 << 0},
-        {"ABILITY_DAMAGE_TYPE_PHYSICAL", 1 << 1},           // 物理伤害
-        {"ABILITY_DAMAGE_TYPE_MAGICAL", 1 << 2},            // 法术伤害
-        {"ABILITY_DAMAGE_TYPE_PURE", 1 << 3},               // 纯粹伤害
-        {"ABILITY_DAMAGE_TYPE_TRIGGER_ITEM", 1 << 4},       // 触发装备效果
-        {"ABILITY_DAMAGE_TYPE_TRIGGER_PASSIVE", 1 << 5},    // 触发被动效果
+        {"ABILITY_DAMAGE_TYPE_NONE", 1},
+        {"ABILITY_DAMAGE_TYPE_NORMAL_PHYSICAL", 2},    // 普攻物理类型
+        {"ABILITY_DAMAGE_TYPE_SKILL_PHYSICAL", 3},     // 技能物理类型
+        {"ABILITY_DAMAGE_TYPE_NORMAL_MAGICAL", 4},     // 普攻法术类型
+        {"ABILITY_DAMAGE_TYPE_SKILL_MAGICAL", 5},      // 技能法术类型
+        {"ABILITY_DAMAGE_TYPE_PURE", 6},               // 真实伤害
         
         //
         //

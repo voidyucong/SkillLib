@@ -18,9 +18,16 @@ class CAbilityEntity;
 
 class CMaster {
 public:
-    static void ApplyDamage(CAbilityEntity* victim, CAbilityEntity* attacker, float damage, ABILITY_DAMAGE_TYPE type, CAbility* ability = NULL);
+    static void ApplyDamage(CAbilityEntity* victim,
+                            CAbilityEntity* attacker,
+                            float damage,
+                            ABILITY_DAMAGE_TYPE type,
+                            long damgeFlags,
+                            CAbility* ability = NULL);
     
-    static void ApplyHealth(CAbilityEntity* target, CAbilityEntity* source, float value);
+    static void ApplyHealth(CAbilityEntity* target,
+                            CAbilityEntity* source,
+                            float value);
 };
 
 #endif /* CMaster_hpp */

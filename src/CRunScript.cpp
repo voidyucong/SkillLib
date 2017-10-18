@@ -8,16 +8,38 @@
 
 #include "CRunScript.hpp"
 #include "CAbilityValue.hpp"
+#include "CAbility.hpp"
+#include "CAbilityEntity.hpp"
 
 lua_State* CRunScript::L_ = 0;
+
+static int CAbility_GetName(lua_State* L) {
+    CAbility* instance = *((CAbility**)lua_touserdata(L, -1));
+    lua_pushstring(L, instance->GetName().c_str());
+    return 1;
+}
+static int CAbilityEntity_GetCurHp(lua_State* L) {
+    CAbilityEntity* instance = *((CAbilityEntity**)lua_touserdata(L, -1));
+    lua_pushnumber(L, instance->GetCurHp());
+    return 1;
+}
 
 CRunScript::CRunScript()
 : scripteFile_("")
 , function_("")
 {
     if (!L_) {
-        L_ = luaL_newstate();
-        luaL_openlibs(L_);
+        L_ = CLuaStack::getInstance()->GetState();
+        
+        // test
+        CLuaStack::getInstance()
+            ->BeginClass("CAbility")
+                ->PushFunction("GetName", &CAbility_GetName)
+            ->EndClass();
+        CLuaStack::getInstance()
+            ->BeginClass("CAbilityEntity")
+                ->PushFunction("GetCurHp", &CAbilityEntity_GetCurHp)
+            ->EndClass();
     }
 }
 
@@ -37,15 +59,20 @@ void CRunScript::Execute() {
     lua_getglobal(L_, function_.c_str());
     lua_newtable(L_);
     for (auto iter = params_.begin(); iter != params_.end(); ++iter) {
-        lua_pushstring(L_, iter->first.c_str());
         if (iter->second->IsFloat()) {
-            lua_pushnumber(L_, iter->second->GetValue<float>());
+            CLuaStack::getInstance()->PushString(iter->first)->PushNumber(iter->second->GetValue<float>());
         }
         else if (iter->second->IsString()) {
-            lua_pushstring(L_, iter->second->GetValue<std::string>().c_str());
+            CLuaStack::getInstance()->PushString(iter->first)->PushString(iter->second->GetValue<std::string>());
         }
         lua_settable(L_, -3);
     }
+    CLuaStack::getInstance()->PushString("ability")->PushUserdata(ability_, "CAbility");
+    lua_settable(L_, -3);                       /* table[str] = userdata stack: function table */
+    CLuaStack::getInstance()->PushString("caster")->PushUserdata(caster_, "CAbilityEntity");
+    lua_settable(L_, -3);                       /* table[str] = userdata stack: function table */
+    CLuaStack::getInstance()->PushString("target")->PushUserdata(target_, "CAbilityEntity");
+    lua_settable(L_, -3);                       /* table[str] = userdata stack: function table */
     lua_call(L_, 1, 0);
 }
 

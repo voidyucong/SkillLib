@@ -256,7 +256,7 @@ int COpDamage::Execute(CAbilityEntity* entity, CAbility* ability, CTargetStack* 
     COperate::Execute(entity, ability, parentStack);
     auto targets = targetStack_->GetValid()->GetTargets();
     for (auto target : targets) {
-        CMaster::ApplyDamage(target, entity, damage_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>(), damageType_, ability);
+        CMaster::ApplyDamage(target, entity, damage_->GetArrayValueByIndex(ability->GetLevel() - 1)->GetValue<float>(), damageType_, ABILITY_DAMAGE_FLAG_NONE, ability);
     }
     return 1;
 }
