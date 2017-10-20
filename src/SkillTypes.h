@@ -152,11 +152,11 @@ enum ENTITY_ATTRIBUTES {
     ENTITY_ATTRIBUTE_AGILITY,              // 敏捷
     ENTITY_ATTRIBUTE_AGILITY_GAIN,         // 敏捷成长
     ENTITY_ATTRIBUTE_HP,                   // 生命上限
-    ENTITY_ATTRIBUTE_CUR_HP,               // 当前生命变化值
+    ENTITY_ATTRIBUTE_HP_CHANGE,               // 当前生命变化值
     ENTITY_ATTRIBUTE_HP_GAIN,              // 生命上限成长
     ENTITY_ATTRIBUTE_HP_REGEN,             // 生命回复速度
     ENTITY_ATTRIBUTE_MANA,
-    ENTITY_ATTRIBUTE_CUR_MANA,             // 当前法术变化值
+    ENTITY_ATTRIBUTE_MANA_CHANGE,             // 当前法术变化值
     ENTITY_ATTRIBUTE_MANA_GAIN,
     ENTITY_ATTRIBUTE_MANA_REGEN,
     ENTITY_ATTRIBUTE_MANA_STARTING,

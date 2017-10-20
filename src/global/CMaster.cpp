@@ -81,7 +81,7 @@ void CMaster::ApplyDamage(CAbilityEntity* victim,
     // 受害者保存攻击者信息，方便报仇
     victim->SetAttacker(attacker);
     // 减血
-    victim->ModifyAttribute(ENTITY_ATTRIBUTE_CUR_HP, -int(realDamage));
+    victim->ModifyAttribute(ENTITY_ATTRIBUTE_HP_CHANGE, -int(realDamage));
     
     std::cout << "Damage Caster: " << attacker << " Target:" << victim << " Damage:" << damage << " Real:" << realDamage << std::endl;
     
@@ -133,7 +133,8 @@ void CMaster::ApplyHealth(CAbilityEntity* target, CAbilityEntity* source, float 
         return;
     }
     
-    target->ModifyAttribute(ENTITY_ATTRIBUTE_CUR_HP, realValue);
+    target->ModifyAttribute(ENTITY_ATTRIBUTE_HP_CHANGE, realValue);
+    std::cout << "Heal Caster: " << source << " Target:" << target << " Value:" << value << " Real:" << realValue << std::endl;
     // 受到治疗
     if (source && source != target) {
         target->ExecuteModifierEvent(MODIFIER_EVENT_ON_HEAL_RECEIVED);
@@ -142,6 +143,4 @@ void CMaster::ApplyHealth(CAbilityEntity* target, CAbilityEntity* source, float 
     else {
         target->ExecuteModifierEvent(MODIFIER_EVENT_ON_HEALTH_GAINED);
     }
-    
-    std::cout << "Heal Caster: " << source << " Target:" << target << " Value:" << value << " Real:" << realValue << std::endl;
 }

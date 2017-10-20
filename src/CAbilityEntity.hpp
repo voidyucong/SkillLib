@@ -117,8 +117,8 @@ public:
     float GetMagicalPenetrateMax(int level) {
         return this->GetBaseAttribute(ENTITY_ATTRIBUTE_MAGICAL_PENETRATE) + (level - 1) * this->GetBaseAttribute(ENTITY_ATTRIBUTE_MAGICAL_PENETRATE_GAIN); }
     
-    float GetCurHp() { return GetHPMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_CUR_HP); }
-    float GetCurMana() { return GetManaMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_CUR_MANA); }
+    float GetCurHp() { return GetHPMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_HP_CHANGE); }
+    float GetCurMana() { return GetManaMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_MANA_CHANGE); }
     
     float GetCurArmor() {
         return GetArmorMax(level_) + GetModifyAttribute(ENTITY_ATTRIBUTE_ARMOR) + GetProperties(MODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS); }

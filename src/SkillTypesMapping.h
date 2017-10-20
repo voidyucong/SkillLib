@@ -130,11 +130,11 @@ namespace SKB {
         {"ENTITY_ATTRIBUTE_AGILITY", 5},              // 敏捷
         {"ENTITY_ATTRIBUTE_AGILITY_GAIN", 6},         // 敏捷成长
         {"ENTITY_ATTRIBUTE_HP", 7},                   // 生命上限
-        {"ENTITY_ATTRIBUTE_CUR_HP", 8},
+        {"ENTITY_ATTRIBUTE_HP_CHANGE", 8},
         {"ENTITY_ATTRIBUTE_HP_GAIN", 9},              // 生命上限成长
         {"ENTITY_ATTRIBUTE_HP_REGEN", 10},             // 生命回复速度
         {"ENTITY_ATTRIBUTE_MANA", 11},
-        {"ENTITY_ATTRIBUTE_CUR_MANA", 12},
+        {"ENTITY_ATTRIBUTE_MANA_CHANGE", 12},
         {"ENTITY_ATTRIBUTE_MANA_GAIN", 13},
         {"ENTITY_ATTRIBUTE_MANA_REGEN", 14},
         {"ENTITY_ATTRIBUTE_MANA_STARTING", 15},
